@@ -1,16 +1,17 @@
 package me.heartalborada.biliDownloader.Bili;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import me.heartalborada.biliDownloader.Bili.bean.countrySMS;
 import me.heartalborada.biliDownloader.Bili.bean.geetestVerify;
+import me.heartalborada.biliDownloader.Bili.bean.loginData;
 import me.heartalborada.biliDownloader.Bili.exceptions.BadRequestDataException;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.net.CookieManager;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -24,7 +25,34 @@ public class biliInstance {
             61, 26, 17, 0, 1, 60, 51, 30, 4, 22, 25, 54, 21, 56, 59, 6, 63, 57, 62, 11,
             36, 20, 34, 44, 52
     };
-    private final OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new headerInterceptor()).build();
+    private final OkHttpClient client = new OkHttpClient.Builder()
+            .addInterceptor(new headerInterceptor())
+            .cookieJar(new CookieJar() {
+                private final HashMap<HttpUrl, List<Cookie>> cookieStore = new HashMap<>();
+                @Override
+                public void saveFromResponse(@NotNull HttpUrl httpUrl, @NotNull List<Cookie> list) {
+                    if(cookieStore.containsKey(httpUrl)) {
+                        cookieStore.put(httpUrl, list);
+                    } else {
+                        List<Cookie> l = cookieStore.get(httpUrl);
+                        for (Cookie c: list) {
+                            if(!l.contains(c)) {
+                                l.add(c);
+                            } else {
+                                l.remove(c);
+                                l.add(c);
+                            }
+                        }
+                    }
+                }
+
+                @NotNull
+                @Override
+                public List<Cookie> loadForRequest(@NotNull HttpUrl httpUrl) {
+                    return cookieStore.get(httpUrl);
+                }
+            })
+            .build();
     private static class headerInterceptor implements Interceptor {
 
         @NotNull
@@ -120,6 +148,80 @@ public class biliInstance {
                 );
             } else {
                 throw new IOException("Empty body");
+            }
+        }
+    }
+
+    public class Login {
+        public class SMS {
+            public LinkedList<countrySMS> getCountryList() throws IOException {
+                Request req = new Request.Builder().url("https://passport.bilibili.com/web/generic/country/list").build();
+                LinkedList<countrySMS> list = new LinkedList<>();
+                try (Response resp = client.newCall(req).execute()) {
+                    if (resp.body() != null) {
+                        String str = resp.body().string();
+                        JsonObject object = JsonParser.parseString(str).getAsJsonObject();
+                        if(object.getAsJsonPrimitive("code").getAsInt() != 0) {
+                            throw new BadRequestDataException(
+                                    object.getAsJsonPrimitive("code").getAsInt(),
+                                    object.getAsJsonPrimitive("message").getAsString()
+                            );
+                        }
+                        JsonObject data = object.getAsJsonObject("data");
+                        for (JsonElement o: data.getAsJsonArray("common")) {
+                            JsonObject o1 = o.getAsJsonObject();
+                            list.add(new countrySMS(
+                                o1.getAsJsonPrimitive("id").getAsInt(),
+                                o1.getAsJsonPrimitive("cname").getAsString(),
+                                o1.getAsJsonPrimitive("country_id").getAsInt()
+                            ));
+                        }
+                        for (JsonElement o: data.getAsJsonArray("others")) {
+                            JsonObject o1 = o.getAsJsonObject();
+                            list.add(new countrySMS(
+                                    o1.getAsJsonPrimitive("id").getAsInt(),
+                                    o1.getAsJsonPrimitive("cname").getAsString(),
+                                    o1.getAsJsonPrimitive("country_id").getAsInt()
+                            ));
+                        }
+                    } else {
+                        throw new IOException("Empty body");
+                    }
+                }
+                return list;
+            }
+
+            public loginData loginWithSMS(String token,long tel,int countryID,int SMSCode) throws IOException {
+                RequestBody body = new FormBody.Builder()
+                        .add("cid", String.valueOf(countryID))
+                        .add("tel", String.valueOf(tel))
+                        .add("code", String.valueOf(SMSCode))
+                        .add("source","main_web")
+                        .add("captcha_key",token)
+                        .add("go_url","https://www.bilibili.com")
+                        .build();
+                Request req = new Request.Builder()
+                        .post(body)
+                        .url("https://passport.bilibili.com/x/passport-login/web/login/sms")
+                        .build();
+                try (Response resp = client.newCall(req).execute()) {
+                    if (resp.body() != null) {
+                        String str = resp.body().string();
+                        JsonObject object = JsonParser.parseString(str).getAsJsonObject();
+                        if(object.getAsJsonPrimitive("code").getAsInt() != 0) {
+                            throw new BadRequestDataException(
+                                    object.getAsJsonPrimitive("code").getAsInt(),
+                                    object.getAsJsonPrimitive("message").getAsString()
+                            );
+                        }
+                        String RT = object.getAsJsonObject("data").getAsJsonPrimitive("refresh_token").getAsString();
+                        long TS = object.getAsJsonObject("data").getAsJsonPrimitive("timestamp").getAsLong();
+
+                        return new loginData(RT,"",TS);
+                    } else {
+                        throw new IOException("Empty body");
+                    }
+                }
             }
         }
     }

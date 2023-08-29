@@ -269,10 +269,18 @@ public class librariesLoader {
             for (int j = 0; j <childNodes.getLength() ; j++) {
                 if (childNodes.item(j).getNodeType()==Node.ELEMENT_NODE) {
                     switch (childNodes.item(j).getNodeName()) {
-                        case "groupId" -> gId = childNodes.item(j).getFirstChild().getNodeValue();
-                        case "artifactId" -> aId = childNodes.item(j).getFirstChild().getNodeValue();
-                        case "scope" -> scope = childNodes.item(j).getFirstChild().getNodeValue();
-                        case "version" -> ver = childNodes.item(j).getFirstChild().getNodeValue();
+                        case "groupId":
+                            gId = childNodes.item(j).getFirstChild().getNodeValue();
+                            break;
+                        case "artifactId":
+                            aId = childNodes.item(j).getFirstChild().getNodeValue();
+                            break;
+                        case "scope":
+                            scope = childNodes.item(j).getFirstChild().getNodeValue();
+                            break;
+                        case "version":
+                            ver = childNodes.item(j).getFirstChild().getNodeValue();
+                            break;
                     }
                 }
             }
