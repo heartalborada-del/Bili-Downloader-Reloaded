@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":sparkles: new project!">
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/bean/countrySMS.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/bean/loginData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":sparkles: feat: downgrade to java11">
+      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/interfaces/Callback.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/okhttp/simpleCookieJar.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/bean/loginData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/bean/loginData.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/biliInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/biliInstance.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -41,25 +41,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "master",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "项目",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.keymap",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;模块&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\heart\IdeaProjects\Bili-Downloader-Reloaded\src\main\java\me\heartalborada\biliDownloader\utils" />
@@ -81,7 +81,6 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="应用程序.Main" />
         <item itemvalue="应用程序.HelloApplication" />
       </list>
     </recent_temporary>
@@ -97,7 +96,8 @@
       <workItem from="1693213933381" duration="1963000" />
       <workItem from="1693231134713" duration="339000" />
       <workItem from="1693234286038" duration="5573000" />
-      <workItem from="1693268105504" duration="22414000" />
+      <workItem from="1693268105504" duration="23318000" />
+      <workItem from="1693652567665" duration="10920000" />
     </task>
     <task id="LOCAL-00001" summary=":sparkles: new project!">
       <option name="closed" value="true" />
@@ -123,7 +123,15 @@
       <option name="project" value="LOCAL" />
       <updated>1693287517645</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary=":sparkles: feat: downgrade to java11">
+      <option name="closed" value="true" />
+      <created>1693293052364</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1693293052364</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -142,7 +150,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value=":sparkles: new project!" />
-    <option name="LAST_COMMIT_MESSAGE" value=":sparkles: new project!" />
+    <MESSAGE value=":sparkles: feat: downgrade to java11" />
+    <option name="LAST_COMMIT_MESSAGE" value=":sparkles: feat: downgrade to java11" />
   </component>
   <component name="XDebuggerManager">
     <pin-to-top-manager>
