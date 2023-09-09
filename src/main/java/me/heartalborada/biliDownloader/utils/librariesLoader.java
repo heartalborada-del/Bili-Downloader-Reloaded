@@ -229,7 +229,7 @@ public class librariesLoader {
         String name = artifactId + "-" + version + ".jar"; // 文件名
         // jar
         File saveLocation = new File(path, String.format("%s/%s/%s/%s",groupId.replace(".","/"),artifactId,version,name));
-        if(list.contains(saveLocation))
+        if(list.contains(target))
             return;
         logger.info("Verifying " + name);
         if (!downloadLibraryMaven(groupId, artifactId, version, extra, repo, saveLocation, true)) {

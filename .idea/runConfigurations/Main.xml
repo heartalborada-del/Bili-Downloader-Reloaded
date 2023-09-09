@@ -6,7 +6,7 @@
     <option name="VM_PARAMETERS" value="--add-opens=java.base/jdk.internal.loader=me.heartalborada.biliDownloader" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="me.heartalborada.biliDownloader.*" />
+        <option name="PATTERN" value="me.heartalborada.biliDownloader.Cli.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>

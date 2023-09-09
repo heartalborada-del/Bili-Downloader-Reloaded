@@ -12,24 +12,43 @@ import me.heartalborada.biliDownloader.Bili.interfaces.Callback;
 import me.heartalborada.biliDownloader.utils.okhttp.simpleCookieJar;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PSource;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
 public class biliInstance {
+    public biliInstance() throws IOException {
+        simpleCookieJar = new simpleCookieJar();
+        client = new OkHttpClient.Builder()
+                .addInterceptor(new headerInterceptor())
+                .cookieJar(simpleCookieJar)
+                .build();
+    }
+
+    public biliInstance(HashMap<String,List<Cookie>> CookieData) throws IOException {
+        simpleCookieJar = new simpleCookieJar(CookieData);
+        client = new OkHttpClient.Builder()
+                .addInterceptor(new headerInterceptor())
+                .cookieJar(simpleCookieJar)
+                .build();
+    }
+
     private final int[] mixinKeyEncTab = new int[]{
             46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49,
             33, 9, 42, 19, 29, 28, 14, 39, 12, 38, 41, 13, 37, 48, 7, 16, 24, 55, 40,
@@ -37,11 +56,9 @@ public class biliInstance {
             36, 20, 34, 44, 52
     };
 
-    private final simpleCookieJar simpleCookieJar = new simpleCookieJar();
-    private final OkHttpClient client = new OkHttpClient.Builder()
-            .addInterceptor(new headerInterceptor())
-            .cookieJar(simpleCookieJar)
-            .build();
+    private final simpleCookieJar simpleCookieJar;
+    private final OkHttpClient client;
+
     private static class headerInterceptor implements Interceptor {
 
         @NotNull
@@ -56,10 +73,6 @@ public class biliInstance {
     }
 
     private String signature = upgradeWbiSign();
-
-    public biliInstance() throws IOException {
-        System.out.println(getNewGeetestCaptcha());
-    }
 
     protected TreeMap<String,String> signParameters(Map<String,String> parameters) throws IOException {
         TreeMap<String, String> copy = new TreeMap<>(parameters);
@@ -142,7 +155,7 @@ public class biliInstance {
     }
 
     public class Login {
-        public class SMS {
+        public  class SMS {
             public LinkedList<countrySMS> getCountryList() throws IOException {
                 Request req = new Request.Builder().url("https://passport.bilibili.com/web/generic/country/list").build();
                 LinkedList<countrySMS> list = new LinkedList<>();
@@ -286,6 +299,7 @@ public class biliInstance {
                     }
                 }
             }
+
             public loginData loginWithPassword(String username, String password, geetestVerify verify) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
                 keys k = getSaltAndKey();
                 Cipher cipher = Cipher.getInstance("RSA");
@@ -354,25 +368,23 @@ public class biliInstance {
                             }
                             callback.onGetQRUrl(object.getAsJsonObject("data").getAsJsonPrimitive("url").getAsString());
                             String QRKey = object.getAsJsonObject("data").getAsJsonPrimitive("qrcode_key").getAsString();
-                            timer.schedule(new TimerTask() {
-                                private final long ts = System.currentTimeMillis()/1000;
+                                timer.schedule(new TimerTask() {
+                                private final long ts = System.currentTimeMillis();
                                 @Override
                                 public void run() {
-                                    if ((System.currentTimeMillis()/1000 - ts) >= 180) {
+                                    if ((System.currentTimeMillis() - ts) >= 180*1000) {
                                         cancel();
                                         return;
                                     }
                                     client.newCall(
                                             new Request.Builder()
-                                                    .url("https://passport.bilibili.com/x/passport-login/web/qrcode/poll")
-                                                    .post(new FormBody.Builder()
-                                                            .add("qrcode_key",QRKey)
-                                                            .build())
+                                                    .url(String.format("https://passport.bilibili.com/x/passport-login/web/qrcode/poll?qrcode_key=%s",QRKey))
                                                     .build()
                                     ).enqueue(new okhttp3.Callback() {
                                         @Override
                                         public void onFailure(@NotNull Call call, @NotNull IOException e) {
                                             callback.onFailure(e,null,-1);
+                                            cancel();
                                         }
 
                                         @Override
@@ -392,6 +404,7 @@ public class biliInstance {
                                                                 msg,
                                                                 code
                                                         );
+                                                        cancel();
                                                         break;
                                                     case 86101:
                                                     case 86090:
@@ -399,20 +412,130 @@ public class biliInstance {
                                                         break;
                                                     case 86038:
                                                         callback.onFailure(new BadRequestDataException(code,msg),msg,code);
+                                                        cancel();
                                                         break;
                                                 }
                                             } else {
                                                 callback.onFailure(new IOException("Empty Body"),null,-1);
+                                                cancel();
                                             }
                                         }
                                     });
                                 }
-                            },1000L);
+                            },0,1000L);
                         } else {
                             callback.onFailure(new IOException("Empty Body"),null,-1);
                         }
                     }
                 });
+            }
+        }
+    }
+
+    public class Account {
+        public boolean isNeedRefreshToken() throws IOException {
+            Request req = new Request.Builder().url("https://passport.bilibili.com/x/passport-login/web/cookie/info").build();
+            try (Response resp = client.newCall(req).execute()) {
+                if (resp.body() != null) {
+                    String str = resp.body().string();
+                    JsonObject object = JsonParser.parseString(str).getAsJsonObject();
+                    if(object.getAsJsonPrimitive("code").getAsInt() != 0) {
+                        throw new BadRequestDataException(
+                                object.getAsJsonPrimitive("code").getAsInt(),
+                                object.getAsJsonPrimitive("message").getAsString()
+                        );
+                    }
+                    object = object.getAsJsonObject("data");
+                    return object.getAsJsonPrimitive("refresh").getAsBoolean();
+                } else {
+                    throw new IOException("Empty body");
+                }
+            }
+        }
+
+        public String getCsrfToken(String correspondPath) throws IOException {
+            Request req = new Request.Builder().url(String.format("https://www.bilibili.com/correspond/1/%s", correspondPath)).build();
+            try (Response resp = client.newCall(req).execute()) {
+                if (resp.body() != null) {
+                    Document docDesc = Jsoup.parse(resp.body().string());
+                    Element e = docDesc.getElementById("1-name");
+                    if (e != null) {
+                        return e.text();
+                    }
+                    return null;
+                } else {
+                    throw new IOException("Empty body");
+                }
+            }
+        }
+
+        /**
+         *
+         * @param csrf Cookie -> bili_jct
+         * @param refreshCsrf Csrf Token
+         * @param refreshToken Refresh Token
+         * @return New Cookie and refresh token
+         */
+        public loginData refreshCookie(String csrf,String refreshCsrf,String refreshToken) throws IOException {
+            RequestBody body = new FormBody.Builder()
+                    .add("csrf", csrf)
+                    .add("refresh_csrf", refreshCsrf)
+                    .add("source","main_web")
+                    .add("refresh_token", refreshToken)
+                    .build();
+            Request req = new Request.Builder()
+                    .post(body)
+                    .url("https://passport.bilibili.com/x/passport-login/web/cookie/refresh")
+                    .build();
+            try (Response resp = client.newCall(req).execute()) {
+                if (resp.body() != null) {
+                    String str = resp.body().string();
+                    JsonObject object = JsonParser.parseString(str).getAsJsonObject();
+                    if(object.getAsJsonPrimitive("code").getAsInt() != 0) {
+                        throw new BadRequestDataException(
+                                object.getAsJsonPrimitive("code").getAsInt(),
+                                object.getAsJsonPrimitive("message").getAsString()
+                        );
+                    }
+                    return new loginData(
+                            object.getAsJsonObject("data").getAsJsonPrimitive("refresh_token").getAsString(),
+                            simpleCookieJar.dumpCookies(),
+                            System.currentTimeMillis()
+                    );
+                } else {
+                    throw new IOException("Empty body");
+                }
+            }
+        }
+
+        /**
+         *
+         * @param csrf Cookie -> bili_jct
+         * @param oldRefreshToken Old Refresh Token
+         */
+        public void setOldCookieInvalid(String csrf,String oldRefreshToken) throws IOException {
+            RequestBody body = new FormBody.Builder()
+                    .add("csrf", csrf)
+                    .add("source","main_web")
+                    .add("refresh_token", oldRefreshToken)
+                    .build();
+            Request req = new Request.Builder()
+                    .post(body)
+                    .url("https://passport.bilibili.com/x/passport-login/web/confirm/refresh")
+                    .build();
+            try (Response resp = client.newCall(req).execute()) {
+                if (resp.body() != null) {
+                    String str = resp.body().string();
+                    JsonObject object = JsonParser.parseString(str).getAsJsonObject();
+                    if(object.getAsJsonPrimitive("code").getAsInt() != 0) {
+                        throw new BadRequestDataException(
+                                object.getAsJsonPrimitive("code").getAsInt(),
+                                object.getAsJsonPrimitive("message").getAsString()
+                        );
+                    }
+                } else {
+                    throw new IOException("Empty body");
+                }
             }
         }
     }

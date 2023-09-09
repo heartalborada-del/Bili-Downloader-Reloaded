@@ -8,10 +8,14 @@ module me.heartalborada.biliDownloader {
     requires annotations;
     requires java.xml;
     requires java.logging;
+    requires kotlin.stdlib;
+    requires org.jsoup;
 
     opens me.heartalborada.biliDownloader.Bili.bean to com.google.gson;
     opens me.heartalborada.biliDownloader to javafx.fxml;
     exports me.heartalborada.biliDownloader;
     exports me.heartalborada.biliDownloader.UI;
     opens me.heartalborada.biliDownloader.UI to javafx.fxml;
+    exports me.heartalborada.biliDownloader.Cli;
+    opens me.heartalborada.biliDownloader.Cli to javafx.fxml;
 }
