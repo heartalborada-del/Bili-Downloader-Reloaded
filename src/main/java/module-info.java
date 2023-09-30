@@ -11,7 +11,8 @@ module me.heartalborada.biliDownloader {
     requires kotlin.stdlib;
     requires org.jsoup;
 
-    opens me.heartalborada.biliDownloader.Bili.bean to com.google.gson;
+    opens me.heartalborada.biliDownloader.Bili.beans to com.google.gson;
+    opens me.heartalborada.biliDownloader.utils.managers.beans to com.google.gson;
     opens me.heartalborada.biliDownloader to javafx.fxml;
     exports me.heartalborada.biliDownloader;
     exports me.heartalborada.biliDownloader.UI;

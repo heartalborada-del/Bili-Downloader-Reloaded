@@ -1,12 +1,12 @@
 package me.heartalborada.biliDownloader;
 
-import com.google.gson.Gson;
 import lombok.Getter;
-import me.heartalborada.biliDownloader.Bili.bean.loginData;
+import me.heartalborada.biliDownloader.Bili.beans.loginData;
 import me.heartalborada.biliDownloader.Bili.biliInstance;
 import me.heartalborada.biliDownloader.Bili.interfaces.Callback;
+import me.heartalborada.biliDownloader.utils.managers.configManager;
+import me.heartalborada.biliDownloader.utils.managers.dataManager;
 import me.heartalborada.biliDownloader.utils.librariesLoader;
-import okhttp3.Cookie;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,7 +20,29 @@ public class Main {
     private static final File dataPath = new File(System.getProperty("user.dir"),"data");
     @Getter
     private static final File libPath = new File(dataPath,"libs");
+    @Getter
+    private static final configManager Config;
+    @Getter
+    private static final dataManager Data;
+
+    static {
+        try {
+            Config = new configManager(new File(dataPath,"config.json"));
+            Data = new dataManager(new File(dataPath,"data.json"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void main(String[] args) throws IOException, ParserConfigurationException, SAXException {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                Config.save();
+                Data.save();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }));
         List<String[]> list = new LinkedList<>();
 
         list.add(new String[]{"com.squareup.okhttp3", "okhttp", "4.11.0", ""});
@@ -46,7 +68,9 @@ public class Main {
             @Override
             public void onSuccess(loginData data, String message, int code) {
                 System.out.printf("%d-%s%n",code,message);
-                System.out.println(data);
+                dataManager.getData().getBilibili().setCookies(data.getCookies());
+                dataManager.getData().getBilibili().setRefreshToken(data.getRefreshToken());
+                dataManager.getData().getBilibili().setLatestRefreshTimestamp(data.getTimestamp());
             }
 
             @Override

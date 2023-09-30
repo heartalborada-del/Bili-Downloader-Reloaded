@@ -65,9 +65,4 @@ public class simpleCookieJar implements CookieJar {
         String[] arr = httpUrl.host().split("\\.");
         return String.format("%s:%d",arr[arr.length-2]+"."+arr[arr.length-1],httpUrl.port());
     }
-
-    public JsonElement dumpCookies(){
-       Gson g = new Gson();
-       return JsonParser.parseString(g.toJson(cookieStore));
-    }
 }

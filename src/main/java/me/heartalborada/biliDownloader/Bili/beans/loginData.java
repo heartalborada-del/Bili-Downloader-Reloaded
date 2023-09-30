@@ -1,18 +1,21 @@
-package me.heartalborada.biliDownloader.Bili.bean;
+package me.heartalborada.biliDownloader.Bili.beans;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import lombok.Getter;
+import okhttp3.Cookie;
+
+import java.util.HashMap;
+import java.util.List;
 
 public class loginData {
     @Getter
     private final String refreshToken;
     @Getter
-    private final JsonElement cookies;
+    private final HashMap<String, List<Cookie>> cookies;
     @Getter
     private final long timestamp;
 
-    public loginData(String refreshToken, JsonElement cookies, long timestamp) {
+    public loginData(String refreshToken, HashMap<String, List<Cookie>> cookies, long timestamp) {
         this.refreshToken = refreshToken;
         this.cookies = cookies;
         this.timestamp = timestamp;
