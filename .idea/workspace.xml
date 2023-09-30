@@ -7,19 +7,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":construction: feat: add cookie refresh functions">
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/manager/beans/ConfigInstance.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/manager/beans/DataInstance.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/manager/configManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/manager/dataManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/kotlinc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
+    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":construction: feat: new data&amp;config manager">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/bean/loginData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/bean/loginData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/biliInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/biliInstance.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/okhttp/simpleCookieJar.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/okhttp/simpleCookieJar.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -115,7 +106,8 @@
       <workItem from="1695973500631" duration="2185000" />
       <workItem from="1695976099486" duration="412000" />
       <workItem from="1696041938290" duration="93000" />
-      <workItem from="1696060836568" duration="1760000" />
+      <workItem from="1696060836568" duration="2271000" />
+      <workItem from="1696082442289" duration="1111000" />
     </task>
     <task id="LOCAL-00001" summary=":sparkles: new project!">
       <option name="closed" value="true" />
@@ -165,7 +157,15 @@
       <option name="project" value="LOCAL" />
       <updated>1694268133838</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary=":construction: feat: new data&amp;config manager">
+      <option name="closed" value="true" />
+      <created>1696063018356</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1696063018356</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -187,7 +187,9 @@
     <MESSAGE value=":sparkles: feat: downgrade to java11" />
     <MESSAGE value=":construction: feat: add bilibili login methods" />
     <MESSAGE value=":construction: feat: add cookie refresh functions" />
-    <option name="LAST_COMMIT_MESSAGE" value=":construction: feat: add cookie refresh functions" />
+    <MESSAGE value=":construction: feat: new data manager" />
+    <MESSAGE value=":construction: feat: new data&amp;config manager" />
+    <option name="LAST_COMMIT_MESSAGE" value=":construction: feat: new data&amp;config manager" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

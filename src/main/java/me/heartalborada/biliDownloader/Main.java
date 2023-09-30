@@ -49,6 +49,7 @@ public class Main {
         list.add(new String[]{"com.google.code.gson", "gson", "2.10.1", ""});
         list.add(new String[]{"org.jetbrains.kotlin","kotlin-stdlib-jdk8","1.6.20",""});
         list.add(new String[]{"org.jsoup","jsoup","1.16.1",""});
+        list.add(new String[]{"org.jetbrains","annotations","24.0.1",""});
 
         try {
             for(String[] strs : list) {

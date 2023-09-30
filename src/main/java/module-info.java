@@ -4,12 +4,12 @@ module me.heartalborada.biliDownloader {
 
     requires com.google.gson;
     requires okhttp3;
-    requires static lombok;
-    requires annotations;
     requires java.xml;
     requires java.logging;
     requires kotlin.stdlib;
     requires org.jsoup;
+    requires org.jetbrains.annotations;
+    requires lombok;
 
     opens me.heartalborada.biliDownloader.Bili.beans to com.google.gson;
     opens me.heartalborada.biliDownloader.utils.managers.beans to com.google.gson;
