@@ -1,8 +1,5 @@
-package me.heartalborada.biliDownloader.utils.okhttp;
+package me.heartalborada.biliDownloader.Utils.Okhttp;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import lombok.Getter;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;

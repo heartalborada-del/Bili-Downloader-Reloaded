@@ -9,10 +9,12 @@ module me.heartalborada.biliDownloader {
     requires kotlin.stdlib;
     requires org.jsoup;
     requires org.jetbrains.annotations;
-    requires lombok;
+    requires static lombok;
+    requires org.jline;
+    requires com.google.zxing;
 
-    opens me.heartalborada.biliDownloader.Bili.beans to com.google.gson;
-    opens me.heartalborada.biliDownloader.utils.managers.beans to com.google.gson;
+    opens me.heartalborada.biliDownloader.Bili.Beans to com.google.gson;
+    opens me.heartalborada.biliDownloader.Utils.Managers.Beans to com.google.gson;
     opens me.heartalborada.biliDownloader to javafx.fxml;
     exports me.heartalborada.biliDownloader;
     exports me.heartalborada.biliDownloader.UI;

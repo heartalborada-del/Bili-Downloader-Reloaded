@@ -1,4 +1,4 @@
-package me.heartalborada.biliDownloader.utils;
+package me.heartalborada.biliDownloader.Utils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

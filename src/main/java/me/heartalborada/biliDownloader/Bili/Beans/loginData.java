@@ -1,4 +1,4 @@
-package me.heartalborada.biliDownloader.Bili.beans;
+package me.heartalborada.biliDownloader.Bili.Beans;
 
 import com.google.gson.Gson;
 import lombok.Getter;

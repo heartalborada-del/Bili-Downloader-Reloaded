@@ -1,4 +1,4 @@
-package me.heartalborada.biliDownloader.utils;
+package me.heartalborada.biliDownloader.Utils;
 
 import me.heartalborada.biliDownloader.Main;
 import org.w3c.dom.Document;
@@ -23,7 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
-import static me.heartalborada.biliDownloader.utils.loggerFormatter.installFormatter;
+import static me.heartalborada.biliDownloader.Utils.loggerFormatter.installFormatter;
 
 /**
  * Jar 库加载器
@@ -220,6 +220,7 @@ public class librariesLoader {
      * @param path       保存目录
      */
     public static void loadLibraryClassMaven(String groupId, String artifactId, String version, String extra, String repo, File path) throws RuntimeException, IOException, NoSuchAlgorithmException, ParserConfigurationException, SAXException {
+
         String target = String.format("%s-%s-%s%s",groupId,artifactId,version,extra);
         if(list.contains(target)) {
             return;
@@ -229,8 +230,6 @@ public class librariesLoader {
         String name = artifactId + "-" + version + ".jar"; // 文件名
         // jar
         File saveLocation = new File(path, String.format("%s/%s/%s/%s",groupId.replace(".","/"),artifactId,version,name));
-        if(list.contains(target))
-            return;
         logger.info("Verifying " + name);
         if (!downloadLibraryMaven(groupId, artifactId, version, extra, repo, saveLocation, true)) {
             throw new RuntimeException("Failed to download libraries!");
@@ -297,7 +296,7 @@ public class librariesLoader {
      * @param file Jar 文件
      */
     static void loadLibraryClassLocal(File file) throws IOException {
-        logger.info("Loading library " + file);
+        logger.info("Loading library " + file.getName());
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         URL url = file.toURI().toURL();
         if (classLoader instanceof URLClassLoader) {

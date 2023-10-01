@@ -1,4 +1,4 @@
-package me.heartalborada.biliDownloader.Bili.exceptions;
+package me.heartalborada.biliDownloader.Bili.Exceptions;
 
 import lombok.Getter;
 

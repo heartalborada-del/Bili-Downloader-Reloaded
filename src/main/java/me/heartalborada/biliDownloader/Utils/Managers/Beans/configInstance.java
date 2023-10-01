@@ -1,4 +1,4 @@
-package me.heartalborada.biliDownloader.utils.managers.beans;
+package me.heartalborada.biliDownloader.Utils.Managers.Beans;
 
 import lombok.Data;
 

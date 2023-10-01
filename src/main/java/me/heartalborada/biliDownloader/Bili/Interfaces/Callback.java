@@ -1,6 +1,6 @@
-package me.heartalborada.biliDownloader.Bili.interfaces;
+package me.heartalborada.biliDownloader.Bili.Interfaces;
 
-import me.heartalborada.biliDownloader.Bili.beans.loginData;
+import me.heartalborada.biliDownloader.Bili.Beans.loginData;
 
 public interface Callback {
 
