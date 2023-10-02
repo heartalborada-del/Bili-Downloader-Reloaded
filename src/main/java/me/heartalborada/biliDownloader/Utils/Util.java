@@ -1,6 +1,6 @@
 package me.heartalborada.biliDownloader.Utils;
 
-public class util {
+public class Util {
     public static String StrArrToSting(String[] arr) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < arr.length; i++) {

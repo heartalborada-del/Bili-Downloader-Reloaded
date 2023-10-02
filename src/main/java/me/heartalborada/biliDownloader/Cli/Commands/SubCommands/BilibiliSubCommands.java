@@ -2,31 +2,30 @@ package me.heartalborada.biliDownloader.Cli.Commands.SubCommands;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import com.google.zxing.qrcode.encoder.QRCode;
 import me.heartalborada.biliDownloader.Bili.Beans.loginData;
+import me.heartalborada.biliDownloader.Bili.BiliInstance;
 import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
-import me.heartalborada.biliDownloader.Bili.biliInstance;
-import me.heartalborada.biliDownloader.Utils.Managers.dataManager;
-import org.jline.builtins.Commands;
+import me.heartalborada.biliDownloader.Cli.Commands.Utils.Terminal.Progress;
+import me.heartalborada.biliDownloader.Main;
+import me.heartalborada.biliDownloader.Utils.NotWriteQRCode;
 import org.jline.builtins.Options;
 import org.jline.console.impl.SystemRegistryImpl;
-import org.jline.terminal.Terminal;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
-import static me.heartalborada.biliDownloader.Utils.util.StrArrToSting;
+import static me.heartalborada.biliDownloader.Utils.Util.StrArrToSting;
 
 public class BilibiliSubCommands {
-    public static void login(Terminal terminal, PrintStream out, String[] argv) throws Options.HelpException, IOException, SystemRegistryImpl.UnknownCommandException {
+    public static void login(org.jline.terminal.Terminal terminal, PrintStream out, InputStream in, String[] argv) throws Options.HelpException, IOException, SystemRegistryImpl.UnknownCommandException {
         String[] usage = {
                 "login - login your Bilibili account",
                 "Usage: login [OPTIONS]",
@@ -39,85 +38,70 @@ public class BilibiliSubCommands {
         }
         if(Objects.equals(opt.args().get(0), "qr")) {
             terminal.pause();
-            testQrLogin(terminal,out);
+            qrLogin(terminal,out,in);
         } else {
             throw new SystemRegistryImpl.UnknownCommandException(String.format("Unknown command: %s %s","login",StrArrToSting(argv)));
         }
     }
 
-    public static void testQrLogin(Terminal terminal,PrintStream out) throws IOException {
+    public static void qrLogin(org.jline.terminal.Terminal terminal, PrintStream out, InputStream in) throws IOException {
         terminal.pause();
-        out.println("test");
-        try {
-            HashMap<EncodeHintType, Serializable> hints = new HashMap<EncodeHintType, java.io.Serializable>();
-            hints.put(EncodeHintType.CHARACTER_SET, "utf-8");//编码方式
-            hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);//纠错等级
-            BitMatrix bitMatrix = new MultiFormatWriter().encode("https://passport.bilibili.com/h5-app/passport/login/scan?navhide=1&qrcode_key=cc2d9b94a2e5cd84c37efdd38aa3f7ab&from=main-fe-header", BarcodeFormat.QR_CODE, 1, 1, hints);
-            for (int j = 0; j < bitMatrix.getHeight(); j++) {
-                for (int i = 0; i < bitMatrix.getWidth(); i++) {
-                    if (bitMatrix.get(i, j)) {
-                        out.print("\33[48;5;7m  ");
-                    } else {
-                        out.print("\33[0m  ");
-                    }
-                }
-                out.println("\33[0m");
-            }
-        } catch (WriterException e) {
-            e.printStackTrace();
-        }
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        terminal.resume();
-        biliInstance in = new biliInstance();
-        /*in.new Login().new QR().loginWithQrLogin(new Callback() {
+        BiliInstance biliInstance = new BiliInstance();
+        biliInstance.new Login().new QR().loginWithQrLogin(new Callback() {
+            final Progress progress = new Progress(out,20,0,180);
+            int count = 0;
+            @SuppressWarnings("all")
             @Override
             public void onSuccess(loginData data, String message, int code) {
-                System.out.printf("%d-%s%n",code,message);
-                dataManager.getData().getBilibili().setCookies(data.getCookies());
-                dataManager.getData().getBilibili().setRefreshToken(data.getRefreshToken());
-                dataManager.getData().getBilibili().setLatestRefreshTimestamp(data.getTimestamp());
+                Main.getDataManager().getData().getBilibili().setCookies(data.getCookies());
+                Main.getDataManager().getData().getBilibili().setRefreshToken(data.getRefreshToken());
+                Main.getDataManager().getData().getBilibili().setLatestRefreshTimestamp(data.getTimestamp());
+                progress.UpgradeProgress(180,"\33[48;5;2m[SUCCESS]\33[0m",String.format("\33[48;5;2m[%d: %s]\33[0m",code,"SUCCESS"));
                 terminal.resume();
             }
 
             @Override
             public void onFailure(Exception e, String cause, int code) {
-                System.out.printf("%d-%s%n",code,cause);
+                progress.UpgradeProgress(180,"\33[48;5;1m[FAILED]\33[0m",String.format("\33[48;5;1m[%d: %s]\33[0m",code,cause));
                 terminal.resume();
             }
 
             @Override
             public void onUpdate(String message, int code) {
-                System.out.printf("%d-%s%n",code,message);
+                count++;
+                progress.UpgradeProgress(count,"\33[48;5;3m[WAITING]\33[0m",String.format("\33[48;5;3m[%d: %s]\33[0m",code,message));
             }
 
             @Override
             public void onGetQRUrl(String QRUrl) {
-                System.out.println(QRUrl);
+                out.printf("%n");
                 try {
                     HashMap<EncodeHintType, Serializable> hints = new HashMap<EncodeHintType, java.io.Serializable>();
-                    hints.put(EncodeHintType.CHARACTER_SET, "utf-8");//编码方式
-                    hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M);//纠错等级
-                    BitMatrix bitMatrix = new MultiFormatWriter().encode(QRUrl, BarcodeFormat.QR_CODE, 1, 1, hints);
+                    hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
+                    hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+                    hints.put(EncodeHintType.MARGIN,0);
+                    new QRCode();
+                    BitMatrix bitMatrix = new NotWriteQRCode().encode(
+                            QRUrl,
+                            BarcodeFormat.QR_CODE,
+                            1,
+                            1,
+                            hints);
                     for (int j = 0; j < bitMatrix.getHeight(); j++) {
                         for (int i = 0; i < bitMatrix.getWidth(); i++) {
                             if (bitMatrix.get(i, j)) {
-                                out.print("\33[48;5;47m█");
+                                out.print("\33[48;5;7m  ");
                             } else {
                                 out.print("\33[0m  ");
                             }
-
                         }
-                        out.println();
+                        out.println("\33[0m");
                     }
                 } catch (WriterException e) {
                     e.printStackTrace();
                 }
-                flag[0] = false;
+                out.printf("%n\33[48;5;4mURL:\33[48;5;5m%s\33[0m%n",QRUrl);
             }
-        });*/
+        });
     }
 }

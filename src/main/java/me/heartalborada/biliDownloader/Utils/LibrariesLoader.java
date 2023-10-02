@@ -23,12 +23,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
-import static me.heartalborada.biliDownloader.Utils.loggerFormatter.installFormatter;
+import static me.heartalborada.biliDownloader.Utils.LoggerFormatter.installFormatter;
 
 /**
  * Jar 库加载器
  */
-public class librariesLoader {
+public class LibrariesLoader {
     private static final Logger logger = installFormatter(Logger.getLogger("Dependency Loader"));
 
     private static final LinkedList<String> list = new LinkedList<>();

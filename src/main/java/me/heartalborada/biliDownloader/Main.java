@@ -1,27 +1,16 @@
 package me.heartalborada.biliDownloader;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import lombok.Getter;
-import me.heartalborada.biliDownloader.Bili.Beans.loginData;
-import me.heartalborada.biliDownloader.Bili.biliInstance;
-import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
 import me.heartalborada.biliDownloader.Cli.CliMain;
-import me.heartalborada.biliDownloader.Utils.Managers.configManager;
-import me.heartalborada.biliDownloader.Utils.Managers.dataManager;
-import me.heartalborada.biliDownloader.Utils.librariesLoader;
+import me.heartalborada.biliDownloader.Utils.Managers.ConfigManager;
+import me.heartalborada.biliDownloader.Utils.Managers.DataManager;
+import me.heartalborada.biliDownloader.Utils.LibrariesLoader;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -32,9 +21,9 @@ public class Main {
     @Getter
     private static final File libPath = new File(dataPath,"libs");
     @Getter
-    private static configManager Config;
+    private static ConfigManager configManager;
     @Getter
-    private static dataManager Data;
+    private static DataManager dataManager;
 
     public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {
         if(!Objects.equals(System.getProperty("development","false"), "true")) {
@@ -50,7 +39,7 @@ public class Main {
             list.add(new String[]{"com.google.zxing","core","3.5.2",""});
             try {
                 for(String[] strs : list) {
-                    librariesLoader.loadLibraryClassMaven(
+                    LibrariesLoader.loadLibraryClassMaven(
                             strs[0],strs[1],strs[2],strs[3], "https://maven.aliyun.com/repository/public", libPath
                     );
                 }
@@ -59,12 +48,12 @@ public class Main {
             }
         }
 
-        Config = new configManager(new File(dataPath,"config.json"));
-        Data = new dataManager(new File(dataPath,"data.json"));
+        configManager = new ConfigManager(new File(dataPath,"config.json"));
+        dataManager = new DataManager(new File(dataPath,"data.json"));
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
-                Config.save();
-                Data.save();
+                configManager.save();
+                dataManager.save();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

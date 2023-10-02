@@ -3,31 +3,31 @@ package me.heartalborada.biliDownloader.Utils.Managers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.Getter;
-import me.heartalborada.biliDownloader.Utils.Managers.Beans.dataInstance;
+import lombok.Setter;
+import me.heartalborada.biliDownloader.Utils.Managers.Beans.ConfigInstance;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-public class dataManager {
+public class ConfigManager {
     @Getter
-    private static dataInstance data;
+    @Setter
+    private static ConfigInstance config;
     private final File location;
-    public dataManager(File location) throws IOException {
+    public ConfigManager(File location) throws IOException {
         this.location = location;
         if(location.exists()) {
             String unFormat = Files.readString(location.toPath());
-            data = new Gson().fromJson(unFormat, dataInstance.class);
+            config = new Gson().fromJson(unFormat, ConfigInstance.class);
         } else {
-            data = new dataInstance();
+            config = new ConfigInstance();
             save();
         }
     }
 
     public void save() throws IOException {
-        String format = new GsonBuilder().setPrettyPrinting().create().toJson(data);
+        String format = new GsonBuilder().setPrettyPrinting().create().toJson(config);
         if(location.exists() && !location.delete())
             throw new IOException(String.format("Failed delete file: %s",location.getPath()));
         Files.copy(new ByteArrayInputStream(format.getBytes(StandardCharsets.UTF_8)), location.toPath());

@@ -75,7 +75,8 @@ public class CliMain {
                 } else {
                     System.out.printf("%n");
                 }
-            } catch (EndOfFileException e) {
+            } catch (UserInterruptException ignore) {}
+            catch (EndOfFileException e) {
                 // user cancelled application with Ctrl+D or kill
                 break;
             } catch (Throwable t) {

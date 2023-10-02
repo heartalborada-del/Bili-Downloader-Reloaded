@@ -7,30 +7,26 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":construction: fixed: fixed typo">
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands/Bilibili.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands/SubCommands/BilibiliSubCommands.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/util.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/Main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/runConfigurations/Main.xml" afterDir="false" />
+    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":art: feat: add terminal cli code">
+      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands/Utils/Terminal/Progress.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands/Utils/Terminal/Terminal.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands/Utils/Util.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/NotWriteQRCode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/beans/countrySMS.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Beans/countrySMS.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/beans/geetestVerify.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Beans/geetestVerify.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/beans/loginData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Beans/loginData.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/biliInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/biliInstance.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/exceptions/BadRequestDataException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Exceptions/BadRequestDataException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/interfaces/Callback.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Interfaces/Callback.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/CliMain.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/biliInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/BiliInstance.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/CliMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/CliMain.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands/Bilibili.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands/Bilibili.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands/SubCommands/BilibiliSubCommands.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands/SubCommands/BilibiliSubCommands.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/librariesLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/librariesLoader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/loggerFormatter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/loggerFormatter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/managers/beans/configInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/Beans/configInstance.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/managers/beans/dataInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/Beans/dataInstance.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/managers/configManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/configManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/managers/dataManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/dataManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/okhttp/simpleCookieJar.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Okhttp/simpleCookieJar.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/utils/refreshCookies.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/refreshCookies.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/Beans/configInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/Beans/ConfigInstance.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/Beans/dataInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/Beans/DataInstance.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/configManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/ConfigManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/dataManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/DataManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Okhttp/simpleCookieJar.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Okhttp/SimpleCookieJar.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/librariesLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/LibrariesLoader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/loggerFormatter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/LoggerFormatter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/refreshCookies.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/RefreshCookies.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/util.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Util.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -133,7 +129,8 @@
       <workItem from="1696087236498" duration="18000" />
       <workItem from="1696133663360" duration="8716000" />
       <workItem from="1696148161385" duration="22041000" />
-      <workItem from="1696171626706" duration="3342000" />
+      <workItem from="1696171626706" duration="3550000" />
+      <workItem from="1696226100478" duration="10476000" />
     </task>
     <task id="LOCAL-00001" summary=":sparkles: new project!">
       <option name="closed" value="true" />
@@ -199,7 +196,15 @@
       <option name="project" value="LOCAL" />
       <updated>1696083691595</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary=":art: feat: add terminal cli code">
+      <option name="closed" value="true" />
+      <created>1696175954481</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1696175954481</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -235,7 +240,8 @@
     <MESSAGE value=":construction: feat: new data manager" />
     <MESSAGE value=":construction: feat: new data&amp;config manager" />
     <MESSAGE value=":construction: fixed: fixed typo" />
-    <option name="LAST_COMMIT_MESSAGE" value=":construction: fixed: fixed typo" />
+    <MESSAGE value=":art: feat: add terminal cli code" />
+    <option name="LAST_COMMIT_MESSAGE" value=":art: feat: add terminal cli code" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -252,7 +258,7 @@
       </pinned-members>
     </pin-to-top-manager>
     <watches-manager>
-      <inline-watch fileUrl="file://$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/librariesLoader.java" line="33">
+      <inline-watch fileUrl="file://$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/LibrariesLoader.java" line="33">
         <watch expression="list" />
       </inline-watch>
     </watches-manager>

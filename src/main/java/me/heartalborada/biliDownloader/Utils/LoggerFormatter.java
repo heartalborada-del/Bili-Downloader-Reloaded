@@ -7,7 +7,7 @@ import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-public class loggerFormatter extends Formatter {
+public class LoggerFormatter extends Formatter {
     @Override
     public String format(LogRecord record) {
         String message = formatMessage(record);
@@ -34,7 +34,7 @@ public class loggerFormatter extends Formatter {
         if(null != logger){
             logger.setUseParentHandlers(false);
             ConsoleHandler consoleHandler = new ConsoleHandler();
-            consoleHandler.setFormatter(new loggerFormatter());
+            consoleHandler.setFormatter(new LoggerFormatter());
             logger.addHandler(consoleHandler);
         }
         return logger;

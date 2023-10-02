@@ -8,7 +8,7 @@ import javax.crypto.Cipher
 import javax.crypto.spec.OAEPParameterSpec
 import javax.crypto.spec.PSource
 
-class refreshCookies {
+class RefreshCookies {
     fun getCorrespondPath(timestamp: Long): String {
         val publicKeyPEM = """
         -----BEGIN PUBLIC KEY-----

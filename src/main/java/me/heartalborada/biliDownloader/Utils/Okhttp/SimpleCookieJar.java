@@ -9,16 +9,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 
-public class simpleCookieJar implements CookieJar {
+public class SimpleCookieJar implements CookieJar {
     @Getter
     private final HashMap<String, List<Cookie>> cookieStore;
 
-    public simpleCookieJar() {
+    public SimpleCookieJar() {
         super();
         cookieStore = new HashMap<>();
     }
 
-    public simpleCookieJar(HashMap<String,List<Cookie>> CookieData) {
+    public SimpleCookieJar(HashMap<String,List<Cookie>> CookieData) {
         super();
         cookieStore = CookieData;
     }

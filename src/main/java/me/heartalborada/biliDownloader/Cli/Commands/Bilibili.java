@@ -36,7 +36,9 @@ public class Bilibili extends JlineCommandRegistry implements CommandRegistry {
                 (ignore) -> List.of(
                         new Completer[]{
                                 new ArgumentCompleter(
-                                        NullCompleter.INSTANCE,new StringsCompleter("qr"), NullCompleter.INSTANCE
+                                        NullCompleter.INSTANCE,
+                                        new StringsCompleter("qr"),
+                                        NullCompleter.INSTANCE
                                 )
                         })
         ));
@@ -45,7 +47,7 @@ public class Bilibili extends JlineCommandRegistry implements CommandRegistry {
 
     private void loginMethod(CommandInput input) {
         try {
-            BilibiliSubCommands.login(input.terminal(), input.out(), input.args());
+            BilibiliSubCommands.login(input.terminal(), input.out(), input.in(), input.args());
         } catch (Exception e) {
             saveException(e);
         }

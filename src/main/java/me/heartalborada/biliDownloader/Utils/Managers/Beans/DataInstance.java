@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Data
-public class dataInstance {
+public class DataInstance {
     private Bilibili bilibili = new Bilibili();
     @Data
     public static class Bilibili {
