@@ -12,6 +12,8 @@ module me.heartalborada.biliDownloader {
     requires static lombok;
     requires org.jline;
     requires com.google.zxing;
+    requires info.picocli;
+    requires picocli.shell.jline3;
 
     opens me.heartalborada.biliDownloader.Bili.Beans to com.google.gson;
     opens me.heartalborada.biliDownloader.Utils.Managers.Beans to com.google.gson;
@@ -20,5 +22,6 @@ module me.heartalborada.biliDownloader {
     exports me.heartalborada.biliDownloader.UI;
     opens me.heartalborada.biliDownloader.UI to javafx.fxml;
     exports me.heartalborada.biliDownloader.Cli;
-    opens me.heartalborada.biliDownloader.Cli to javafx.fxml;
+    opens me.heartalborada.biliDownloader.Cli to info.picocli;
+    opens me.heartalborada.biliDownloader.Cli.SubCommands to info.picocli;
 }

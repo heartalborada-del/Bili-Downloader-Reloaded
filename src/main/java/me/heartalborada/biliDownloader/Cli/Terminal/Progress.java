@@ -1,4 +1,4 @@
-package me.heartalborada.biliDownloader.Cli.Commands.Utils.Terminal;
+package me.heartalborada.biliDownloader.Cli.Terminal;
 
 import java.io.PrintStream;
 

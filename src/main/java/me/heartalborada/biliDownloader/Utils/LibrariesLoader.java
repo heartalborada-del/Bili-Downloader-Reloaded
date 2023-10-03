@@ -183,7 +183,7 @@ public class LibrariesLoader {
         if (!metaFileMD5.exists()) throw new RuntimeException("Failed to download " + metaFileMD5Url);
 
         // 验证meta文件
-        logger.info("Verifying " + metaFileName);
+        logger.finest("Verifying " + metaFileName);
         if (metaFile.exists()) {
             try (FileInputStream fis = new FileInputStream(metaFile)) {
                 if (!getInputStreamMD5(fis).equals(Files.readString(metaFileMD5.toPath()))) {
@@ -230,7 +230,7 @@ public class LibrariesLoader {
         String name = artifactId + "-" + version + ".jar"; // 文件名
         // jar
         File saveLocation = new File(path, String.format("%s/%s/%s/%s",groupId.replace(".","/"),artifactId,version,name));
-        logger.info("Verifying " + name);
+        logger.finest("Verifying " + name);
         if (!downloadLibraryMaven(groupId, artifactId, version, extra, repo, saveLocation, true)) {
             throw new RuntimeException("Failed to download libraries!");
         }
@@ -252,7 +252,7 @@ public class LibrariesLoader {
         // jar
         File saveLocation = new File(path, String.format("%s/%s/%s/%s",groupId.replace(".","/"),artifactId,version,name));
 
-        logger.info("Verifying " + name);
+        logger.finest("Verifying " + name);
         if (!downloadLibraryPomMaven(groupId, artifactId, version, extra, repo, saveLocation,true)) {
             throw new RuntimeException("Failed to download library's pom!");
         }

@@ -34,9 +34,10 @@ public class Main {
             list.add(new String[]{"org.jetbrains.kotlin","kotlin-stdlib-jdk8","1.6.20",""});
             list.add(new String[]{"org.jsoup","jsoup","1.16.1",""});
             list.add(new String[]{"org.jetbrains","annotations","24.0.1",""});
-            list.add(new String[]{"org.jline", "jline", "3.23.0", ""});
+            list.add(new String[]{"info.picocli", "picocli-shell-jline3", "4.7.5", ""});
             list.add(new String[]{"org.fusesource.jansi","jansi","2.4.0",""});
             list.add(new String[]{"com.google.zxing","core","3.5.2",""});
+
             try {
                 for(String[] strs : list) {
                     LibrariesLoader.loadLibraryClassMaven(

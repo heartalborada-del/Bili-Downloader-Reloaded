@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import me.heartalborada.biliDownloader.Bili.Beans.countrySMS;
 import me.heartalborada.biliDownloader.Bili.Beans.geetestVerify;
 import me.heartalborada.biliDownloader.Bili.Beans.loginData;
@@ -42,6 +43,7 @@ public class BiliInstance {
     private final SimpleCookieJar simpleCookieJar;
     private final OkHttpClient client;
     private String signature;
+
     public BiliInstance() throws IOException {
         simpleCookieJar = new SimpleCookieJar();
         client = new OkHttpClient.Builder()
@@ -344,93 +346,77 @@ public class BiliInstance {
         }
 
         public class QR {
-            public void loginWithQrLogin(Callback callback) {
-                client.newCall(
-                        new Request.Builder().url("https://passport.bilibili.com/x/passport-login/web/qrcode/generate?source=main-fe-header").build()
-                ).enqueue(new okhttp3.Callback() {
-                    @Override
-                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                        callback.onFailure(e, null, -1);
-                    }
-
-                    @Override
-                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                        if (response.body() != null) {
-                            String s = response.body().string();
-                            Timer timer = new Timer();
-                            JsonObject object = JsonParser.parseString(s).getAsJsonObject();
-                            if (object.getAsJsonPrimitive("code").getAsInt() != 0) {
-                                callback.onFailure(
-                                        new BadRequestDataException(
-                                                object.getAsJsonPrimitive("code").getAsInt(),
-                                                object.getAsJsonPrimitive("message").getAsString()
-                                        )
-                                        , object.getAsJsonPrimitive("message").getAsString()
-                                        , object.getAsJsonPrimitive("code").getAsInt());
-                            }
-                            callback.onGetQRUrl(object.getAsJsonObject("data").getAsJsonPrimitive("url").getAsString());
-                            String QRKey = object.getAsJsonObject("data").getAsJsonPrimitive("qrcode_key").getAsString();
-                            timer.schedule(new TimerTask() {
-                                private final long ts = System.currentTimeMillis();
-
-                                @Override
-                                public void run() {
-                                    if ((System.currentTimeMillis() - ts) >= 180 * 1000) {
-                                        cancel();
-                                        return;
-                                    }
-                                    client.newCall(
-                                            new Request.Builder()
-                                                    .url(String.format("https://passport.bilibili.com/x/passport-login/web/qrcode/poll?qrcode_key=%s", QRKey))
-                                                    .build()
-                                    ).enqueue(new okhttp3.Callback() {
-                                        @Override
-                                        public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                                            callback.onFailure(e, null, -1);
-                                            cancel();
-                                        }
-
-                                        @Override
-                                        public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                                            if (response.body() != null) {
-                                                String s = response.body().string();
-                                                JsonObject object = JsonParser.parseString(s).getAsJsonObject();
-                                                JsonObject jsonObject = object.getAsJsonObject("data");
-                                                int code = jsonObject.getAsJsonPrimitive("code").getAsInt();
-                                                String msg = jsonObject.getAsJsonPrimitive("message").getAsString();
-                                                switch (code) {
-                                                    case 0:
-                                                        long ts = jsonObject.getAsJsonPrimitive("timestamp").getAsLong();
-                                                        String rt = jsonObject.getAsJsonPrimitive("refresh_token").getAsString();
-                                                        callback.onSuccess(
-                                                                new loginData(rt, simpleCookieJar.getCookieStore(), ts),
-                                                                msg,
-                                                                code
-                                                        );
-                                                        cancel();
-                                                        break;
-                                                    case 86101:
-                                                    case 86090:
-                                                        callback.onUpdate(msg, code);
-                                                        break;
-                                                    case 86038:
-                                                        callback.onFailure(new BadRequestDataException(code, msg), msg, code);
-                                                        cancel();
-                                                        break;
-                                                }
-                                            } else {
-                                                callback.onFailure(new IOException("Empty Body"), null, -1);
-                                                cancel();
-                                            }
-                                        }
-                                    });
-                                }
-                            }, 0, 1000L);
-                        } else {
-                            callback.onFailure(new IOException("Empty Body"), null, -1);
+            public Timer loginWithQrLogin(Callback callback){
+                try (Response resp = client.newCall(new Request.Builder().url("https://passport.bilibili.com/x/passport-login/web/qrcode/generate?source=main-fe-header").build()).execute()) {
+                    if (resp.body() != null) {
+                        String s = resp.body().string();
+                        Timer timer = new Timer();
+                        JsonObject object = JsonParser.parseString(s).getAsJsonObject();
+                        if (object.getAsJsonPrimitive("code").getAsInt() != 0) {
+                            callback.onFailure(
+                                    new BadRequestDataException(
+                                            object.getAsJsonPrimitive("code").getAsInt(),
+                                            object.getAsJsonPrimitive("message").getAsString()
+                                    )
+                                    , object.getAsJsonPrimitive("message").getAsString()
+                                    , object.getAsJsonPrimitive("code").getAsInt());
                         }
+                        callback.onGetQRUrl(object.getAsJsonObject("data").getAsJsonPrimitive("url").getAsString());
+                        String QRKey = object.getAsJsonObject("data").getAsJsonPrimitive("qrcode_key").getAsString();
+                        timer.schedule(new TimerTask() {
+                            private final long ts = System.currentTimeMillis();
+
+                            @SneakyThrows
+                            @Override
+                            public void run() {
+                                if ((System.currentTimeMillis() - ts) >= 180 * 1000) {
+                                    cancel();
+                                    return;
+                                }
+                                try (Response response = client.newCall(new Request.Builder().url(String.format("https://passport.bilibili.com/x/passport-login/web/qrcode/poll?qrcode_key=%s", QRKey)).build()).execute()) {
+                                    if (response.body() != null) {
+                                        String s = response.body().string();
+                                        JsonObject object = JsonParser.parseString(s).getAsJsonObject();
+                                        JsonObject jsonObject = object.getAsJsonObject("data");
+                                        int code = jsonObject.getAsJsonPrimitive("code").getAsInt();
+                                        String msg = jsonObject.getAsJsonPrimitive("message").getAsString();
+                                        switch (code) {
+                                            case 0:
+                                                long ts = jsonObject.getAsJsonPrimitive("timestamp").getAsLong();
+                                                String rt = jsonObject.getAsJsonPrimitive("refresh_token").getAsString();
+                                                callback.onSuccess(
+                                                        new loginData(rt, simpleCookieJar.getCookieStore(), ts),
+                                                        msg,
+                                                        code
+                                                );
+                                                cancel();
+                                                break;
+                                            case 86101:
+                                            case 86090:
+                                                callback.onUpdate(msg, code);
+                                                break;
+                                            case 86038:
+                                                callback.onFailure(new BadRequestDataException(code, msg), msg, code);
+                                                cancel();
+                                                break;
+                                        }
+                                    } else {
+                                        callback.onFailure(new IOException("Empty Body"), null, -1);
+                                        cancel();
+                                    }
+                                } catch (Exception e) {
+                                    callback.onFailure(e, null, -1);
+                                }
+                            }
+                        }, 0, 1000L);
+                        return timer;
+                    } else {
+                        callback.onFailure(new IOException("Empty Body"), null, -1);
                     }
-                });
+                } catch (Exception e) {
+                    callback.onFailure(e, null, -1);
+                }
+                return null;
             }
         }
     }
