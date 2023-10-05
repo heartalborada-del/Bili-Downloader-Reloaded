@@ -43,7 +43,12 @@ public class BiliInstance {
     private final SimpleCookieJar simpleCookieJar;
     private final OkHttpClient client;
     private String signature;
-
+    @Getter
+    private final Login login = new Login();
+    @Getter
+    private final Account account = new Account();
+    @Getter
+    private final Video video = new Video();
     public BiliInstance() throws IOException {
         simpleCookieJar = new SimpleCookieJar();
         client = new OkHttpClient.Builder()
@@ -156,6 +161,12 @@ public class BiliInstance {
     }
 
     public class Login {
+        @Getter
+        private final SMS SMS = new SMS();
+        @Getter
+        private final Password Password = new Password();
+        @Getter
+        private final QR QR = new QR();
         public class SMS {
             public LinkedList<countrySMS> getCountryList() throws IOException {
                 Request req = new Request.Builder().url("https://passport.bilibili.com/web/generic/country/list").build();
@@ -525,5 +536,9 @@ public class BiliInstance {
                 }
             }
         }
+    }
+
+    public class Video {
+
     }
 }

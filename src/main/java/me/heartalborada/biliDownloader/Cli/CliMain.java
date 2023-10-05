@@ -3,7 +3,6 @@ package me.heartalborada.biliDownloader.Cli;
 import lombok.Getter;
 import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.Utils.LoggerFormatter;
-import org.jline.console.impl.Builtins;
 import org.jline.console.impl.SystemRegistryImpl;
 import org.jline.reader.*;
 import org.jline.reader.impl.DefaultParser;
@@ -66,13 +65,12 @@ public class CliMain {
         SystemRegistryImpl systemRegistry = new SystemRegistryImpl(parser,terminal, workDir,null);
 
         Commands commands = new Commands(terminal);
-        PicocliCommands.PicocliCommandsFactory factory = new PicocliCommands.PicocliCommandsFactory();
+        CommandLine.IFactory factory = new InnerClassFactory(commands);
 
         CommandLine commandLine = new CommandLine(commands,factory);
         PicocliCommands picocliCommands = new PicocliCommands(commandLine);
 
         systemRegistry.setCommandRegistries(picocliCommands);
-        systemRegistry.register("help",picocliCommands);
 
         LineReader lineReader = LineReaderBuilder.builder()
                 .terminal(terminal)
@@ -81,8 +79,6 @@ public class CliMain {
                 .completer(systemRegistry.completer())
                 .build();
         lineReader.setVariable(LineReader.BLINK_MATCHING_PAREN, 0);
-
-        commands.setReader(lineReader);
 
         terminal.writer().append(welcome);
 

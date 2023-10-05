@@ -155,6 +155,7 @@
                         <manifestEntries>
                             <Add-Opens>java.base/java.lang java.base/java.lang.reflect java.base/java.net java.base/jdk.internal.loader</Add-Opens>
                             <Add-Exports>java.base/jdk.internal.loader</Add-Exports>
+                            <Builtin-Dependency>false</Builtin-Dependency>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -223,6 +224,37 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            <mainClass>
+                                me.heartalborada.biliDownloader.Main
+                            </mainClass>
+                        </manifest>
+                        <manifestEntries>
+                            <Add-Opens>java.base/java.lang java.base/java.lang.reflect java.base/java.net java.base/jdk.internal.loader</Add-Opens>
+                            <Add-Exports>java.base/jdk.internal.loader</Add-Exports>
+                            <Builtin-Dependency>true</Builtin-Dependency>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

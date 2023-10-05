@@ -37,3 +37,4 @@ build/
 ### Mac OS ###
 .DS_Store
 /data/
+/.idea/inspectionProfiles/Project_Default.xml

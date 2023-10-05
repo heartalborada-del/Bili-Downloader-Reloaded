@@ -4,12 +4,6 @@
     <module name="Bili-Downloader-Reloaded" />
     <shortenClasspath name="MANIFEST" />
     <option name="VM_PARAMETERS" value="-Ddevelopment=true --add-opens=java.base/jdk.internal.loader=me.heartalborada.biliDownloader --add-opens=java.base/java.lang.reflect=me.heartalborada.biliDownloader " />
-    <extension name="coverage">
-      <pattern>
-        <option name="PATTERN" value="me.heartalborada.biliDownloader.Cli.Old.*" />
-        <option name="ENABLED" value="true" />
-      </pattern>
-    </extension>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

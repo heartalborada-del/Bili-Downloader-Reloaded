@@ -23,5 +23,4 @@ module me.heartalborada.biliDownloader {
     opens me.heartalborada.biliDownloader.UI to javafx.fxml;
     exports me.heartalborada.biliDownloader.Cli;
     opens me.heartalborada.biliDownloader.Cli to info.picocli;
-    opens me.heartalborada.biliDownloader.Cli.SubCommands to info.picocli;
 }
