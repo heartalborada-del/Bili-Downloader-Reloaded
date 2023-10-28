@@ -13,7 +13,7 @@ import java.nio.file.Files;
 
 public class DataManager {
     @Getter
-    private static DataInstance data;
+    private final DataInstance data;
     private final File location;
     public DataManager(File location) throws IOException {
         this.location = location;

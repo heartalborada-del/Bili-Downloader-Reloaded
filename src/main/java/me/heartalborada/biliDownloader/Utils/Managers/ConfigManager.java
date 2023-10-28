@@ -13,7 +13,7 @@ import java.nio.file.Files;
 public class ConfigManager {
     @Getter
     @Setter
-    private static ConfigInstance config;
+    private ConfigInstance config;
     private final File location;
     public ConfigManager(File location) throws IOException {
         this.location = location;

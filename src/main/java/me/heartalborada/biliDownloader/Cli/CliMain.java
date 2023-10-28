@@ -33,27 +33,26 @@ public class CliMain {
 
     static {
         try {
+            Field logField = org.jline.utils.Log.class.getDeclaredField("logger");
+            logField.setAccessible(true);
+            Field mod = logField.getClass().getDeclaredField("modifiers");
+            mod.setAccessible(true);
+            mod.setInt(logField,logField.getModifiers() &~ Modifier.FINAL);
+            Logger tmp = Logger.getLogger("JLine");
+            LoggerFormatter.installFormatter(tmp);
+            logField.set(org.jline.utils.Log.class, tmp);
             terminal = TerminalBuilder.builder()
                     .system(true)
-                        .signalHandler(Terminal.SignalHandler.SIG_IGN)
-                        .jansi(true)
-                        .jna(true)
-                        .build();
-        } catch (IOException e) {
+                    .signalHandler(Terminal.SignalHandler.SIG_IGN)
+                    .jansi(true)
+                    .jna(true)
+                    .build();
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        Field logField = org.jline.utils.Log.class.getDeclaredField("logger");
-        logField.setAccessible(true);
-        Field mod = logField.getClass().getDeclaredField("modifiers");
-        mod.setAccessible(true);
-        mod.setInt(logField,logField.getModifiers() &~ Modifier.FINAL);
-        Logger tmp = Logger.getLogger("JLine");
-        LoggerFormatter.installFormatter(tmp);
-        logField.set(org.jline.utils.Log.class, tmp);
-
+    public static void main(String[] args) {
         DefaultParser parser = new DefaultParser();
         parser.setEofOnUnclosedQuote(true);
         parser.setEscapeChars(null);
@@ -69,6 +68,7 @@ public class CliMain {
 
         CommandLine commandLine = new CommandLine(commands,factory);
         PicocliCommands picocliCommands = new PicocliCommands(commandLine);
+        picocliCommands.name("Builtin Commands");
 
         systemRegistry.setCommandRegistries(picocliCommands);
 

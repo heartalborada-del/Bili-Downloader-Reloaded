@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import lombok.Getter;
 import lombok.Setter;
 
-public class geetestVerify {
+public class GeetestVerify {
     @Getter
     private final String challenge;
     @Getter
@@ -18,7 +18,7 @@ public class geetestVerify {
     @Setter
     private String seccode;
 
-    public geetestVerify(String challenge, String gt, String token) {
+    public GeetestVerify(String challenge, String gt, String token) {
         this.challenge = challenge;
         this.gt = gt;
         this.token = token;

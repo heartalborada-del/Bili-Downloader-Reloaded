@@ -7,7 +7,7 @@ import okhttp3.Cookie;
 import java.util.HashMap;
 import java.util.List;
 
-public class loginData {
+public class LoginData {
     @Getter
     private final String refreshToken;
     @Getter
@@ -15,7 +15,7 @@ public class loginData {
     @Getter
     private final long timestamp;
 
-    public loginData(String refreshToken, HashMap<String, List<Cookie>> cookies, long timestamp) {
+    public LoginData(String refreshToken, HashMap<String, List<Cookie>> cookies, long timestamp) {
         this.refreshToken = refreshToken;
         this.cookies = cookies;
         this.timestamp = timestamp;

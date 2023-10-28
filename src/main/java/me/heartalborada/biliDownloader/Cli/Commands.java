@@ -5,7 +5,7 @@ import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import me.heartalborada.biliDownloader.Bili.Beans.loginData;
+import me.heartalborada.biliDownloader.Bili.Beans.LoginData;
 import me.heartalborada.biliDownloader.Bili.BiliInstance;
 import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
 import me.heartalborada.biliDownloader.Cli.Terminal.Progress;
@@ -69,7 +69,7 @@ public class Commands implements Runnable {
 
                     @SuppressWarnings("all")
                     @Override
-                    public void onSuccess(loginData data, String message, int code) {
+                    public void onSuccess(LoginData data, String message, int code) {
                         Main.getDataManager().getData().getBilibili().setCookies(data.getCookies());
                         Main.getDataManager().getData().getBilibili().setRefreshToken(data.getRefreshToken());
                         Main.getDataManager().getData().getBilibili().setLatestRefreshTimestamp(data.getTimestamp());

@@ -5,9 +5,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import me.heartalborada.biliDownloader.Bili.Beans.countrySMS;
-import me.heartalborada.biliDownloader.Bili.Beans.geetestVerify;
-import me.heartalborada.biliDownloader.Bili.Beans.loginData;
+import me.heartalborada.biliDownloader.Bili.Beans.CountrySMS;
+import me.heartalborada.biliDownloader.Bili.Beans.GeetestVerify;
+import me.heartalborada.biliDownloader.Bili.Beans.LoginData;
 import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
 import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
 import me.heartalborada.biliDownloader.Utils.Okhttp.SimpleCookieJar;
@@ -123,7 +123,7 @@ public class BiliInstance {
         return signatureTemp.substring(0, 32);
     }
 
-    public geetestVerify getNewGeetestCaptcha() throws IOException {
+    public GeetestVerify getNewGeetestCaptcha() throws IOException {
         Request req = new Request.Builder().url("https://passport.bilibili.com/x/passport-login/captcha?source=main_web").build();
         try (Response resp = client.newCall(req).execute()) {
             if (resp.body() != null) {
@@ -136,7 +136,7 @@ public class BiliInstance {
                     );
                 }
                 object = object.getAsJsonObject("data");
-                return new geetestVerify(
+                return new GeetestVerify(
                         object.getAsJsonObject("geetest").getAsJsonPrimitive("challenge").getAsString(),
                         object.getAsJsonObject("geetest").getAsJsonPrimitive("gt").getAsString(),
                         object.getAsJsonPrimitive("token").getAsString()
@@ -168,9 +168,9 @@ public class BiliInstance {
         @Getter
         private final QR QR = new QR();
         public class SMS {
-            public LinkedList<countrySMS> getCountryList() throws IOException {
+            public LinkedList<CountrySMS> getCountryList() throws IOException {
                 Request req = new Request.Builder().url("https://passport.bilibili.com/web/generic/country/list").build();
-                LinkedList<countrySMS> list = new LinkedList<>();
+                LinkedList<CountrySMS> list = new LinkedList<>();
                 try (Response resp = client.newCall(req).execute()) {
                     if (resp.body() != null) {
                         String str = resp.body().string();
@@ -184,7 +184,7 @@ public class BiliInstance {
                         JsonObject data = object.getAsJsonObject("data");
                         for (JsonElement o : data.getAsJsonArray("common")) {
                             JsonObject o1 = o.getAsJsonObject();
-                            list.add(new countrySMS(
+                            list.add(new CountrySMS(
                                     o1.getAsJsonPrimitive("id").getAsInt(),
                                     o1.getAsJsonPrimitive("cname").getAsString(),
                                     o1.getAsJsonPrimitive("country_id").getAsInt()
@@ -192,7 +192,7 @@ public class BiliInstance {
                         }
                         for (JsonElement o : data.getAsJsonArray("others")) {
                             JsonObject o1 = o.getAsJsonObject();
-                            list.add(new countrySMS(
+                            list.add(new CountrySMS(
                                     o1.getAsJsonPrimitive("id").getAsInt(),
                                     o1.getAsJsonPrimitive("cname").getAsString(),
                                     o1.getAsJsonPrimitive("country_id").getAsInt()
@@ -205,7 +205,7 @@ public class BiliInstance {
                 return list;
             }
 
-            public String sendSMSCode(long tel, int countryID, geetestVerify verify) throws IOException {
+            public String sendSMSCode(long tel, int countryID, GeetestVerify verify) throws IOException {
                 RequestBody body = new FormBody.Builder()
                         .add("cid", String.valueOf(countryID))
                         .add("tel", String.valueOf(tel))
@@ -236,7 +236,7 @@ public class BiliInstance {
                 }
             }
 
-            public loginData loginWithSMS(String SMSToken, long tel, int countryID, int SMSCode) throws IOException {
+            public LoginData loginWithSMS(String SMSToken, long tel, int countryID, int SMSCode) throws IOException {
                 RequestBody body = new FormBody.Builder()
                         .add("cid", String.valueOf(countryID))
                         .add("tel", String.valueOf(tel))
@@ -262,7 +262,7 @@ public class BiliInstance {
                         String RT = object.getAsJsonObject("data").getAsJsonPrimitive("refresh_token").getAsString();
                         long TS = object.getAsJsonObject("data").getAsJsonPrimitive("timestamp").getAsLong();
 
-                        return new loginData(RT, simpleCookieJar.getCookieStore(), TS);
+                        return new LoginData(RT, simpleCookieJar.getCookieStore(), TS);
                     } else {
                         throw new IOException("Empty body");
                     }
@@ -302,7 +302,7 @@ public class BiliInstance {
                 }
             }
 
-            public loginData loginWithPassword(String username, String password, geetestVerify verify) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+            public LoginData loginWithPassword(String username, String password, GeetestVerify verify) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
                 keys k = getSaltAndKey();
                 Cipher cipher = Cipher.getInstance("RSA");
                 cipher.init(Cipher.ENCRYPT_MODE, k.getKey());
@@ -336,7 +336,7 @@ public class BiliInstance {
                         String RT = object.getAsJsonObject("data").getAsJsonPrimitive("refresh_token").getAsString();
                         long ts = object.getAsJsonObject("data").getAsJsonPrimitive("timestamp").getAsLong();
 
-                        return new loginData(RT, simpleCookieJar.getCookieStore(), ts);
+                        return new LoginData(RT, simpleCookieJar.getCookieStore(), ts);
                     } else {
                         throw new IOException("Empty body");
                     }
@@ -396,7 +396,7 @@ public class BiliInstance {
                                                 long ts = jsonObject.getAsJsonPrimitive("timestamp").getAsLong();
                                                 String rt = jsonObject.getAsJsonPrimitive("refresh_token").getAsString();
                                                 callback.onSuccess(
-                                                        new loginData(rt, simpleCookieJar.getCookieStore(), ts),
+                                                        new LoginData(rt, simpleCookieJar.getCookieStore(), ts),
                                                         msg,
                                                         code
                                                 );
@@ -475,7 +475,7 @@ public class BiliInstance {
          * @param refreshToken Refresh Token
          * @return New Cookie and refresh token
          */
-        public loginData refreshCookie(String csrf, String refreshCsrf, String refreshToken) throws IOException {
+        public LoginData refreshCookie(String csrf, String refreshCsrf, String refreshToken) throws IOException {
             RequestBody body = new FormBody.Builder()
                     .add("csrf", csrf)
                     .add("refresh_csrf", refreshCsrf)
@@ -496,7 +496,7 @@ public class BiliInstance {
                                 object.getAsJsonPrimitive("message").getAsString()
                         );
                     }
-                    return new loginData(
+                    return new LoginData(
                             object.getAsJsonObject("data").getAsJsonPrimitive("refresh_token").getAsString(),
                             simpleCookieJar.getCookieStore(),
                             System.currentTimeMillis()
@@ -539,6 +539,12 @@ public class BiliInstance {
     }
 
     public class Video {
+        public void getVideoData(int aid) {
+            Request req = new Request.Builder().url(String.format("https://api.bilibili.com/x/web-interface/view?aid=%d",aid)).build();
 
+        }
+        public void getVideoData(String bvid) {
+
+        }
     }
 }
