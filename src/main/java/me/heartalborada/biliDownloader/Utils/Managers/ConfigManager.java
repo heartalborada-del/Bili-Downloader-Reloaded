@@ -6,18 +6,21 @@ import lombok.Getter;
 import lombok.Setter;
 import me.heartalborada.biliDownloader.Utils.Managers.Beans.ConfigInstance;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 public class ConfigManager {
+    private final File location;
     @Getter
     @Setter
     private ConfigInstance config;
-    private final File location;
+
     public ConfigManager(File location) throws IOException {
         this.location = location;
-        if(location.exists()) {
+        if (location.exists()) {
             String unFormat = Files.readString(location.toPath());
             config = new Gson().fromJson(unFormat, ConfigInstance.class);
         } else {
@@ -28,8 +31,8 @@ public class ConfigManager {
 
     public void save() throws IOException {
         String format = new GsonBuilder().setPrettyPrinting().create().toJson(config);
-        if(location.exists() && !location.delete())
-            throw new IOException(String.format("Failed delete file: %s",location.getPath()));
+        if (location.exists() && !location.delete())
+            throw new IOException(String.format("Failed delete file: %s", location.getPath()));
         Files.copy(new ByteArrayInputStream(format.getBytes(StandardCharsets.UTF_8)), location.toPath());
     }
 }

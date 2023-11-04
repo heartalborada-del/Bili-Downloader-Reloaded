@@ -1,5 +1,6 @@
 package me.heartalborada.biliDownloader.Bili;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -8,6 +9,7 @@ import lombok.SneakyThrows;
 import me.heartalborada.biliDownloader.Bili.Beans.CountrySMS;
 import me.heartalborada.biliDownloader.Bili.Beans.GeetestVerify;
 import me.heartalborada.biliDownloader.Bili.Beans.LoginData;
+import me.heartalborada.biliDownloader.Bili.Beans.Video.VideoData;
 import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
 import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
 import me.heartalborada.biliDownloader.Utils.Okhttp.SimpleCookieJar;
@@ -33,6 +35,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
+@SuppressWarnings("unused")
 public class BiliInstance {
     private final int[] mixinKeyEncTab = new int[]{
             46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49,
@@ -42,13 +45,14 @@ public class BiliInstance {
     };
     private final SimpleCookieJar simpleCookieJar;
     private final OkHttpClient client;
-    private String signature;
     @Getter
     private final Login login = new Login();
     @Getter
     private final Account account = new Account();
     @Getter
     private final Video video = new Video();
+    private String signature;
+
     public BiliInstance() throws IOException {
         simpleCookieJar = new SimpleCookieJar();
         client = new OkHttpClient.Builder()
@@ -167,6 +171,7 @@ public class BiliInstance {
         private final Password Password = new Password();
         @Getter
         private final QR QR = new QR();
+
         public class SMS {
             public LinkedList<CountrySMS> getCountryList() throws IOException {
                 Request req = new Request.Builder().url("https://passport.bilibili.com/web/generic/country/list").build();
@@ -334,9 +339,9 @@ public class BiliInstance {
                             );
                         }
                         String RT = object.getAsJsonObject("data").getAsJsonPrimitive("refresh_token").getAsString();
-                        long ts = object.getAsJsonObject("data").getAsJsonPrimitive("timestamp").getAsLong();
+                        long TS = object.getAsJsonObject("data").getAsJsonPrimitive("timestamp").getAsLong();
 
-                        return new LoginData(RT, simpleCookieJar.getCookieStore(), ts);
+                        return new LoginData(RT, simpleCookieJar.getCookieStore(), TS);
                     } else {
                         throw new IOException("Empty body");
                     }
@@ -357,7 +362,7 @@ public class BiliInstance {
         }
 
         public class QR {
-            public Timer loginWithQrLogin(Callback callback){
+            public Timer loginWithQrLogin(Callback callback) {
                 try (Response resp = client.newCall(new Request.Builder().url("https://passport.bilibili.com/x/passport-login/web/qrcode/generate?source=main-fe-header").build()).execute()) {
                     if (resp.body() != null) {
                         String s = resp.body().string();
@@ -538,13 +543,44 @@ public class BiliInstance {
         }
     }
 
+    @SuppressWarnings("Duplicates")
     public class Video {
-        public void getVideoData(int aid) {
-            Request req = new Request.Builder().url(String.format("https://api.bilibili.com/x/web-interface/view?aid=%d",aid)).build();
-
+        public VideoData getVideoData(int aid) throws IOException {
+            Request req = new Request.Builder().url(String.format("https://api.bilibili.com/x/web-interface/view?aid=%d", aid)).build();
+            try (Response response = client.newCall(req).execute()) {
+                if (response.body() != null) {
+                    String str = response.body().string();
+                    JsonObject object = JsonParser.parseString(str).getAsJsonObject();
+                    if (object.getAsJsonPrimitive("code").getAsInt() != 0) {
+                        throw new BadRequestDataException(
+                                object.getAsJsonPrimitive("code").getAsInt(),
+                                object.getAsJsonPrimitive("message").getAsString()
+                        );
+                    }
+                    return new Gson().fromJson(object.get("data"), VideoData.class);
+                } else {
+                    throw new IOException("Empty body");
+                }
+            }
         }
-        public void getVideoData(String bvid) {
 
+        public VideoData getVideoData(String bvid) throws IOException {
+            Request req = new Request.Builder().url(String.format("https://api.bilibili.com/x/web-interface/view?bvid=%s", bvid)).build();
+            try (Response response = client.newCall(req).execute()) {
+                if (response.body() != null) {
+                    String str = response.body().string();
+                    JsonObject object = JsonParser.parseString(str).getAsJsonObject();
+                    if (object.getAsJsonPrimitive("code").getAsInt() != 0) {
+                        throw new BadRequestDataException(
+                                object.getAsJsonPrimitive("code").getAsInt(),
+                                object.getAsJsonPrimitive("message").getAsString()
+                        );
+                    }
+                    return new Gson().fromJson(object.get("data"), VideoData.class);
+                } else {
+                    throw new IOException("Empty body");
+                }
+            }
         }
     }
 }

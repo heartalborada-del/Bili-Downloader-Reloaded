@@ -6,7 +6,10 @@ import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 
 
 public class SimpleCookieJar implements CookieJar {
@@ -18,33 +21,38 @@ public class SimpleCookieJar implements CookieJar {
         cookieStore = new HashMap<>();
     }
 
-    public SimpleCookieJar(HashMap<String,List<Cookie>> CookieData) {
+    public SimpleCookieJar(HashMap<String, List<Cookie>> CookieData) {
         super();
         cookieStore = CookieData;
+    }
+
+    private static String getUrlKey(HttpUrl httpUrl) {
+        String[] arr = httpUrl.host().split("\\.");
+        return String.format("%s:%d", arr[arr.length - 2] + "." + arr[arr.length - 1], httpUrl.port());
     }
 
     @Override
     public void saveFromResponse(@NotNull HttpUrl httpUrl, @NotNull List<Cookie> list) {
         String url = getUrlKey(httpUrl);
-        if(cookieStore.containsKey(url)) {
+        if (cookieStore.containsKey(url)) {
             cookieStore.put(url, list);
         } else {
             List<Cookie> l = cookieStore.get(url) != null ? cookieStore.get(url) : new LinkedList<>();
-            for (Cookie c: list) {
+            for (Cookie c : list) {
                 boolean isMatch = false;
-                for (Cookie c1: l) {
-                    if(Objects.equals(c1.domain(), c.domain()) && c1.expiresAt() < c.expiresAt()) {
+                for (Cookie c1 : l) {
+                    if (Objects.equals(c1.domain(), c.domain()) && c1.expiresAt() < c.expiresAt()) {
                         l.remove(c1);
                         l.add(c);
                         isMatch = true;
                         break;
                     }
                 }
-                if(!isMatch)
+                if (!isMatch)
                     l.add(c);
             }
             cookieStore.remove(url);
-            cookieStore.put(url,l);
+            cookieStore.put(url, l);
         }
     }
 
@@ -53,13 +61,8 @@ public class SimpleCookieJar implements CookieJar {
     public List<Cookie> loadForRequest(@NotNull HttpUrl httpUrl) {
         String url = getUrlKey(httpUrl);
         List<Cookie> m = cookieStore.get(url);
-        if(m != null)
+        if (m != null)
             return cookieStore.get(url);
         return new LinkedList<>();
-    }
-
-    private static String getUrlKey(HttpUrl httpUrl){
-        String[] arr = httpUrl.host().split("\\.");
-        return String.format("%s:%d",arr[arr.length-2]+"."+arr[arr.length-1],httpUrl.port());
     }
 }

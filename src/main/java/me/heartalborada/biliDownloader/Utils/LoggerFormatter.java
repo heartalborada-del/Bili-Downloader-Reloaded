@@ -8,6 +8,16 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 public class LoggerFormatter extends Formatter {
+    public static Logger installFormatter(Logger logger) {
+        if (null != logger) {
+            logger.setUseParentHandlers(false);
+            ConsoleHandler consoleHandler = new ConsoleHandler();
+            consoleHandler.setFormatter(new LoggerFormatter());
+            logger.addHandler(consoleHandler);
+        }
+        return logger;
+    }
+
     @Override
     public String format(LogRecord record) {
         String message = formatMessage(record);
@@ -28,15 +38,5 @@ public class LoggerFormatter extends Formatter {
                 record.getLoggerName(),
                 message,
                 throwable);
-    }
-
-    public static Logger installFormatter(Logger logger){
-        if(null != logger){
-            logger.setUseParentHandlers(false);
-            ConsoleHandler consoleHandler = new ConsoleHandler();
-            consoleHandler.setFormatter(new LoggerFormatter());
-            logger.addHandler(consoleHandler);
-        }
-        return logger;
     }
 }

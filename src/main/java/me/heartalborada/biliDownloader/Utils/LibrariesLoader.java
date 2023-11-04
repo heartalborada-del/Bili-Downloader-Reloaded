@@ -32,6 +32,7 @@ public class LibrariesLoader {
     private static final Logger logger = installFormatter(Logger.getLogger("Dependency Loader"));
 
     private static final LinkedList<String> list = new LinkedList<>();
+
     private static void downloadFile(File file, URL url) throws IOException {
         try (InputStream is = url.openStream()) {
             Files.copy(is, file.toPath());
@@ -221,15 +222,15 @@ public class LibrariesLoader {
      */
     public static void loadLibraryClassMaven(String groupId, String artifactId, String version, String extra, String repo, File path) throws RuntimeException, IOException, NoSuchAlgorithmException, ParserConfigurationException, SAXException {
 
-        String target = String.format("%s-%s-%s%s",groupId,artifactId,version,extra);
-        if(list.contains(target)) {
+        String target = String.format("%s-%s-%s%s", groupId, artifactId, version, extra);
+        if (list.contains(target)) {
             return;
         }
         list.add(target);
-        loadLibraryLibrary(groupId, artifactId, version, extra,repo, path);
+        loadLibraryLibrary(groupId, artifactId, version, extra, repo, path);
         String name = artifactId + "-" + version + ".jar"; // 文件名
         // jar
-        File saveLocation = new File(path, String.format("%s/%s/%s/%s",groupId.replace(".","/"),artifactId,version,name));
+        File saveLocation = new File(path, String.format("%s/%s/%s/%s", groupId.replace(".", "/"), artifactId, version, name));
         logger.finest("Verifying " + name);
         if (!downloadLibraryMaven(groupId, artifactId, version, extra, repo, saveLocation, true)) {
             throw new RuntimeException("Failed to download libraries!");
@@ -246,14 +247,14 @@ public class LibrariesLoader {
      * @param version    版本
      * @param extra      额外参数
      */
-    public static void loadLibraryLibrary(String groupId, String artifactId, String version, String extra,String repo, File path) throws RuntimeException, IOException, NoSuchAlgorithmException, ParserConfigurationException, SAXException {
+    public static void loadLibraryLibrary(String groupId, String artifactId, String version, String extra, String repo, File path) throws RuntimeException, IOException, NoSuchAlgorithmException, ParserConfigurationException, SAXException {
         String name = artifactId + "-" + version + ".pom"; // 文件名
 
         // jar
-        File saveLocation = new File(path, String.format("%s/%s/%s/%s",groupId.replace(".","/"),artifactId,version,name));
+        File saveLocation = new File(path, String.format("%s/%s/%s/%s", groupId.replace(".", "/"), artifactId, version, name));
 
         logger.finest("Verifying " + name);
-        if (!downloadLibraryPomMaven(groupId, artifactId, version, extra, repo, saveLocation,true)) {
+        if (!downloadLibraryPomMaven(groupId, artifactId, version, extra, repo, saveLocation, true)) {
             throw new RuntimeException("Failed to download library's pom!");
         }
 
@@ -261,12 +262,12 @@ public class LibrariesLoader {
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.parse(saveLocation);
         NodeList list = doc.getElementsByTagName("dependency");
-        for (int i = 0; i <list.getLength() ; i++) {
+        for (int i = 0; i < list.getLength(); i++) {
             Node node = list.item(i);
             NodeList childNodes = node.getChildNodes();
-            String gId = "",aId = "",ver="",scope="";
-            for (int j = 0; j <childNodes.getLength() ; j++) {
-                if (childNodes.item(j).getNodeType()==Node.ELEMENT_NODE) {
+            String gId = "", aId = "", ver = "", scope = "";
+            for (int j = 0; j < childNodes.getLength(); j++) {
+                if (childNodes.item(j).getNodeType() == Node.ELEMENT_NODE) {
                     switch (childNodes.item(j).getNodeName()) {
                         case "groupId":
                             gId = childNodes.item(j).getFirstChild().getNodeValue();
@@ -283,7 +284,7 @@ public class LibrariesLoader {
                     }
                 }
             }
-            if(gId.equals("")||aId.equals("")||ver.equals("")||!scope.equals("compile")) {
+            if (gId.equals("") || aId.equals("") || ver.equals("") || !scope.equals("compile")) {
                 break;
             }
             loadLibraryClassMaven(gId, aId, ver, extra, repo, path);
@@ -339,8 +340,7 @@ public class LibrariesLoader {
         byte[] byteArray = new byte[1024];
         int bytesCount = 0;
 
-        while ((bytesCount = inputStream.read(byteArray)) != -1)
-        {
+        while ((bytesCount = inputStream.read(byteArray)) != -1) {
             digest.update(byteArray, 0, bytesCount);
         }
 

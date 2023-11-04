@@ -5,9 +5,9 @@ import java.io.PrintStream;
 import static me.heartalborada.biliDownloader.Cli.Terminal.Utils.getStringPrintLen;
 
 public abstract class Terminal {
-    private String lastString = "";
     private final String format;
     private final PrintStream printStream;
+    private String lastString = "";
 
     public Terminal(String format, PrintStream printStream) {
         this.format = format;
@@ -16,12 +16,8 @@ public abstract class Terminal {
 
     public void UpgradeString(Object... a) {
         StringBuilder newStr = new StringBuilder(String.format(format, a));
-        for(int i=lastString.length();i>0;i--) {
-            printStream.print("\b");
-        }
-        String cp = newStr.toString();
-        newStr.append(" ".repeat(Math.max(0, getStringPrintLen(lastString) - getStringPrintLen(cp) + 1)));
-        lastString = cp;
+        printStream.printf("\33[%dD",lastString.length());
+        lastString = newStr.toString();
         printStream.print(newStr);
     }
 }

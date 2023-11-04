@@ -15,9 +15,10 @@ public class DataManager {
     @Getter
     private final DataInstance data;
     private final File location;
+
     public DataManager(File location) throws IOException {
         this.location = location;
-        if(location.exists()) {
+        if (location.exists()) {
             String unFormat = Files.readString(location.toPath());
             data = new Gson().fromJson(unFormat, DataInstance.class);
         } else {
@@ -28,8 +29,8 @@ public class DataManager {
 
     public void save() throws IOException {
         String format = new GsonBuilder().setPrettyPrinting().create().toJson(data);
-        if(location.exists() && !location.delete())
-            throw new IOException(String.format("Failed delete file: %s",location.getPath()));
+        if (location.exists() && !location.delete())
+            throw new IOException(String.format("Failed delete file: %s", location.getPath()));
         Files.copy(new ByteArrayInputStream(format.getBytes(StandardCharsets.UTF_8)), location.toPath());
     }
 }

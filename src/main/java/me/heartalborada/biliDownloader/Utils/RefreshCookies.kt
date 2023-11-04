@@ -20,17 +20,22 @@ class RefreshCookies {
     """.trimIndent()
 
         val publicKey = KeyFactory.getInstance("RSA").generatePublic(
-                X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyPEM
+            X509EncodedKeySpec(
+                Base64.getDecoder().decode(
+                    publicKeyPEM
                         .replace("-----BEGIN PUBLIC KEY-----", "")
                         .replace("-----END PUBLIC KEY-----", "")
                         .replace("\n", "")
-                        .trim()))
+                        .trim()
+                )
+            )
         )
 
         val cipher = Cipher.getInstance("RSA/ECB/OAEPPadding").apply {
-            init(Cipher.ENCRYPT_MODE,
-                    publicKey,
-                    OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT)
+            init(
+                Cipher.ENCRYPT_MODE,
+                publicKey,
+                OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT)
             )
         }
 

@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 public class DataInstance {
     private Bilibili bilibili = new Bilibili();
+
     @Data
     public static class Bilibili {
         private HashMap<String, List<Cookie>> cookies = new HashMap<>();

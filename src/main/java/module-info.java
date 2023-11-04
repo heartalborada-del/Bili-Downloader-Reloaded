@@ -2,6 +2,8 @@ module me.heartalborada.biliDownloader {
     requires javafx.controls;
     requires javafx.fxml;
 
+    //requires java.datatransfer;
+    requires java.sql;
     requires com.google.gson;
     requires okhttp3;
     requires java.xml;
@@ -24,4 +26,5 @@ module me.heartalborada.biliDownloader {
     exports me.heartalborada.biliDownloader.Cli;
     opens me.heartalborada.biliDownloader.Cli to info.picocli;
     opens me.heartalborada.biliDownloader.Bili.Beans.Video to com.google.gson;
+    opens me.heartalborada.biliDownloader.Bili.Beans.Video.Sub to com.google.gson;
 }
