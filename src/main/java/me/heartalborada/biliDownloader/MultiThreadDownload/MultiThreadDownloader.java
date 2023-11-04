@@ -1,12 +1,13 @@
 package me.heartalborada.biliDownloader.MultiThreadDownload;
 
-import me.heartalborada.biliDownloader.Bili.Beans.LoginData;
+import me.heartalborada.biliDownloader.MultiThreadDownload.Speed.DownloadSpeedStat;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
 
 @SuppressWarnings("unused")
 public class MultiThreadDownloader {
@@ -29,14 +30,25 @@ public class MultiThreadDownloader {
         this.client = client.newBuilder().build();
     }
 
-    public void download(URL url, File filePath, Callback callback) throws IOException {
-
+    public DownloadInstance download(URL url, File filePath, Callback callback, LinkedHashMap<String,String> header) throws IOException {
+        return new DownloadInstance(
+                10 * 1024 * 1024,
+                threadCount,
+                url,
+                callback,
+                Path.of(filePath.toURI()),
+                new DownloadSpeedStat(callback::newSpeedStat),
+                header
+        );
     }
+
     public interface Callback {
         void onSuccess(long fileSize);
 
         void onFailure(Exception e, String cause);
 
         void onStart(long fileSize);
+
+        void newSpeedStat(long speed);
     }
 }

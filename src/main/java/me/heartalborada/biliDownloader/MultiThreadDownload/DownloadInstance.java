@@ -1,18 +1,16 @@
 package me.heartalborada.biliDownloader.MultiThreadDownload;
 
 import me.heartalborada.biliDownloader.MultiThreadDownload.Speed.DownloadSpeedStat;
-import okhttp3.Call;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -27,24 +25,40 @@ public class DownloadInstance {
     private final MultiThreadDownloader.Callback callback;
     private final Path savePath;
     private final DownloadSpeedStat stat;
+    private final Map<String, String> header;
     private long THREAD_COUNTER = 0;
+    private boolean SUCCESS_FLAG = false;
+
     public DownloadInstance(
             long threshold,
             int threadCount,
             URL url,
             MultiThreadDownloader.Callback callback,
             Path savePath,
-            DownloadSpeedStat stat
+            DownloadSpeedStat stat,
+            LinkedHashMap<String, String> header
     ) throws IOException {
         this.stat = stat;
-        service = Executors.newFixedThreadPool(threadCount+1);
+        service = Executors.newFixedThreadPool(threadCount + 1);
         this.url = url;
         this.callback = callback;
         this.savePath = savePath;
-        URLConnection conn = url.openConnection();
+        File f = new File(savePath.toUri());
+        if (!f.getParentFile().exists())
+            f.getParentFile().mkdirs();
+        if (f.exists())
+            f.delete();
+        this.header = header;
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestProperty("Origin", "https://www.bilibili.com/");
+        conn.setRequestProperty("Referer", "https://www.bilibili.com");
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.24");
+        for (String k : header.keySet()) {
+            conn.setRequestProperty(k, header.get(k));
+        }
         long length = -1;
         boolean isAllowMultiThread = false;
-        if (!Objects.equals(conn.getHeaderField("Transfer-Encoding"), "chunked") && Objects.equals(conn.getHeaderField("Accept-Ranges"), "bytes")) {
+        if (!Objects.equals(conn.getHeaderField("Transfer-Encoding"), "chunked") && (Objects.equals(conn.getHeaderField("Accept-Ranges"), "bytes") || conn.getHeaderField("Content-Length") != null)) {
             length = conn.getContentLength();
             isAllowMultiThread = true;
         }
@@ -52,24 +66,33 @@ public class DownloadInstance {
         this.fileSize = length;
         callback.onStart(fileSize);
         service.submit(new SaveTask());
-        if(isAllowMultiThread && fileSize > threshold) {
+        if (isAllowMultiThread && fileSize > threshold) {
             long startPos = 0, endPos = 0;
             long count = fileSize / threshold;
             for (long i = 0; i < count; i++) {
                 startPos = i * threshold;
                 endPos = startPos + threshold - 1;
-                service.submit(new Task(startPos,endPos));
+                service.submit(new Task(startPos, endPos));
             }
             if (endPos < fileSize - 1) {
-                service.submit(new Task(endPos+1, fileSize - 1));
+                service.submit(new Task(endPos + 1, fileSize - 1));
             }
         } else {
-            service.submit(new Task(0,fileSize));
+            service.submit(new Task(0, fileSize));
         }
         stat.start();
     }
 
-    class Task implements Runnable{
+    public boolean stop() {
+        service.shutdownNow();
+        return service.isShutdown();
+    }
+
+    public boolean isDone() {
+        return SUCCESS_FLAG;
+    }
+
+    class Task implements Runnable {
         private final long startPos;
         private final long endPos;
         private final long serialNum;
@@ -86,7 +109,14 @@ public class DownloadInstance {
             HttpURLConnection conn = null;
             try {
                 conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestProperty("Range",String.format("bytes=%d-%d",startPos,endPos));
+                if (!(endPos < 0 || startPos < 0))
+                    conn.setRequestProperty("Range", String.format("bytes=%d-%d", startPos, endPos));
+                conn.setRequestProperty("Origin", "https://www.bilibili.com/");
+                conn.setRequestProperty("Referer", "https://www.bilibili.com");
+                conn.setRequestProperty("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.24");
+                for (String k : header.keySet()) {
+                    conn.setRequestProperty(k, header.get(k));
+                }
                 conn.connect();
                 BufferData buffData = new BufferData(serialNum, startPos, endPos);
                 byte[] data = new byte[1024 * 8];
@@ -100,7 +130,9 @@ public class DownloadInstance {
                 }
                 dataQueue.offer(buffData);
             } catch (Exception e) {
-                callback.onFailure(e,e.getMessage());
+                callback.onFailure(e, e.getMessage());
+                SUCCESS_FLAG = true;
+                service.shutdownNow();
             } finally {
                 if (conn != null) {
                     conn.disconnect();
@@ -123,8 +155,11 @@ public class DownloadInstance {
                 } while (writSize < fileSize);
                 stat.stop();
                 callback.onSuccess(writSize);
+                SUCCESS_FLAG = true;
             } catch (IOException | InterruptedException e) {
-                callback.onFailure(e,e.getMessage());
+                callback.onFailure(e, e.getMessage());
+                SUCCESS_FLAG = true;
+                service.shutdownNow();
             }
         }
     }

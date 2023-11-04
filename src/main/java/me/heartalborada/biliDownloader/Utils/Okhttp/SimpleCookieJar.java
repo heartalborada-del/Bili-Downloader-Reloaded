@@ -14,7 +14,7 @@ import java.util.Objects;
 
 public class SimpleCookieJar implements CookieJar {
     @Getter
-    private final HashMap<String, List<Cookie>> cookieStore;
+    private HashMap<String, List<Cookie>> cookieStore;
 
     public SimpleCookieJar() {
         super();

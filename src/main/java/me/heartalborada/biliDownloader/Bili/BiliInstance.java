@@ -4,12 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.Data;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import me.heartalborada.biliDownloader.Bili.Beans.CountrySMS;
 import me.heartalborada.biliDownloader.Bili.Beans.GeetestVerify;
 import me.heartalborada.biliDownloader.Bili.Beans.LoginData;
 import me.heartalborada.biliDownloader.Bili.Beans.Video.VideoData;
+import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.VideoStreamData;
 import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
 import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
 import me.heartalborada.biliDownloader.Utils.Okhttp.SimpleCookieJar;
@@ -35,7 +37,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused","Duplicates"})
 public class BiliInstance {
     private final int[] mixinKeyEncTab = new int[]{
             46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49,
@@ -51,15 +53,84 @@ public class BiliInstance {
     private final Account account = new Account();
     @Getter
     private final Video video = new Video();
-    private String signature;
+    private final Signature signature = new Signature();
 
-    public BiliInstance() throws IOException {
+    @Data
+    private class Signature {
+
+        private String signStr;
+        private long expireTimeStamp;
+        public void upgrade() throws IOException {
+            Request req = new Request.Builder().url("https://api.bilibili.com/x/web-interface/nav").build();
+            String imgAndSub;
+            try (Response resp = client.newCall(req).execute()) {
+                if (resp.body() != null) {
+                    String str = resp.body().string();
+                    JsonObject element = JsonParser.parseString(str).getAsJsonObject();
+                    JsonObject wbiData = element.getAsJsonObject().getAsJsonObject("data").getAsJsonObject("wbi_img");
+                    String img = wbiData.getAsJsonPrimitive("img_url").getAsString();
+                    img = img.substring(img.lastIndexOf('/') + 1, img.lastIndexOf("."));
+
+                    String sub = wbiData.getAsJsonPrimitive("sub_url").getAsString();
+                    sub = sub.substring(sub.lastIndexOf('/') + 1, sub.lastIndexOf("."));
+                    imgAndSub = img + sub;
+                } else {
+                    throw new IOException("Empty body");
+                }
+            }
+            StringBuilder signatureTemp = new StringBuilder();
+            for (int i : mixinKeyEncTab) {
+                signatureTemp.append(imgAndSub.charAt(i));
+            }
+            signStr = signatureTemp.substring(0, 32);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DATE,1);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            expireTimeStamp = calendar.getTimeInMillis();
+        }
+
+        private String generateMD5(String input) {
+            try {
+                MessageDigest md = MessageDigest.getInstance("MD5");
+                byte[] digest = md.digest(input.getBytes());
+                StringBuilder sb = new StringBuilder();
+                for (byte b : digest) {
+                    sb.append(String.format("%02x", b));
+                }
+                return sb.toString();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        protected TreeMap<String, String> sign(Map<String, String> parameters) throws IOException {
+            TreeMap<String, String> copy = new TreeMap<>(parameters);
+            copy.put("wts", String.valueOf(System.currentTimeMillis() / 1000));
+            StringJoiner paramStr = new StringJoiner("&");
+            copy.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .forEach(
+                            entry ->
+                                    paramStr.add(entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
+                    );
+            if (signStr == null || System.currentTimeMillis() >= expireTimeStamp)
+                upgrade();
+            copy.put("w_rid", generateMD5(paramStr + signStr));
+            return copy;
+        }
+
+    }
+    public BiliInstance() {
         simpleCookieJar = new SimpleCookieJar();
         client = new OkHttpClient.Builder()
                 .addInterceptor(new headerInterceptor())
                 .cookieJar(simpleCookieJar)
                 .build();
-        signature = upgradeWbiSign();
     }
 
     public BiliInstance(HashMap<String, List<Cookie>> CookieData) throws IOException {
@@ -68,63 +139,6 @@ public class BiliInstance {
                 .addInterceptor(new headerInterceptor())
                 .cookieJar(simpleCookieJar)
                 .build();
-        signature = upgradeWbiSign();
-    }
-
-    private static String generateMD5(String input) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] digest = md.digest(input.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (byte b : digest) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    protected TreeMap<String, String> signParameters(Map<String, String> parameters) throws IOException {
-        TreeMap<String, String> copy = new TreeMap<>(parameters);
-        copy.put("wts", String.valueOf(System.currentTimeMillis() / 1000));
-        StringJoiner paramStr = new StringJoiner("&");
-        copy.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
-                .forEach(
-                        entry ->
-                                paramStr.add(entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
-                );
-        if (signature == null)
-            signature = upgradeWbiSign();
-        copy.put("w_rid", generateMD5(paramStr + signature));
-        return copy;
-    }
-
-    protected String upgradeWbiSign() throws IOException {
-        Request req = new Request.Builder().url("https://api.bilibili.com/x/web-interface/nav").build();
-        String imgAndSub;
-        try (Response resp = client.newCall(req).execute()) {
-            if (resp.body() != null) {
-                String str = resp.body().string();
-                JsonObject element = JsonParser.parseString(str).getAsJsonObject();
-                JsonObject wbiData = element.getAsJsonObject().getAsJsonObject("data").getAsJsonObject("wbi_img");
-                String img = wbiData.getAsJsonPrimitive("img_url").getAsString();
-                img = img.substring(img.lastIndexOf('/') + 1, img.lastIndexOf("."));
-
-                String sub = wbiData.getAsJsonPrimitive("sub_url").getAsString();
-                sub = sub.substring(sub.lastIndexOf('/') + 1, sub.lastIndexOf("."));
-                imgAndSub = img + sub;
-            } else {
-                throw new IOException("Empty body");
-            }
-        }
-        StringBuilder signatureTemp = new StringBuilder();
-        for (int i : mixinKeyEncTab) {
-            signatureTemp.append(imgAndSub.charAt(i));
-        }
-        return signatureTemp.substring(0, 32);
     }
 
     public GeetestVerify getNewGeetestCaptcha() throws IOException {
@@ -171,7 +185,6 @@ public class BiliInstance {
         private final Password Password = new Password();
         @Getter
         private final QR QR = new QR();
-
         public class SMS {
             public LinkedList<CountrySMS> getCountryList() throws IOException {
                 Request req = new Request.Builder().url("https://passport.bilibili.com/web/generic/country/list").build();
@@ -583,8 +596,33 @@ public class BiliInstance {
             }
         }
 
-        public void a() {
-
+        public VideoStreamData getVideoStreamData(VideoData data, int page) throws IOException {
+            HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse("https://api.bilibili.com/x/player/wbi/playurl")).newBuilder();
+            Map<String, String> param = new HashMap<>();
+            param.put("bvid",data.getBvid());
+            param.put("cid", String.valueOf(data.getPages().get(page).getCid()));
+            param.put("fourk","1");
+            param.put("fnval","16");
+            TreeMap<String,String> signedParam = signature.sign(param);
+            for (String key : signedParam.keySet()) {
+                urlBuilder.addQueryParameter(key,signedParam.get(key));
+            }
+            Request req = new Request.Builder().url(urlBuilder.build()).build();
+            try (Response response = client.newCall(req).execute()) {
+                if (response.body() != null) {
+                    String str = response.body().string();
+                    JsonObject object = JsonParser.parseString(str).getAsJsonObject();
+                    if (object.getAsJsonPrimitive("code").getAsInt() != 0) {
+                        throw new BadRequestDataException(
+                                object.getAsJsonPrimitive("code").getAsInt(),
+                                object.getAsJsonPrimitive("message").getAsString()
+                        );
+                    }
+                    return new Gson().fromJson(object.get("data"), VideoStreamData.class);
+                } else {
+                    throw new IOException("Empty body");
+                }
+            }
         }
     }
 }

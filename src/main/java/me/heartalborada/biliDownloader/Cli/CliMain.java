@@ -1,5 +1,7 @@
 package me.heartalborada.biliDownloader.Cli;
 
+import com.github.kwhat.jnativehook.GlobalScreen;
+import com.github.kwhat.jnativehook.NativeHookException;
 import lombok.Getter;
 import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.Utils.LoggerFormatter;
@@ -19,6 +21,7 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CliMain {
@@ -51,6 +54,11 @@ public class CliMain {
                     .build();
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+        try {
+            GlobalScreen.registerNativeHook();
+        } catch (NativeHookException e) {
+            e.printStackTrace();
         }
     }
 
@@ -99,13 +107,13 @@ public class CliMain {
                     try {
                         Object result = systemRegistry.execute(line);
                         if (result != null) {
-                            System.out.println(result);
+                            terminal.writer().println(result);
                         }
                     } catch (IllegalArgumentException | SystemRegistryImpl.UnknownCommandException e) {
-                        System.err.printf("\33[1;31m%s\33[0m%n", e.getMessage());
+                        terminal.writer().printf("\33[1;31m%s\33[0m%n", e.getMessage());
                     }
                 } else {
-                    System.out.printf("%n");
+                    terminal.writer().printf("%n");
                 }
             } catch (UserInterruptException ignore) {
             } catch (EndOfFileException e) {
