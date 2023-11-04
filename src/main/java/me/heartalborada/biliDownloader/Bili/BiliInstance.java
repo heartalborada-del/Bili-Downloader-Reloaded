@@ -582,5 +582,9 @@ public class BiliInstance {
                 }
             }
         }
+
+        public void a() {
+
+        }
     }
 }

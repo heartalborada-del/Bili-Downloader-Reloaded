@@ -56,7 +56,7 @@ public class Main {
                 list.add(new String[]{"info.picocli", "picocli-shell-jline3", "4.7.5", ""});
                 list.add(new String[]{"org.fusesource.jansi", "jansi", "2.4.0", ""});
                 list.add(new String[]{"com.google.zxing", "core", "3.5.2", ""});
-
+                list.add(new String[]{"me.tongfei","progressbar","0.10.0",""});
 
                 for (String[] strs : list) {
                     try {
