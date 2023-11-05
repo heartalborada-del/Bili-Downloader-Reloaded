@@ -49,6 +49,6 @@ public class MultiThreadDownloader {
 
         void onStart(long fileSize);
 
-        void newSpeedStat(long speed);
+        void newSpeedStat(long speed,boolean isStop);
     }
 }

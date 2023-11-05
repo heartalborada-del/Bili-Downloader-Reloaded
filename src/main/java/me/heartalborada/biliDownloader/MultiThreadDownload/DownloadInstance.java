@@ -84,6 +84,8 @@ public class DownloadInstance {
     }
 
     public boolean stop() {
+        stat.stop();
+        SUCCESS_FLAG = true;
         service.shutdownNow();
         return service.isShutdown();
     }
@@ -128,7 +130,8 @@ public class DownloadInstance {
                         buffData.write(data, 0, len);
                     }
                 }
-                dataQueue.offer(buffData);
+                if(!SUCCESS_FLAG)
+                    dataQueue.offer(buffData);
             } catch (Exception e) {
                 callback.onFailure(e, e.getMessage());
                 SUCCESS_FLAG = true;
@@ -147,16 +150,17 @@ public class DownloadInstance {
             try (RandomAccessFile randomAccessFile = new RandomAccessFile(savePath.toAbsolutePath().toString(), "rw")) {
                 long writSize = 0;
                 do {
-                    BufferData buffData = dataQueue.take();
+                    BufferData buffData = dataQueue.poll();
+                    if(buffData == null) continue;
                     randomAccessFile.seek(buffData.getStartPos());
                     randomAccessFile.write(buffData.array());
                     //log.info(buffData.getStartPos() + "-" + buffData.getEndPos() + " 已写入到文件，写入长度：" + buffData.array().length);
                     writSize += buffData.array().length;
-                } while (writSize < fileSize);
+                } while (writSize < fileSize && !SUCCESS_FLAG);
                 stat.stop();
                 callback.onSuccess(writSize);
                 SUCCESS_FLAG = true;
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 callback.onFailure(e, e.getMessage());
                 SUCCESS_FLAG = true;
                 service.shutdownNow();

@@ -1,7 +1,5 @@
 package me.heartalborada.biliDownloader.Cli;
 
-import com.github.kwhat.jnativehook.GlobalScreen;
-import com.github.kwhat.jnativehook.NativeHookException;
 import lombok.Getter;
 import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.Utils.LoggerFormatter;
@@ -54,11 +52,6 @@ public class CliMain {
                     .build();
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-        try {
-            GlobalScreen.registerNativeHook();
-        } catch (NativeHookException e) {
-            e.printStackTrace();
         }
     }
 

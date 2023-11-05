@@ -3,7 +3,6 @@ module me.heartalborada.biliDownloader {
     requires javafx.fxml;
 
     requires me.tongfei.progressbar;
-    requires com.github.kwhat.jnativehook;
     requires java.sql;
     requires com.google.gson;
     requires okhttp3;

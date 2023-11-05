@@ -1,9 +1,5 @@
 package me.heartalborada.biliDownloader.Cli;
 
-import com.github.kwhat.jnativehook.GlobalScreen;
-import com.github.kwhat.jnativehook.NativeHookException;
-import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
-import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
@@ -32,12 +28,10 @@ import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
+import org.jline.utils.NonBlockingReader;
 import picocli.CommandLine;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Serializable;
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.ZoneId;
@@ -489,44 +483,30 @@ public class Commands implements Runnable {
             }
             header.put("Cookie", cookieStr.toString());
             terminal.pause();
-            NativeKeyListener listener = new NativeKeyListener() {
-                @Override
-                public void nativeKeyTyped(NativeKeyEvent e) {
-                    if (e.getKeyCode() == NativeKeyEvent.VC_C && e.getModifiers() == NativeKeyEvent.CTRL_L_MASK) {
-                        for (DownloadInstance instance : instances) {
-                            instance.stop();
-                        }
-                        terminal.writer().printf("\33[48;5;1m[CANCELED]\33[0m%n");
-                        terminal.resume();
-                    }
-                }
-
-                @Override
-                public void nativeKeyPressed(NativeKeyEvent nativeEvent) {
-                    NativeKeyListener.super.nativeKeyPressed(nativeEvent);
-                }
-
-                @Override
-                public void nativeKeyReleased(NativeKeyEvent nativeEvent) {
-                    NativeKeyListener.super.nativeKeyReleased(nativeEvent);
-                }
-            };
-
+            final ProgressBar AudioProgressBar;
+            final ProgressBar VideoprogressBar;
+            {
+                ProgressBarBuilder builder = new ProgressBarBuilder();
+                builder.setStyle(ProgressBarStyle.ASCII);
+                //builder.clearDisplayOnFinish();
+                builder.setTaskName("Video");
+                builder.setInitialMax(0);
+                VideoprogressBar = builder.build();
+            }
+            {
+                ProgressBarBuilder builder = new ProgressBarBuilder();
+                builder.setStyle(ProgressBarStyle.ASCII);
+                //builder.clearDisplayOnFinish();
+                builder.setTaskName("Audio");
+                builder.setInitialMax(0);
+                AudioProgressBar = builder.build();
+            }
             instances.add(downloader.download(
                     new URL(video.getBaseUrl()),
                     new File(Main.getCachePath(), String.format("%d/%d.mp4", videoData.getAid(), cid)),
                     new MultiThreadDownloader.Callback() {
-                        final ProgressBar VideoprogressBar;
                         long total = 0;
 
-                        {
-                            ProgressBarBuilder builder = new ProgressBarBuilder();
-                            builder.setStyle(ProgressBarStyle.ASCII);
-                            //builder.clearDisplayOnFinish();
-                            builder.setTaskName("Video");
-                            builder.setInitialMax(0);
-                            VideoprogressBar = builder.build();
-                        }
 
                         @Override
                         public void onSuccess(long fileSize) {
@@ -546,7 +526,8 @@ public class Commands implements Runnable {
                         }
 
                         @Override
-                        public void newSpeedStat(long speed) {
+                        public void newSpeedStat(long speed, boolean isStop) {
+                            if (isStop) return;
                             total += speed;
                             VideoprogressBar.stepTo(total);
                             VideoprogressBar.setExtraMessage(String.format("Speed: %s/s", Util.byteToUnit(speed)));
@@ -559,17 +540,7 @@ public class Commands implements Runnable {
                         new URL(audio.getBaseUrl()),
                         new File(Main.getCachePath(), String.format("%d/%d.m4a", videoData.getAid(), cid)),
                         new MultiThreadDownloader.Callback() {
-                            final ProgressBar AudioProgressBar;
                             long total = 0;
-
-                            {
-                                ProgressBarBuilder builder = new ProgressBarBuilder();
-                                builder.setStyle(ProgressBarStyle.ASCII);
-                                //builder.clearDisplayOnFinish();
-                                builder.setTaskName("Audio");
-                                builder.setInitialMax(0);
-                                AudioProgressBar = builder.build();
-                            }
 
                             @Override
                             public void onSuccess(long fileSize) {
@@ -589,7 +560,8 @@ public class Commands implements Runnable {
                             }
 
                             @Override
-                            public void newSpeedStat(long speed) {
+                            public void newSpeedStat(long speed, boolean isStop) {
+                                if(isStop) return;
                                 total += speed;
                                 AudioProgressBar.stepTo(total);
                                 AudioProgressBar.setExtraMessage(String.format("Speed: %s/s", Util.byteToUnit(speed)));
@@ -598,18 +570,53 @@ public class Commands implements Runnable {
                         header
                 ));
             }
-            GlobalScreen.addNativeKeyListener(listener);
-            while (true) {
-                boolean flag = true;
-                for (DownloadInstance i : instances) {
-                    if (!i.isDone()) {
-                        flag = false;
+            NonBlockingReader reader = terminal.reader();
+            Thread thread = new Thread(()-> {
+                while (true) {
+                    boolean flag = true;
+                    for (DownloadInstance i : instances) {
+                        if (!i.isDone()) {
+                            flag = false;
+                        }
+                    }
+                    if (flag) {
+                        terminal.resume();
+                        reader.shutdown();
+                        return;
                     }
                 }
-                if (flag) {
+            });
+            thread.start();
+            while (true) {
+                try {
+                    reader.read();
+                    boolean flag = true;
+                    for (DownloadInstance i : instances) {
+                        if (!i.isDone()) {
+                            flag = false;
+                        }
+                    }
+                    if (flag) {
+                        AudioProgressBar.close();
+                        VideoprogressBar.close();
+                        terminal.resume();
+                        reader.shutdown();
+                        thread.stop();
+                        return;
+                    }
+                } catch (InterruptedIOException eof) {
+                    AudioProgressBar.close();
+                    VideoprogressBar.close();
+                    for (DownloadInstance i : instances) {
+                        i.stop();
+                    }
+                    terminal.writer().printf("\33[48;5;1m[CANCELED]\33[0m%n");
+                    reader.shutdown();
+                    thread.stop();
                     terminal.resume();
-                    GlobalScreen.removeNativeKeyListener(listener);
                     return;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }

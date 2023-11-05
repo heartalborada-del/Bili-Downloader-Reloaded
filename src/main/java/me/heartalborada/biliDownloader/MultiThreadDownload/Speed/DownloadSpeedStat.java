@@ -10,6 +10,7 @@ public class DownloadSpeedStat {
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1);
     private long preCount = 0;
 
+    private boolean isShutdown = false;
     public DownloadSpeedStat(SpeedNotifyEvent speedNotifyEvent) {
         this.speedNotifyEvent = speedNotifyEvent;
     }
@@ -22,7 +23,7 @@ public class DownloadSpeedStat {
         if (!scheduledThreadPoolExecutor.isShutdown()) {
             scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> {
                 long nowCount = counter.get();
-                speedNotifyEvent.event(nowCount - preCount);
+                speedNotifyEvent.event(nowCount - preCount, isShutdown);
                 preCount = nowCount;
             }, 0, 1, TimeUnit.SECONDS);
         }
