@@ -34,6 +34,8 @@ public class CliMain {
     @Getter
     private static final Terminal terminal;
 
+    @Getter
+    private static LineReader lineReader;
     static {
         try {
             Field logField = org.jline.utils.Log.class.getDeclaredField("logger");
@@ -75,7 +77,7 @@ public class CliMain {
 
         systemRegistry.setCommandRegistries(picocliCommands);
 
-        LineReader lineReader = LineReaderBuilder.builder()
+        lineReader = LineReaderBuilder.builder()
                 .terminal(terminal)
                 .appName("BDR CLI")
                 .parser(parser)

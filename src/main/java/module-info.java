@@ -2,7 +2,6 @@ module me.heartalborada.biliDownloader {
     requires javafx.controls;
     requires javafx.fxml;
 
-    requires me.tongfei.progressbar;
     requires java.sql;
     requires com.google.gson;
     requires okhttp3;
@@ -16,6 +15,8 @@ module me.heartalborada.biliDownloader {
     requires com.google.zxing;
     requires info.picocli;
     requires picocli.shell.jline3;
+    requires kotlinx.coroutines.core.jvm;
+    requires org.fusesource.jansi;
 
     opens me.heartalborada.biliDownloader.Bili.Beans to com.google.gson;
     opens me.heartalborada.biliDownloader.Utils.Managers.Beans to com.google.gson;

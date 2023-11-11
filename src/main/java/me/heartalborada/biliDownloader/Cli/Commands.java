@@ -14,15 +14,12 @@ import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.Sub.Video;
 import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.VideoStreamData;
 import me.heartalborada.biliDownloader.Bili.BiliInstance;
 import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
-import me.heartalborada.biliDownloader.Cli.Terminal.Progress;
+import me.heartalborada.biliDownloader.Cli.Terminal.TerminalProcessProgress;
 import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.MultiThreadDownload.DownloadInstance;
 import me.heartalborada.biliDownloader.MultiThreadDownload.MultiThreadDownloader;
 import me.heartalborada.biliDownloader.Utils.NotWriteQRCode;
 import me.heartalborada.biliDownloader.Utils.Util;
-import me.tongfei.progressbar.ProgressBar;
-import me.tongfei.progressbar.ProgressBarBuilder;
-import me.tongfei.progressbar.ProgressBarStyle;
 import okhttp3.Cookie;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
@@ -36,8 +33,6 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,44 +91,34 @@ public class Commands implements Runnable {
                 CliMain.getTerminal().pause(true);
                 Timer task = biliInstance.getLogin().getQR().loginWithQrLogin(new Callback() {
                     final Long curT = System.currentTimeMillis();
-                    final Progress progress = new Progress(out, 20, 0, 180);
-
+                    final TerminalProcessProgress progress = new TerminalProcessProgress(lineReader,terminal);
+                    {
+                        progress.setTotalSize(180);
+                    }
                     @SuppressWarnings("all")
                     @Override
                     public void onSuccess(LoginData data, String message, int code) {
                         Main.getDataManager().getData().getBilibili().setCookies(data.getCookies());
                         Main.getDataManager().getData().getBilibili().setRefreshToken(data.getRefreshToken());
                         Main.getDataManager().getData().getBilibili().setLatestRefreshTimestamp(data.getTimestamp());
-                        progress.UpgradeProgress(
-                                (System.currentTimeMillis() - curT) / 1000,
-                                "\33[48;5;2m[SUCCESS]\33[0m",
-                                String.format("\33[48;5;2m[%d: %s]\33[0m\33[48;5;4m[Time: %d-180]\33[0m%\33[48;5;3m[Press Enter To Conutinue]\33[0m", code, "SUCCESS", (System.currentTimeMillis() - curT) / 1000)
-                        );
+                        progress.update(180);
+                        progress.updateText("\33[48;5;2m[SUCCESS]\33[0m");
+                        progress.close();
                         terminal.resume();
                     }
 
                     @Override
                     public void onFailure(Exception e, String cause, int code) {
-                        progress.UpgradeProgress(
-                                (System.currentTimeMillis() - curT) / 1000,
-                                "\33[48;5;1m[FAILED]\33[0m",
-                                String.format("\33[48;5;1m[%d: %s]\33[0m\33[48;5;4m[Time: %d-180]\33[0m%n\33[48;5;3m[Press Enter To Conutinue]\33[0m", code, cause, (System.currentTimeMillis() - curT) / 1000)
-                        );
+                        progress.updateText("\33[48;5;1m[FAILED]\33[0m");
+                        progress.setFailed();
+                        progress.close();
                         terminal.resume();
                     }
 
                     @Override
                     public void onUpdate(String message, int code) {
-                        progress.UpgradeProgress(
-                                (System.currentTimeMillis() - curT) / 1000,
-                                "\33[48;5;3m[WAITING]\33[0m",
-                                String.format("\33[48;5;3m[%d: %s]\33[0m\33[48;5;4m[Time: %d-180]\33[0m", code, message, (System.currentTimeMillis() - curT) / 1000)
-                        );
-                        try {
-                            terminal.pause(true);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
+                        progress.update((System.currentTimeMillis() - curT) / 1000);
+                        progress.updateText(String.format("\33[48;5;3m[WAITING]\33[0m\33[48;5;3m[%d: %s]\33[0m\33[48;5;4m[Time: %d-180]\33[0m", code, message, (System.currentTimeMillis() - curT) / 1000));
                     }
 
                     @Override
@@ -482,55 +467,43 @@ public class Commands implements Runnable {
                 cookieStr.append(String.format("%s=%s;", cookie.name(), cookie.value()));
             }
             header.put("Cookie", cookieStr.toString());
-            terminal.pause();
-            final ProgressBar AudioProgressBar;
-            final ProgressBar VideoprogressBar;
-            {
-                ProgressBarBuilder builder = new ProgressBarBuilder();
-                builder.setStyle(ProgressBarStyle.ASCII);
-                //builder.clearDisplayOnFinish();
-                builder.setTaskName("Video");
-                builder.setInitialMax(0);
-                VideoprogressBar = builder.build();
-            }
-            {
-                ProgressBarBuilder builder = new ProgressBarBuilder();
-                builder.setStyle(ProgressBarStyle.ASCII);
-                //builder.clearDisplayOnFinish();
-                builder.setTaskName("Audio");
-                builder.setInitialMax(0);
-                AudioProgressBar = builder.build();
-            }
+            //terminal.pause();
+            final TerminalProcessProgress AudioProgressBar = new TerminalProcessProgress(lineReader,terminal);
+            final TerminalProcessProgress VideoProgressBar = new TerminalProcessProgress(lineReader,terminal);
             instances.add(downloader.download(
                     new URL(video.getBaseUrl()),
                     new File(Main.getCachePath(), String.format("%d/%d.mp4", videoData.getAid(), cid)),
                     new MultiThreadDownloader.Callback() {
                         long total = 0;
-
-
                         @Override
                         public void onSuccess(long fileSize) {
-                            VideoprogressBar.stepTo(fileSize);
-                            VideoprogressBar.close();
+                            VideoProgressBar.update(fileSize);
+                            VideoProgressBar.close();
+                            VideoProgressBar.rerender();
                         }
 
                         @Override
                         public void onFailure(Exception e, String cause) {
-                            VideoprogressBar.close();
+                            VideoProgressBar.setFailed();
+                            VideoProgressBar.close();
+                            VideoProgressBar.rerender();
                             e.printStackTrace();
                         }
 
                         @Override
                         public void onStart(long fileSize) {
-                            VideoprogressBar.maxHint(fileSize);
+                            VideoProgressBar.setTotalSize(fileSize);
+                            VideoProgressBar.rerender();
+                            //System.out.println(fileSize);
                         }
 
                         @Override
                         public void newSpeedStat(long speed, boolean isStop) {
                             if (isStop) return;
                             total += speed;
-                            VideoprogressBar.stepTo(total);
-                            VideoprogressBar.setExtraMessage(String.format("Speed: %s/s", Util.byteToUnit(speed)));
+                            VideoProgressBar.update(total);
+                            VideoProgressBar.updateText(String.format("Speed: %s/s", Util.byteToUnit(speed)));
+                            VideoProgressBar.rerender();
                         }
                     },
                     header
@@ -544,7 +517,7 @@ public class Commands implements Runnable {
 
                             @Override
                             public void onSuccess(long fileSize) {
-                                AudioProgressBar.stepTo(fileSize);
+                                AudioProgressBar.update(fileSize);
                                 AudioProgressBar.close();
                             }
 
@@ -556,15 +529,15 @@ public class Commands implements Runnable {
 
                             @Override
                             public void onStart(long fileSize) {
-                                AudioProgressBar.maxHint(fileSize);
+                                AudioProgressBar.setTotalSize(fileSize);
                             }
 
                             @Override
                             public void newSpeedStat(long speed, boolean isStop) {
                                 if(isStop) return;
                                 total += speed;
-                                AudioProgressBar.stepTo(total);
-                                AudioProgressBar.setExtraMessage(String.format("Speed: %s/s", Util.byteToUnit(speed)));
+                                AudioProgressBar.update(total);
+                                AudioProgressBar.updateText(String.format("Speed: %s/s", Util.byteToUnit(speed)));
                             }
                         },
                         header
@@ -598,7 +571,7 @@ public class Commands implements Runnable {
                     }
                     if (flag) {
                         AudioProgressBar.close();
-                        VideoprogressBar.close();
+                        VideoProgressBar.close();
                         terminal.resume();
                         reader.shutdown();
                         thread.stop();
@@ -606,7 +579,7 @@ public class Commands implements Runnable {
                     }
                 } catch (InterruptedIOException eof) {
                     AudioProgressBar.close();
-                    VideoprogressBar.close();
+                    VideoProgressBar.close();
                     for (DownloadInstance i : instances) {
                         i.stop();
                     }
