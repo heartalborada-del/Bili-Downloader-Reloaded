@@ -91,7 +91,7 @@ public class Commands implements Runnable {
                 CliMain.getTerminal().pause(true);
                 Timer task = biliInstance.getLogin().getQR().loginWithQrLogin(new Callback() {
                     final Long curT = System.currentTimeMillis();
-                    final TerminalProcessProgress progress = new TerminalProcessProgress(lineReader,terminal);
+                    final TerminalProcessProgress progress = new TerminalProcessProgress(lineReader);
                     {
                         progress.setTotalSize(180);
                     }
@@ -467,9 +467,9 @@ public class Commands implements Runnable {
                 cookieStr.append(String.format("%s=%s;", cookie.name(), cookie.value()));
             }
             header.put("Cookie", cookieStr.toString());
-            //terminal.pause();
-            final TerminalProcessProgress AudioProgressBar = new TerminalProcessProgress(lineReader,terminal);
-            final TerminalProcessProgress VideoProgressBar = new TerminalProcessProgress(lineReader,terminal);
+            terminal.pause();
+            final TerminalProcessProgress AudioProgressBar = new TerminalProcessProgress(lineReader);
+            final TerminalProcessProgress VideoProgressBar = new TerminalProcessProgress(lineReader);
             instances.add(downloader.download(
                     new URL(video.getBaseUrl()),
                     new File(Main.getCachePath(), String.format("%d/%d.mp4", videoData.getAid(), cid)),
