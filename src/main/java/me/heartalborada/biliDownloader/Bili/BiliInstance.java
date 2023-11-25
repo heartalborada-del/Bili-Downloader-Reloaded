@@ -558,7 +558,7 @@ public class BiliInstance {
 
     @SuppressWarnings("Duplicates")
     public class Video {
-        public VideoData getVideoData(int aid) throws IOException {
+        public VideoData getVideoData(int aid) throws IOException,BadRequestDataException {
             Request req = new Request.Builder().url(String.format("https://api.bilibili.com/x/web-interface/view?aid=%d", aid)).build();
             try (Response response = client.newCall(req).execute()) {
                 if (response.body() != null) {

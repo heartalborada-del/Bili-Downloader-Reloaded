@@ -32,9 +32,10 @@ public class Main {
     @Getter
     private static DataManager dataManager;
     @Getter
-    private static BiliInstance biliInstance;
+    private final static BiliInstance biliInstance;
 
     static {
+        BiliInstance temp;
         try {
             if(!Objects.equals(System.getProperty("development", "false"), "true")) {
                 boolean isBuiltinDependency = false;
@@ -84,10 +85,12 @@ public class Main {
                     throw new RuntimeException(e);
                 }
             }));
-            biliInstance = new BiliInstance(getDataManager().getData().getBilibili().getCookies());
+            temp = new BiliInstance(getDataManager().getData().getBilibili().getCookies());
         } catch (IOException e) {
+            temp = new BiliInstance();
             configManager = null;
         }
+        biliInstance = temp;
     }
 
     public static void main(String[] args) {

@@ -1,10 +1,10 @@
-name: Build
+name: Dev Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "dev" ]
 
 jobs:
   build:
@@ -24,5 +24,5 @@ jobs:
       - name: Upload to Actions
         uses: actions/upload-artifact@v3.1.3
         with:
-          name: "BDR-CI"
+          name: "BDR-dev"
           path: "target/*.jar"

@@ -7,16 +7,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":art: feat: 多线程下载功能基本完成">
+    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":construction_worker: 更正CI的编译设置">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.MD" beforeDir="false" afterPath="$PROJECT_DIR$/README.MD" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/BiliInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/BiliInstance.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/CliMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/CliMain.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/DownloadInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/DownloadInstance.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/MultiThreadDownloader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/MultiThreadDownloader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/Speed/DownloadSpeedStat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/Speed/DownloadSpeedStat.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/Speed/SpeedNotifyEvent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/Speed/SpeedNotifyEvent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,12 +23,17 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Kotlin Class" />
         <option value="Class" />
+        <option value="Kotlin Class" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MacroExpansionManager">
@@ -60,8 +62,8 @@
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;deletionFromPopupRequiresConfirmation&quot;: &quot;false&quot;,
     &quot;extract.method.default.visibility&quot;: &quot;private&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/heart/IdeaProjects/Bili-Downloader-Reloaded/data&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/heart/IdeaProjects/Bili-Downloader-Reloaded/.github/workflows&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -71,7 +73,7 @@
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
     &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;reference.projectsettings.compiler.javacompiler&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.general&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -81,6 +83,7 @@
       <recent name="me.heartalborada.biliDownloader.Cli.Commands" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\heart\IdeaProjects\Bili-Downloader-Reloaded\.github\workflows" />
       <recent name="C:\Users\heart\IdeaProjects\Bili-Downloader-Reloaded\data" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -105,8 +108,35 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Bili-Downloader-Reloaded [package]" type="MavenRunConfiguration" factoryName="Maven">
+      <MavenSettings>
+        <option name="myGeneralSettings" />
+        <option name="myRunnerSettings" />
+        <option name="myRunnerParameters">
+          <MavenRunnerParameters>
+            <option name="profiles">
+              <set />
+            </option>
+            <option name="goals">
+              <list>
+                <option value="kotlin:compile" />
+                <option value="package" />
+              </list>
+            </option>
+            <option name="pomFileName" value="pom.xml" />
+            <option name="profilesMap">
+              <map />
+            </option>
+            <option name="resolveToWorkspace" value="false" />
+            <option name="workingDirPath" value="$PROJECT_DIR$" />
+          </MavenRunnerParameters>
+        </option>
+      </MavenSettings>
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="JAR 应用程序.Run Jar" />
+      <item itemvalue="Maven.Bili-Downloader-Reloaded [package]" />
       <item itemvalue="应用程序.Main" />
       <item itemvalue="应用程序.CliMain" />
     </list>
@@ -159,7 +189,13 @@
       <workItem from="1698554169462" duration="3722000" />
       <workItem from="1698992621616" duration="26544000" />
       <workItem from="1699068624717" duration="43547000" />
-      <workItem from="1699153148201" duration="2784000" />
+      <workItem from="1699153148201" duration="2870000" />
+      <workItem from="1699706185911" duration="4158000" />
+      <workItem from="1699714985591" duration="6975000" />
+      <workItem from="1699753859790" duration="1447000" />
+      <workItem from="1700374126635" duration="9000" />
+      <workItem from="1700927332550" duration="278000" />
+      <workItem from="1700927620413" duration="1293000" />
     </task>
     <task id="LOCAL-00001" summary=":sparkles: new project!">
       <option name="closed" value="true" />
@@ -281,7 +317,31 @@
       <option name="project" value="LOCAL" />
       <updated>1699087675502</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary=":art: untested: 未测试">
+      <option name="closed" value="true" />
+      <created>1699163893114</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1699163893114</updated>
+    </task>
+    <task id="LOCAL-00017" summary=":poop: bug: 无法显示进度条">
+      <option name="closed" value="true" />
+      <created>1699723227353</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1699723227353</updated>
+    </task>
+    <task id="LOCAL-00018" summary=":construction_worker: 更正CI的编译设置">
+      <option name="closed" value="true" />
+      <created>1699754741970</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1699754741970</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -324,7 +384,10 @@
     <MESSAGE value=":art: feat: cli模式下获取视频信息coming soon" />
     <MESSAGE value=":art: feat: 视频详情功能基本完成" />
     <MESSAGE value=":art: feat: 多线程下载功能基本完成" />
-    <option name="LAST_COMMIT_MESSAGE" value=":art: feat: 多线程下载功能基本完成" />
+    <MESSAGE value=":art: untested: 未测试" />
+    <MESSAGE value=":poop: bug: 无法显示进度条" />
+    <MESSAGE value=":construction_worker: 更正CI的编译设置" />
+    <option name="LAST_COMMIT_MESSAGE" value=":construction_worker: 更正CI的编译设置" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -31,8 +31,17 @@ public class CliMain {
             "██████╔╝██████╔╝██║  ██║    ╚██████╗███████╗██║\n" +
             "╚═════╝ ╚═════╝ ╚═╝  ╚═╝     ╚═════╝╚══════╝╚═╝\n" +
             "Type Ctrl+D or type \"exit\" to quit.          \n";
-    @Getter
     private static final Terminal terminal;
+
+    public static Terminal getTerminal() {
+        return terminal;
+    }
+
+    private static LineReader lineReader;
+
+    public static LineReader getLineReader() {
+        return lineReader;
+    }
 
     static {
         try {
@@ -75,7 +84,7 @@ public class CliMain {
 
         systemRegistry.setCommandRegistries(picocliCommands);
 
-        LineReader lineReader = LineReaderBuilder.builder()
+        lineReader = LineReaderBuilder.builder()
                 .terminal(terminal)
                 .appName("BDR CLI")
                 .parser(parser)
