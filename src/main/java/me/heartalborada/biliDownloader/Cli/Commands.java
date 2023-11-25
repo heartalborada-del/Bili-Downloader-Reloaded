@@ -13,6 +13,7 @@ import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.Sub.Audio;
 import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.Sub.Video;
 import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.VideoStreamData;
 import me.heartalborada.biliDownloader.Bili.BiliInstance;
+import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
 import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
 import me.heartalborada.biliDownloader.Cli.Terminal.TerminalProcessProgress;
 import me.heartalborada.biliDownloader.Main;
@@ -190,24 +191,30 @@ public class Commands implements Runnable {
         ) throws IOException, InterruptedException, IllegalStateException {
             terminal.pause(true);
             VideoData videoData;
-            if (Pattern.matches(avMatch.pattern(), id.toLowerCase())) {
-                Matcher matcher = avMatch.matcher(id);
-                String bid = "  ";
-                while (matcher.find())
-                    bid = matcher.group();
-                videoData = biliInstance.getVideo().getVideoData(
-                        Integer.decode(bid.substring(2))
-                );
-            } else if (Pattern.matches(bvMatch.pattern(), id.toLowerCase())) {
-                Matcher matcher = bvMatch.matcher(id);
-                String bid = "  ";
-                while (matcher.find())
-                    bid = matcher.group();
-                videoData = biliInstance.getVideo().getVideoData(
-                        bid.substring(2)
-                );
-            } else {
-                terminal.writer().printf("\33[31mUnknowID: %s\33[0m%n", id);
+            try {
+                if (Pattern.matches(avMatch.pattern(), id.toLowerCase())) {
+                    Matcher matcher = avMatch.matcher(id);
+                    String bid = "  ";
+                    while (matcher.find())
+                        bid = matcher.group();
+                    videoData = biliInstance.getVideo().getVideoData(
+                            Integer.decode(bid.substring(2))
+                    );
+                } else if (Pattern.matches(bvMatch.pattern(), id.toLowerCase())) {
+                    Matcher matcher = bvMatch.matcher(id);
+                    String bid = "  ";
+                    while (matcher.find())
+                        bid = matcher.group();
+                    videoData = biliInstance.getVideo().getVideoData(
+                            bid.substring(2)
+                    );
+                } else {
+                    terminal.writer().printf("\33[31mUnknowID: %s\33[0m%n", id);
+                    terminal.resume();
+                    return;
+                }
+            } catch (BadRequestDataException exception) {
+                terminal.writer().printf("\33[31mError: [%d]%s\33[0m%n", exception.getCode(), exception.getMessage());
                 terminal.resume();
                 return;
             }
@@ -266,25 +273,31 @@ public class Commands implements Runnable {
                 @CommandLine.Option(names = {"-au", "--audio"}, description = "Is Need choose download Audio Quality") boolean needAudioQuality
         ) throws IOException, InterruptedException {
             terminal.pause(true);
-            VideoData videoData;
-            if (Pattern.matches(avMatch.pattern(), id.toLowerCase())) {
-                Matcher matcher = avMatch.matcher(id);
-                String bid = "  ";
-                while (matcher.find())
-                    bid = matcher.group();
-                videoData = biliInstance.getVideo().getVideoData(
-                        Integer.decode(bid.substring(2))
-                );
-            } else if (Pattern.matches(bvMatch.pattern(), id.toLowerCase())) {
-                Matcher matcher = bvMatch.matcher(id);
-                String bid = "  ";
-                while (matcher.find())
-                    bid = matcher.group();
-                videoData = biliInstance.getVideo().getVideoData(
-                        bid.substring(2)
-                );
-            } else {
-                terminal.writer().printf("\33[31mUnknowID: %s\33[0m%n", id);
+            VideoData videoData = null;
+            try {
+                if (Pattern.matches(avMatch.pattern(), id.toLowerCase())) {
+                    Matcher matcher = avMatch.matcher(id);
+                    String bid = "  ";
+                    while (matcher.find())
+                        bid = matcher.group();
+                    videoData = biliInstance.getVideo().getVideoData(
+                            Integer.decode(bid.substring(2))
+                    );
+                } else if (Pattern.matches(bvMatch.pattern(), id.toLowerCase())) {
+                    Matcher matcher = bvMatch.matcher(id);
+                    String bid = "  ";
+                    while (matcher.find())
+                        bid = matcher.group();
+                    videoData = biliInstance.getVideo().getVideoData(
+                            bid.substring(2)
+                    );
+                } else {
+                    terminal.writer().printf("\33[31mUnknowID: %s\33[0m%n", id);
+                    terminal.resume();
+                    return;
+                }
+            } catch (BadRequestDataException exception) {
+                terminal.writer().printf("\33[31mError: [%d]%s\33[0m%n", exception.getCode(), exception.getMessage());
                 terminal.resume();
                 return;
             }

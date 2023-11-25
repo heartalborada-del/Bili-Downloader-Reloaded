@@ -31,11 +31,18 @@ public class CliMain {
             "██████╔╝██████╔╝██║  ██║    ╚██████╗███████╗██║\n" +
             "╚═════╝ ╚═════╝ ╚═╝  ╚═╝     ╚═════╝╚══════╝╚═╝\n" +
             "Type Ctrl+D or type \"exit\" to quit.          \n";
-    @Getter
     private static final Terminal terminal;
 
-    @Getter
+    public static Terminal getTerminal() {
+        return terminal;
+    }
+
     private static LineReader lineReader;
+
+    public static LineReader getLineReader() {
+        return lineReader;
+    }
+
     static {
         try {
             Field logField = org.jline.utils.Log.class.getDeclaredField("logger");
