@@ -7,9 +7,8 @@ import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
-public class Util {
+public class Utils {
     public static String StrArrToSting(String[] arr) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < arr.length; i++) {
@@ -67,4 +66,17 @@ public class Util {
         }
         return str == null ? String.format("%.2f%s", byteSize / (1 << 10 * (unit.length - 1)) + 0.0f, unit[unit.length - 1]) : str;
     }
+
+    public static String generateProgressBar(char barCompleteChar,char barIncompleteChar,int barLength, long total, long current) {
+        long p = total / barLength;
+        StringBuilder sb = new StringBuilder();
+        for(int i=0,g=0;i<barLength;i++,g+=p) {
+            if(g<current)
+                sb.append(barCompleteChar);
+            else
+                sb.append(barIncompleteChar);
+        }
+        return sb.toString();
+    }
+
 }

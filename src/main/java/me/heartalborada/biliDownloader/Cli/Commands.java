@@ -20,7 +20,7 @@ import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.MultiThreadDownload.DownloadInstance;
 import me.heartalborada.biliDownloader.MultiThreadDownload.MultiThreadDownloader;
 import me.heartalborada.biliDownloader.Utils.NotWriteQRCode;
-import me.heartalborada.biliDownloader.Utils.Util;
+import me.heartalborada.biliDownloader.Utils.Utils;
 import okhttp3.Cookie;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
@@ -37,9 +37,9 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static me.heartalborada.biliDownloader.Utils.Util.NumberUtils.amountConversion;
-import static me.heartalborada.biliDownloader.Utils.Util.timestampToDate;
-import static me.heartalborada.biliDownloader.Utils.Util.zonedDateToFormatString;
+import static me.heartalborada.biliDownloader.Utils.Utils.NumberUtils.amountConversion;
+import static me.heartalborada.biliDownloader.Utils.Utils.timestampToDate;
+import static me.heartalborada.biliDownloader.Utils.Utils.zonedDateToFormatString;
 
 @CommandLine.Command(name = "",
         description = {"Bilibili Features"},
@@ -515,7 +515,7 @@ public class Commands implements Runnable {
                             if (isStop) return;
                             total += speed;
                             VideoProgressBar.update(total);
-                            VideoProgressBar.updateText(String.format("Speed: %s/s", Util.byteToUnit(speed)));
+                            VideoProgressBar.updateText(String.format("Speed: %s/s", Utils.byteToUnit(speed)));
                             VideoProgressBar.rerender();
                         }
                     },
@@ -550,7 +550,7 @@ public class Commands implements Runnable {
                                 if(isStop) return;
                                 total += speed;
                                 AudioProgressBar.update(total);
-                                AudioProgressBar.updateText(String.format("Speed: %s/s", Util.byteToUnit(speed)));
+                                AudioProgressBar.updateText(String.format("Speed: %s/s", Utils.byteToUnit(speed)));
                             }
                         },
                         header
@@ -605,6 +605,18 @@ public class Commands implements Runnable {
                     throw new RuntimeException(e);
                 }
             }
+        }
+
+        @CommandLine.Command(
+                name = "test"
+        )
+        void test() throws InterruptedException {
+            TerminalProcessProgress progress = new TerminalProcessProgress(lineReader);
+            progress.setTotalSize(114514);
+            progress.update(1919);
+            progress.updateText("WDNMD");
+            Thread.sleep(100);
+            progress.setFailed();
         }
     }
 }
