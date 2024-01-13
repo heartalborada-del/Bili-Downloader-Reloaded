@@ -22,6 +22,8 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static me.heartalborada.biliDownloader.Utils.Utils.getTargetClassModifiers;
+
 public class CliMain {
     private static final String welcome = "\n" +
             "██████╗ ██████╗ ██████╗      ██████╗██╗     ██╗\n" +
@@ -47,7 +49,7 @@ public class CliMain {
         try {
             Field logField = org.jline.utils.Log.class.getDeclaredField("logger");
             logField.setAccessible(true);
-            Field mod = logField.getClass().getDeclaredField("modifiers");
+            Field mod = getTargetClassModifiers(logField.getClass());
             mod.setAccessible(true);
             mod.setInt(logField, logField.getModifiers() & ~Modifier.FINAL);
             Logger tmp = Logger.getLogger("JLine");

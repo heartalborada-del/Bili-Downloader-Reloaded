@@ -1,5 +1,8 @@
 package me.heartalborada.biliDownloader.Utils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -79,4 +82,25 @@ public class Utils {
         return sb.toString();
     }
 
+    public static Field getTargetClassModifiers(Class clazz) throws NoSuchFieldException {
+        try {
+            return clazz.getDeclaredField("modifiers");
+        } catch (NoSuchFieldException e) {
+            try {
+                Method getDeclaredFields0 = Class.class.getDeclaredMethod("getDeclaredFields0", boolean.class);
+                getDeclaredFields0.setAccessible(true);
+                Field[] fields = (Field[]) getDeclaredFields0.invoke(Field.class, false);
+                Field modifiers = null;
+                for (Field each : fields) {
+                    if ("modifiers".equals(each.getName())) {
+                        modifiers = each;
+                    }
+                }
+                return modifiers;
+            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException ex) {
+                e.addSuppressed(ex);
+            }
+            throw e;
+        }
+    }
 }

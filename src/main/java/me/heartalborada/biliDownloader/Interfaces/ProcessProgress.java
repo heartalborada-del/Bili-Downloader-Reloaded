@@ -8,5 +8,4 @@ public interface ProcessProgress {
     void update(long processed,long size);
     void setFailed();
     void rerender();
-    void close();
-}
+    void close();}

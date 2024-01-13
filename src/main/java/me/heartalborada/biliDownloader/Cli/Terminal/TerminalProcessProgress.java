@@ -1,68 +1,61 @@
 package me.heartalborada.biliDownloader.Cli.Terminal;
 
+import javafx.css.Size;
 import me.heartalborada.biliDownloader.Interfaces.ProcessProgress;
 import me.heartalborada.biliDownloader.Utils.Utils;
 import org.jline.reader.LineReader;
+import org.jline.terminal.Terminal;
+import org.jline.utils.AttributedString;
+import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.Display;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class TerminalProcessProgress implements ProcessProgress {
     private boolean isFailed,isClosed;
-    private final LineReader reader;
-    private final PrintWriter writer;
+    private final Terminal terminal;
+    private final Display display;
     private long total, processed;
     private String extraString = "";
     private final Lock lock = new ReentrantLock();
-    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-    private final PropertyChangeListener listener = evt -> {
-        if(lock.tryLock()) {
-            try {
-                //TODO 这是一个临时解决方案
-                if (evt.getPropertyName().equals("NeedUpdate") && evt.getNewValue() instanceof Boolean && (Boolean) evt.getNewValue()) {
-                    updateProgresses();
-                }
-            } finally {
-                lock.unlock();
-            }
-        } else {
-            //TODO 未获取到锁处理
-            return;
-        }
-    };
     private final String ProgressStyle;
 
     /**
      *
-     * @param reader JLine Reader
+     * @param terminal Jline Terminal
      * @param ProgressStyle These are allowed placeholder<br>
      *                      <code>{bar}</code> Progress bar<br>
      *                      <code>{percentage}</code> Percentage<br>
      *                      <code>{processed}</code> Processed Block<br>
      *                      <code>{total}</code> Total Block<br>
-     *                      <code>{extra}</code> Extra Text
+     *                      <code>{extra}</code> Extra Text<br>
+     *                      <code>{stat}</code> Progress Stat
      */
-    public TerminalProcessProgress(LineReader reader, String ProgressStyle){
-        this.reader = reader;
-        this.writer = reader.getTerminal().writer();
+    public TerminalProcessProgress(Terminal terminal, String ProgressStyle){
+        this.terminal = terminal;
         this.ProgressStyle = ProgressStyle;
-        pcs.addPropertyChangeListener(listener);
+        this.display = new Display(terminal,false);
+        display.resize(1,terminal.getWidth() == 0 ? 20 : terminal.getWidth());
     }
-    public  TerminalProcessProgress(LineReader reader) {
-        this.reader = reader;
-        this.writer = reader.getTerminal().writer();
-        this.ProgressStyle = "{bar} | {percentage}% | {processed}/{total}";
-        pcs.addPropertyChangeListener(listener);
+    public  TerminalProcessProgress(Terminal terminal) {
+        this.terminal = terminal;
+        this.ProgressStyle = "{stat} | {bar} | {percentage}% | {processed}/{total}";
+        this.display = new Display(terminal,false);
+        display.resize(1,terminal.getWidth() == 0 ? 20 : terminal.getWidth());
     }
 
     @Override
     public void updateText(String string) {
         extraString = string;
-        pcs.firePropertyChange(new PropertyChangeEvent(this,"NeedUpdate",false,true));
+        updateProgresses();
     }
 
     @Override
@@ -78,7 +71,7 @@ public class TerminalProcessProgress implements ProcessProgress {
     @Override
     public void update(long processed) {
         this.processed = processed;
-        pcs.firePropertyChange(new PropertyChangeEvent(this,"NeedUpdate",false,true));
+        updateProgresses();
     }
 
     @Override
@@ -93,6 +86,7 @@ public class TerminalProcessProgress implements ProcessProgress {
         this.close();
     }
 
+
     @Override
     public void rerender() {
         updateProgresses();
@@ -100,22 +94,37 @@ public class TerminalProcessProgress implements ProcessProgress {
 
     @Override
     public void close() {
-        pcs.removePropertyChangeListener(listener);
+        updateProgresses();
         this.isClosed = true;
     }
 
     private void updateProgresses() {
-        if(isClosed || isFailed)
-            return;
-        String output = this.ProgressStyle
-                .replace("{bar}", Utils.generateProgressBar(
-                        '█','░',10,this.total,this.processed
-                ))
-                .replace("{percentage}",String.valueOf(this.processed/this.total))
-                .replace("{processed}",String.valueOf(this.processed))
-                .replace("{total}",String.valueOf(this.total))
-                .replace("{extra}",extraString);
-        writer.print("\r"+output);
+        if(lock.tryLock()){
+            if(isClosed || isFailed)
+                return;
+            String output = this.ProgressStyle
+                    .replace("{bar}", Utils.generateProgressBar(
+                            '█','░',10,this.total,this.processed
+                    ))
+                    .replace("{stat}",getStat())
+                    .replace("{percentage}",String.valueOf((this.processed*100/this.total)))
+                    .replace("{processed}",String.valueOf(this.processed))
+                    .replace("{total}",String.valueOf(this.total))
+                    .replace("{extra}",extraString);
+            display.update(
+                    Collections.singletonList(new AttributedStringBuilder().append(output).toAttributedString())
+                    , terminal.getSize().cursorPos(1,0));
+            lock.unlock();
+        }
     }
 
+    private String getStat() {
+        if(this.isFailed && this.isClosed) {
+            return "[Failed]";
+        } else if (this.isClosed && this.processed >= this.total) {
+            return "[Done]";
+        } else {
+            return "[Processing]";
+        }
+    }
 }
