@@ -15,6 +15,7 @@ import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.VideoStreamData;
 import me.heartalborada.biliDownloader.Bili.BiliInstance;
 import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
 import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
+import me.heartalborada.biliDownloader.Cli.Enums.KeyOperation;
 import me.heartalborada.biliDownloader.Cli.Terminal.TerminalProcessProgress;
 import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.MultiThreadDownload.DownloadInstance;
@@ -22,11 +23,14 @@ import me.heartalborada.biliDownloader.MultiThreadDownload.MultiThreadDownloader
 import me.heartalborada.biliDownloader.Utils.NotWriteQRCode;
 import me.heartalborada.biliDownloader.Utils.Utils;
 import okhttp3.Cookie;
+import org.jline.keymap.BindingReader;
+import org.jline.keymap.KeyMap;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
 import org.jline.utils.Display;
+import org.jline.utils.InfoCmp;
 import org.jline.utils.NonBlockingReader;
 import picocli.CommandLine;
 
@@ -43,6 +47,7 @@ import java.util.regex.Pattern;
 import static me.heartalborada.biliDownloader.Utils.Utils.NumberUtils.amountConversion;
 import static me.heartalborada.biliDownloader.Utils.Utils.timestampToDate;
 import static me.heartalborada.biliDownloader.Utils.Utils.zonedDateToFormatString;
+import static org.jline.keymap.KeyMap.key;
 
 @CommandLine.Command(name = "",
         description = {"Bilibili Features"},
@@ -616,13 +621,11 @@ public class Commands implements Runnable {
                 name = "test"
         )
         void test() throws InterruptedException {
-            TerminalProcessProgress progress = new TerminalProcessProgress(lineReader.getTerminal());
-            progress.setTotalSize(2000);
-            for (int i = 0; i <= 2000; i++) {
-                progress.update(i);
-                Thread.sleep(10);
-            }
-            progress.setFailed();
+            KeyMap<KeyOperation> keys = new KeyMap<>();
+            keys.bind(KeyOperation.UP,key(terminal, InfoCmp.Capability.key_up));
+            BindingReader r = new BindingReader(terminal.reader());
+            KeyOperation op = r.readBinding(keys);
+            System.out.println(op.name());
         }
     }
 }
