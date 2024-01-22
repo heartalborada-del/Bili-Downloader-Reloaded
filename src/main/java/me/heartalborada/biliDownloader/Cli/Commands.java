@@ -22,10 +22,13 @@ import me.heartalborada.biliDownloader.MultiThreadDownload.MultiThreadDownloader
 import me.heartalborada.biliDownloader.Utils.NotWriteQRCode;
 import me.heartalborada.biliDownloader.Utils.Utils;
 import okhttp3.Cookie;
+import org.jline.keymap.KeyMap;
+import org.jline.reader.Binding;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
+import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.Display;
 import org.jline.utils.NonBlockingReader;
 import picocli.CommandLine;
@@ -35,8 +38,6 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -86,7 +87,6 @@ public class Commands implements Runnable {
                 subcommands = {CommandLine.HelpCommand.class},
                 description = "Log in to your Bilibili account"
         )
-        @SuppressWarnings("IntegerDivisionInFloatingPointContext")
         void login(
                 @CommandLine.Option(names = {"-t", "--type"}, description = "Allow \"QR\"", required = true) String type
         ) throws InterruptedException {
@@ -277,7 +277,7 @@ public class Commands implements Runnable {
                 @CommandLine.Option(names = {"-au", "--audio"}, description = "Is Need choose download Audio Quality") boolean needAudioQuality
         ) throws IOException, InterruptedException {
             terminal.pause(true);
-            VideoData videoData = null;
+            VideoData videoData;
             try {
                 if (Pattern.matches(avMatch.pattern(), id.toLowerCase())) {
                     Matcher matcher = avMatch.matcher(id);
@@ -616,13 +616,14 @@ public class Commands implements Runnable {
                 name = "test"
         )
         void test() throws InterruptedException {
-            TerminalProcessProgress progress = new TerminalProcessProgress(lineReader.getTerminal());
-            progress.setTotalSize(2000);
-            for (int i = 0; i <= 2000; i++) {
-                progress.update(i);
-                Thread.sleep(10);
-            }
-            progress.setFailed();
+            Display d = new Display(terminal,false);
+            d.resize(1,terminal.getWidth() == 0 ? 20 : terminal.getWidth());
+            d.update(
+                    Collections.singletonList(new AttributedStringBuilder().append("awa").toAttributedString())
+                    , terminal.getSize().cursorPos(1,0));
+            String m = lineReader.getKeyMap();
+            //lineReader.
+            System.out.println(m);
         }
     }
 }
