@@ -4,6 +4,8 @@ import lombok.Getter;
 import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.Utils.LoggerFormatter;
 import org.jline.console.impl.SystemRegistryImpl;
+import org.jline.nativ.JLineLibrary;
+import org.jline.nativ.JLineNativeLoader;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -40,10 +42,6 @@ public class CliMain {
     }
 
     private static LineReader lineReader;
-
-    public static LineReader getLineReader() {
-        return lineReader;
-    }
 
     static {
         try {
@@ -92,7 +90,6 @@ public class CliMain {
                 .parser(parser)
                 .completer(systemRegistry.completer())
                 .build();
-
         lineReader.setVariable(LineReader.BLINK_MATCHING_PAREN, 0);
 
         terminal.writer().append(welcome);
@@ -107,7 +104,7 @@ public class CliMain {
             try {
                 systemRegistry.cleanUp();
                 line = lineReader.readLine(prompt).trim();
-                if (!line.equals("")) {
+                if (!line.isEmpty()) {
                     try {
                         Object result = systemRegistry.execute(line);
                         if (result != null) {

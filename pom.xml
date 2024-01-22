@@ -9,10 +9,17 @@
     <version>1.0-SNAPSHOT</version>
     <name>Bili-Downloader-Reloaded</name>
 
+    <licenses>
+        <license>
+            <name>GPL-3.0-only</name>
+            <url>https://www.gnu.org/licenses/gpl-3.0-standalone.html</url>
+        </license>
+    </licenses>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.9.2</junit.version>
-        <kotlin.version>1.6.20</kotlin.version>
+        <kotlin.version>1.8.20</kotlin.version>
     </properties>
 
     <dependencies>
@@ -30,7 +37,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>4.11.0</version>
+            <version>4.12.0</version>
         </dependency>
 
         <dependency>
@@ -54,7 +61,7 @@
         <dependency>
             <groupId>org.jline</groupId>
             <artifactId>jline</artifactId>
-            <version>3.23.0</version>
+            <version>3.25.0</version>
         </dependency>
 
         <dependency>
