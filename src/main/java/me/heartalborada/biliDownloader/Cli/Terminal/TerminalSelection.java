@@ -1,5 +1,6 @@
 package me.heartalborada.biliDownloader.Cli.Terminal;
 
+import lombok.Getter;
 import me.heartalborada.biliDownloader.Cli.Enums.KeyOperation;
 import me.heartalborada.biliDownloader.Interfaces.Selection;
 import me.heartalborada.biliDownloader.Interfaces.SelectionCallback;
@@ -9,59 +10,77 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.impl.DumbTerminal;
 import org.jline.utils.*;
 
+import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.jline.keymap.KeyMap.ctrl;
 import static org.jline.keymap.KeyMap.key;
 
 public class TerminalSelection<T> implements Selection<T> {
-    private final LinkedHashMap<T,SelectionCallback<T>> map = new LinkedHashMap<>();
-    private final boolean isDumb;
+    private final ConcurrentHashMap<T,SelectionCallback<T>> binds = new ConcurrentHashMap<>();
+    @Getter
+    volatile private boolean isClosed = false;
     private final Display display;
     private final int width;
     private final ExecutorService service = Executors.newFixedThreadPool(1);
-    public TerminalSelection(Terminal terminal) {
+    private final AtomicInteger selectedNum = new AtomicInteger(-1);
+    private final Terminal terminal;
+    public TerminalSelection(Terminal terminal, Map<T,SelectionCallback<T>> binds) {
+        this.binds.putAll(binds);
         width = terminal.getWidth() == 0 ? 20 : terminal.getWidth();
-        isDumb = terminal instanceof DumbTerminal;
+        this.terminal = terminal;
         this.display = new Display(terminal,false);
-        if(!terminal.paused()) terminal.pause();
-        if(isDumb) {
+        //if(!terminal.paused()) terminal.pause();
+        if(!(terminal instanceof DumbTerminal)) {
+            this.display.resize(this.binds.size(),width);
             service.submit(() -> {
-                int selectedNum = -1;
                 KeyMap<KeyOperation> keys = new KeyMap<>();
-                BindingReader bindingReader = new BindingReader(terminal.reader());
+                BindingReader bindingReader = new BindingReaderM(terminal.reader());
                 keys.bind(KeyOperation.UP,key(terminal, InfoCmp.Capability.key_up));
                 keys.bind(KeyOperation.DOWN,key(terminal, InfoCmp.Capability.key_down));
                 keys.bind(KeyOperation.ENTER,key(terminal,InfoCmp.Capability.key_enter));
-                keys.bind(KeyOperation.CTRL_C,ctrl('C'));
-                while(true) {
+                keys.bind(KeyOperation.ENTER, String.valueOf((char) 13));
+                keys.bind(KeyOperation.CTRL_C,ctrl('c'));
+                while(!isClosed) {
                     KeyOperation key = bindingReader.readBinding(keys);
-                    switch (key){
+                    switch (key) {
                         case UP:
-                            if(selectedNum+1>=map.size()) selectedNum = 0;
-                            else selectedNum++;
+                            if (selectedNum.get() + 1 >= this.binds.size()) selectedNum.set(0);
+                            else selectedNum.incrementAndGet();
                             break;
                         case DOWN:
-                            if(selectedNum-1<0) selectedNum = map.size()-1;
-                            else selectedNum--;
+                            if (selectedNum.get() - 1 < 0) selectedNum.set(this.binds.size() - 1);
+                            else selectedNum.decrementAndGet();
                             break;
                         case CTRL_C:
-                            //TODO QUIT
+                            this.close();
                             break;
                         case ENTER:
-                            //TODO QUIT
+                            T Tobj = null;
+                            int i = 0;
+                            for (T obj : this.binds.keySet()) {
+                                if (i == selectedNum.get())
+                                    Tobj = obj;
+                                i++;
+                            }
+                            if (Tobj == null) break;
+                            this.binds.get(Tobj).onSelected(Tobj);
+                            this.close();
                             break;
                     }
                 }
             });
         } else {
+            this.display.resize(this.binds.size()+1,width);
             service.submit(() -> {
                 NonBlockingReader nonBlockingReader = terminal.reader();
-                LinkedList<Character> characters = new LinkedList<Character>();
-                while (true) {
+                LinkedList<Character> characters = new LinkedList<>();
+                while (!isClosed) {
                     try {
                         int i = nonBlockingReader.read();
                         //Press Backspace
@@ -69,14 +88,21 @@ public class TerminalSelection<T> implements Selection<T> {
                             characters.removeLast();
                         }//Press Enter
                         else if (i==13) {
+                            StringBuilder stringBuilder = new StringBuilder(characters.size());
+                            for (Character character : characters) stringBuilder.append(character);
+                            int parsed = Integer.parseInt(stringBuilder.toString());
+                            if (checkValid(parsed)) {
+                                this.close();
+                            }
                             characters.clear();
-                            //TODO QUIT
                         }//Number Key
                         else if(i>=48&&i<=57) {
                             characters.add((char)i);
                         }
                     } catch (InterruptedIOException ignore) {
-                        //TODO QUIT
+                        this.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             });
@@ -85,32 +111,36 @@ public class TerminalSelection<T> implements Selection<T> {
 
     @Override
     public void bind(T obj, SelectionCallback<T> cb) {
-        map.put(obj,cb);
+        binds.put(obj,cb);
     }
 
     @Override
     public void rerender() {
-        /*if(isDumb) {
-            this.display.resize(map.size()+1,width);
-            generateSequenceCollection(map.keySet(),null);
+        if(terminal instanceof DumbTerminal) {
+            this.display.resize(binds.size()+1,width);
+            List<AttributedString> c = generateSequenceCollection(binds.keySet(),null);
+            this.display.update(c,terminal.getSize().cursorPos(1,0));
         } else {
-            this.display.resize(map.size(),width);
-            generateSequenceCollection(map.keySet(),getSetElement(map.keySet(),selectedNum));
-        }*/
+            this.display.resize(binds.size(),width);
+            List<AttributedString> c = generateSequenceCollection(binds.keySet(),getSetElement(binds.keySet(),selectedNum.get()));
+            this.display.update(c,terminal.getSize().cursorPos(1,0));
+        }
     }
 
     @Override
     public void close() {
+        isClosed = true;
         service.shutdownNow();
     }
 
     @Override
     public void binds(Map<T,SelectionCallback<T>> map) {
-        this.map.putAll(map);
+        this.binds.putAll(map);
+        rerender();
     }
 
-    private Collection<AttributedCharSequence> generateSequenceCollection(Set<T> set, T highLightRow) {
-        Collection<AttributedCharSequence> charSequences = new LinkedList<>();
+    private List<AttributedString> generateSequenceCollection(Set<T> set, T highLightRow) {
+        LinkedList<AttributedString> charSequences = new LinkedList<>();
         for (T o:set) {
             AttributedStringBuilder builder = new AttributedStringBuilder().append("•").append(o.toString());
             if(o == highLightRow)
@@ -129,4 +159,10 @@ public class TerminalSelection<T> implements Selection<T> {
         }
         return null;
     }
+
+    private boolean checkValid(int n) {
+        if(n>binds.size()-1) return false;
+        else return n >= 0;
+    }
+
 }

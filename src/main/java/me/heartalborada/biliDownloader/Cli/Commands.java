@@ -15,6 +15,8 @@ import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.VideoStreamData;
 import me.heartalborada.biliDownloader.Bili.BiliInstance;
 import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
 import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
+import me.heartalborada.biliDownloader.Cli.Enums.KeyOperation;
+import me.heartalborada.biliDownloader.Cli.Terminal.BindingReaderM;
 import me.heartalborada.biliDownloader.Cli.Terminal.TerminalProcessProgress;
 import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.MultiThreadDownload.DownloadInstance;
@@ -22,10 +24,13 @@ import me.heartalborada.biliDownloader.MultiThreadDownload.MultiThreadDownloader
 import me.heartalborada.biliDownloader.Utils.NotWriteQRCode;
 import me.heartalborada.biliDownloader.Utils.Utils;
 import okhttp3.Cookie;
+import org.jline.keymap.BindingReader;
+import org.jline.keymap.KeyMap;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
+import org.jline.utils.InfoCmp;
 import org.jline.utils.NonBlockingReader;
 import picocli.CommandLine;
 
@@ -34,12 +39,16 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static me.heartalborada.biliDownloader.Utils.Utils.NumberUtils.amountConversion;
 import static me.heartalborada.biliDownloader.Utils.Utils.timestampToDate;
 import static me.heartalborada.biliDownloader.Utils.Utils.zonedDateToFormatString;
+import static org.jline.keymap.KeyMap.ctrl;
+import static org.jline.keymap.KeyMap.key;
 
 @CommandLine.Command(name = "",
         description = {"Bilibili Features"},
@@ -613,22 +622,23 @@ public class Commands implements Runnable {
                 name = "test"
         )
         void test() throws InterruptedException, IOException {
-            /*Multi-Thread read test pass*/
-            NonBlockingReader nonBlockingReader = terminal.reader();
-            LinkedList<Character> characters = new LinkedList<Character>();
-            while (true) {
-                int i = nonBlockingReader.read();
-                //Press Backspace
-                //Press Enter
-                if(i==8) {
-                    characters.removeLast();
-                } else if (i==13) {
-                    characters.clear();
-                    //TODO
-                } else if(i>=48&&i<=57) {
-                    characters.add((char)i);
+            ExecutorService service = Executors.newFixedThreadPool(1);
+            //terminal.pause(true);
+            //service.submit(() -> {
+                KeyMap<KeyOperation> keys = new KeyMap<>();
+                BindingReader bindingReader = new BindingReaderM(terminal.reader());
+                keys.bind(KeyOperation.UP, key(terminal, InfoCmp.Capability.key_up));
+                keys.bind(KeyOperation.DOWN, key(terminal, InfoCmp.Capability.key_down));
+                keys.bind(KeyOperation.ENTER, key(terminal, InfoCmp.Capability.key_enter));
+                keys.bind(KeyOperation.CTRL_C, ctrl('c'));
+                keys.bind(KeyOperation.ENTER, String.valueOf((char) 13));
+                while (true) {
+                    KeyOperation key = bindingReader.readBinding(keys);
+                    System.out.println();
+                    if(key == KeyOperation.CTRL_C) break;
+                    System.out.println(key.name());
                 }
-            }
+           // });
         }
     }
 }
