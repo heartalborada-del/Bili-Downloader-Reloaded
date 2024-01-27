@@ -17,7 +17,6 @@ module me.heartalborada.biliDownloader {
     requires picocli.shell.jline3;
     requires kotlinx.coroutines.core.jvm;
     requires org.fusesource.jansi;
-    requires java.desktop;
 
     opens me.heartalborada.biliDownloader.Bili.Beans to com.google.gson;
     opens me.heartalborada.biliDownloader.Utils.Managers.Beans to com.google.gson;

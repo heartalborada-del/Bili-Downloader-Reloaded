@@ -1,20 +1,11 @@
 package me.heartalborada.biliDownloader.Cli.Terminal;
 
-import javafx.css.Size;
 import me.heartalborada.biliDownloader.Interfaces.ProcessProgress;
 import me.heartalborada.biliDownloader.Utils.Utils;
-import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
-import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.Display;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;

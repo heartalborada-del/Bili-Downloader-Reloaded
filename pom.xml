@@ -6,20 +6,13 @@
 
     <groupId>me.heartalborada.biliDownloader</groupId>
     <artifactId>Bili-Downloader-Reloaded</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version><!--main-->
     <name>Bili-Downloader-Reloaded</name>
-
-    <licenses>
-        <license>
-            <name>GPL-3.0-only</name>
-            <url>https://www.gnu.org/licenses/gpl-3.0-standalone.html</url>
-        </license>
-    </licenses>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.9.2</junit.version>
-        <kotlin.version>1.8.20</kotlin.version>
+        <kotlin.version>1.8.0</kotlin.version>
     </properties>
 
     <dependencies>
@@ -180,7 +173,7 @@
                 <executions>
                     <execution>
                         <id>compile</id>
-                        <phase>compile</phase>
+                        <phase>process-sources</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>
