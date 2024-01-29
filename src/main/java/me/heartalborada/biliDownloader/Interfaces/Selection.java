@@ -7,4 +7,5 @@ public interface Selection<T> {
     void binds(Map<T,SelectionCallback<T>> map);
     void rerender();
     void close();
+    void begin();
 }

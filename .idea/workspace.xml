@@ -8,10 +8,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":art: recycle: Rewrite Terminal Selection">
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/BindingReaderM.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalSelection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalSelection.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Interfaces/Selection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Interfaces/Selection.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,6 +68,7 @@
     "Maven.Bili-Downloader-Reloaded [kotlin:compile...].executor": "Run",
     "Maven.Bili-Downloader-Reloaded [org.jetbrains.kotlin:kotlin-maven-plugin:1.8.0:compile].executor": "Run",
     "Maven.Bili-Downloader-Reloaded [package].executor": "Run",
+    "Maven.Bili-Downloader-Reloaded [test].executor": "Run",
     "Maven.Bili-Downloader-Reloaded [verify].executor": "Run",
     "Maven.Bili-Downloader-Reloaded [versions:revert].executor": "Run",
     "Maven.Bili-Downloader-Reloaded [versions:set...].executor": "Run",
@@ -92,7 +93,8 @@
     "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true",
     "应用程序.CliMain.executor": "Run",
-    "应用程序.Main.executor": "Run"
+    "应用程序.Main.executor": "Run",
+    "远程 JVM 调试.Remote.executor": "Debug"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -111,7 +113,7 @@
       <recent name="C:\Users\heart\IdeaProjects\Bili-Downloader-Reloaded\src\main\java\me\heartalborada\biliDownloader\utils" />
     </key>
   </component>
-  <component name="RunManager" selected="应用程序.CliMain">
+  <component name="RunManager" selected="远程 JVM 调试.Remote">
     <configuration name="CliMain" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="me.heartalborada.biliDownloader.Cli.CliMain" />
       <module name="Bili-Downloader-Reloaded" />
@@ -157,11 +159,26 @@
       </MavenSettings>
       <method v="2" />
     </configuration>
+    <configuration name="Remote" type="Remote">
+      <module name="Bili-Downloader-Reloaded" />
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5005" />
+      <option name="AUTO_RESTART" value="false" />
+      <RunnerSettings RunnerId="Debug">
+        <option name="DEBUG_PORT" value="5005" />
+        <option name="LOCAL" value="false" />
+      </RunnerSettings>
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="JAR 应用程序.Run Jar" />
       <item itemvalue="Maven.Bili-Downloader-Reloaded [package]" />
       <item itemvalue="应用程序.Main" />
       <item itemvalue="应用程序.CliMain" />
+      <item itemvalue="远程 JVM 调试.Remote" />
     </list>
     <recent_temporary>
       <list>
@@ -234,7 +251,9 @@
       <workItem from="1706318511286" duration="4192000" />
       <workItem from="1706324373678" duration="3799000" />
       <workItem from="1706330314409" duration="314000" />
-      <workItem from="1706330689468" duration="8763000" />
+      <workItem from="1706330689468" duration="9984000" />
+      <workItem from="1706368159404" duration="2350000" />
+      <workItem from="1706533055918" duration="4520000" />
     </task>
     <task id="LOCAL-00001" summary=":sparkles: new project!">
       <option name="closed" value="true" />
@@ -532,7 +551,15 @@
       <option name="project" value="LOCAL" />
       <updated>1706319283687</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary=":art: recycle: Rewrite Terminal Selection">
+      <option name="closed" value="true" />
+      <created>1706345279230</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1706345279230</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
