@@ -6,10 +6,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Data;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import me.heartalborada.biliDownloader.Bili.Beans.CountrySMS;
 import me.heartalborada.biliDownloader.Bili.Beans.GeetestVerify;
 import me.heartalborada.biliDownloader.Bili.Beans.LoginData;
+import me.heartalborada.biliDownloader.Bili.Beans.QRLoginToken;
 import me.heartalborada.biliDownloader.Bili.Beans.Video.VideoData;
 import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.VideoStreamData;
 import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
@@ -36,8 +36,12 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings({"unused","Duplicates"})
+@SuppressWarnings({"unused", "Duplicates"})
 public class BiliInstance {
     private final int[] mixinKeyEncTab = new int[]{
             46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49,
@@ -55,11 +59,65 @@ public class BiliInstance {
     private final Video video = new Video();
     private final Signature signature = new Signature();
 
+    public BiliInstance() {
+        simpleCookieJar = new SimpleCookieJar();
+        client = new OkHttpClient.Builder()
+                .addInterceptor(new headerInterceptor())
+                .cookieJar(simpleCookieJar)
+                .build();
+    }
+
+    public BiliInstance(HashMap<String, List<Cookie>> CookieData) throws IOException {
+        simpleCookieJar = new SimpleCookieJar(CookieData);
+        client = new OkHttpClient.Builder()
+                .addInterceptor(new headerInterceptor())
+                .cookieJar(simpleCookieJar)
+                .build();
+    }
+
+    public GeetestVerify getNewGeetestCaptcha() throws IOException {
+        Request req = new Request.Builder().url("https://passport.bilibili.com/x/passport-login/captcha?source=main_web").build();
+        try (Response resp = client.newCall(req).execute()) {
+            if (resp.body() != null) {
+                String str = resp.body().string();
+                JsonObject object = JsonParser.parseString(str).getAsJsonObject();
+                if (object.getAsJsonPrimitive("code").getAsInt() != 0) {
+                    throw new BadRequestDataException(
+                            object.getAsJsonPrimitive("code").getAsInt(),
+                            object.getAsJsonPrimitive("message").getAsString()
+                    );
+                }
+                object = object.getAsJsonObject("data");
+                return new GeetestVerify(
+                        object.getAsJsonObject("geetest").getAsJsonPrimitive("challenge").getAsString(),
+                        object.getAsJsonObject("geetest").getAsJsonPrimitive("gt").getAsString(),
+                        object.getAsJsonPrimitive("token").getAsString()
+                );
+            } else {
+                throw new BadRequestDataException(resp.code(), "The url has no data");
+            }
+        }
+    }
+
+    private static class headerInterceptor implements Interceptor {
+
+        @NotNull
+        @Override
+        public Response intercept(@NotNull Chain chain) throws IOException {
+            Request.Builder b = chain.request().newBuilder();
+            b.addHeader("Origin", "https://www.bilibili.com/");
+            b.addHeader("Referer", "https://www.bilibili.com");
+            b.addHeader("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.24");
+            return chain.proceed(b.build());
+        }
+    }
+
     @Data
     private class Signature {
 
         private String signStr;
         private long expireTimeStamp;
+
         public void upgrade() throws IOException {
             Request req = new Request.Builder().url("https://api.bilibili.com/x/web-interface/nav").build();
             String imgAndSub;
@@ -75,7 +133,7 @@ public class BiliInstance {
                     sub = sub.substring(sub.lastIndexOf('/') + 1, sub.lastIndexOf("."));
                     imgAndSub = img + sub;
                 } else {
-                    throw new IOException("Empty body");
+                    throw new BadRequestDataException(resp.code(), "The url has no data");
                 }
             }
             StringBuilder signatureTemp = new StringBuilder();
@@ -85,7 +143,7 @@ public class BiliInstance {
             signStr = signatureTemp.substring(0, 32);
 
             Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.DATE,1);
+            calendar.add(Calendar.DATE, 1);
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -125,58 +183,6 @@ public class BiliInstance {
         }
 
     }
-    public BiliInstance() {
-        simpleCookieJar = new SimpleCookieJar();
-        client = new OkHttpClient.Builder()
-                .addInterceptor(new headerInterceptor())
-                .cookieJar(simpleCookieJar)
-                .build();
-    }
-
-    public BiliInstance(HashMap<String, List<Cookie>> CookieData) throws IOException {
-        simpleCookieJar = new SimpleCookieJar(CookieData);
-        client = new OkHttpClient.Builder()
-                .addInterceptor(new headerInterceptor())
-                .cookieJar(simpleCookieJar)
-                .build();
-    }
-
-    public GeetestVerify getNewGeetestCaptcha() throws IOException {
-        Request req = new Request.Builder().url("https://passport.bilibili.com/x/passport-login/captcha?source=main_web").build();
-        try (Response resp = client.newCall(req).execute()) {
-            if (resp.body() != null) {
-                String str = resp.body().string();
-                JsonObject object = JsonParser.parseString(str).getAsJsonObject();
-                if (object.getAsJsonPrimitive("code").getAsInt() != 0) {
-                    throw new BadRequestDataException(
-                            object.getAsJsonPrimitive("code").getAsInt(),
-                            object.getAsJsonPrimitive("message").getAsString()
-                    );
-                }
-                object = object.getAsJsonObject("data");
-                return new GeetestVerify(
-                        object.getAsJsonObject("geetest").getAsJsonPrimitive("challenge").getAsString(),
-                        object.getAsJsonObject("geetest").getAsJsonPrimitive("gt").getAsString(),
-                        object.getAsJsonPrimitive("token").getAsString()
-                );
-            } else {
-                throw new IOException("Empty body");
-            }
-        }
-    }
-
-    private static class headerInterceptor implements Interceptor {
-
-        @NotNull
-        @Override
-        public Response intercept(@NotNull Chain chain) throws IOException {
-            Request.Builder b = chain.request().newBuilder();
-            b.addHeader("Origin", "https://www.bilibili.com/");
-            b.addHeader("Referer", "https://www.bilibili.com");
-            b.addHeader("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.24");
-            return chain.proceed(b.build());
-        }
-    }
 
     public class Login {
         @Getter
@@ -185,6 +191,7 @@ public class BiliInstance {
         private final Password Password = new Password();
         @Getter
         private final QR QR = new QR();
+
         public class SMS {
             public LinkedList<CountrySMS> getCountryList() throws IOException {
                 Request req = new Request.Builder().url("https://passport.bilibili.com/web/generic/country/list").build();
@@ -217,7 +224,7 @@ public class BiliInstance {
                             ));
                         }
                     } else {
-                        throw new IOException("Empty body");
+                        throw new BadRequestDataException(resp.code(), "The url has no data");
                     }
                 }
                 return list;
@@ -249,7 +256,7 @@ public class BiliInstance {
                         }
                         return object.getAsJsonObject("data").getAsJsonPrimitive("captcha_key").getAsString();
                     } else {
-                        throw new IOException("Empty body");
+                        throw new BadRequestDataException(resp.code(), "The url has no data");
                     }
                 }
             }
@@ -282,7 +289,7 @@ public class BiliInstance {
 
                         return new LoginData(RT, simpleCookieJar.getCookieStore(), TS);
                     } else {
-                        throw new IOException("Empty body");
+                        throw new BadRequestDataException(resp.code(), "The url has no data");
                     }
                 }
             }
@@ -315,7 +322,7 @@ public class BiliInstance {
                                         )
                         );
                     } else {
-                        throw new IOException("Empty body");
+                        throw new BadRequestDataException(resp.code(), "The url has no data");
                     }
                 }
             }
@@ -356,7 +363,7 @@ public class BiliInstance {
 
                         return new LoginData(RT, simpleCookieJar.getCookieStore(), TS);
                     } else {
-                        throw new IOException("Empty body");
+                        throw new BadRequestDataException(resp.code(), "The url has no data");
                     }
                 }
             }
@@ -375,77 +382,70 @@ public class BiliInstance {
         }
 
         public class QR {
-            public Timer loginWithQrLogin(Callback callback) {
-                try (Response resp = client.newCall(new Request.Builder().url("https://passport.bilibili.com/x/passport-login/web/qrcode/generate?source=main-fe-header").build()).execute()) {
+            public QRLoginToken getQRLoginToken() throws BadRequestDataException, IOException {
+                try (Response resp = client
+                        .newCall(
+                                new Request.Builder()
+                                        .url("https://passport.bilibili.com/x/passport-login/web/qrcode/generate?source=main-fe-header")
+                                        .build()
+                        ).execute()) {
                     if (resp.body() != null) {
-                        String s = resp.body().string();
-                        Timer timer = new Timer();
-                        JsonObject object = JsonParser.parseString(s).getAsJsonObject();
-                        if (object.getAsJsonPrimitive("code").getAsInt() != 0) {
-                            callback.onFailure(
-                                    new BadRequestDataException(
-                                            object.getAsJsonPrimitive("code").getAsInt(),
-                                            object.getAsJsonPrimitive("message").getAsString()
-                                    )
-                                    , object.getAsJsonPrimitive("message").getAsString()
-                                    , object.getAsJsonPrimitive("code").getAsInt());
-                        }
-                        callback.onGetQRUrl(object.getAsJsonObject("data").getAsJsonPrimitive("url").getAsString());
-                        String QRKey = object.getAsJsonObject("data").getAsJsonPrimitive("qrcode_key").getAsString();
-                        timer.schedule(new TimerTask() {
-                            private final long ts = System.currentTimeMillis();
-
-                            @SneakyThrows
-                            @Override
-                            public void run() {
-                                if ((System.currentTimeMillis() - ts) >= 180 * 1000) {
-                                    cancel();
-                                    return;
-                                }
-                                try (Response response = client.newCall(new Request.Builder().url(String.format("https://passport.bilibili.com/x/passport-login/web/qrcode/poll?qrcode_key=%s", QRKey)).build()).execute()) {
-                                    if (response.body() != null) {
-                                        String s = response.body().string();
-                                        JsonObject object = JsonParser.parseString(s).getAsJsonObject();
-                                        JsonObject jsonObject = object.getAsJsonObject("data");
-                                        int code = jsonObject.getAsJsonPrimitive("code").getAsInt();
-                                        String msg = jsonObject.getAsJsonPrimitive("message").getAsString();
-                                        switch (code) {
-                                            case 0:
-                                                long ts = jsonObject.getAsJsonPrimitive("timestamp").getAsLong();
-                                                String rt = jsonObject.getAsJsonPrimitive("refresh_token").getAsString();
-                                                callback.onSuccess(
-                                                        new LoginData(rt, simpleCookieJar.getCookieStore(), ts),
-                                                        msg,
-                                                        code
-                                                );
-                                                cancel();
-                                                break;
-                                            case 86101:
-                                            case 86090:
-                                                callback.onUpdate(msg, code);
-                                                break;
-                                            case 86038:
-                                                callback.onFailure(new BadRequestDataException(code, msg), msg, code);
-                                                cancel();
-                                                break;
-                                        }
-                                    } else {
-                                        callback.onFailure(new IOException("Empty Body"), null, -1);
-                                        cancel();
-                                    }
-                                } catch (Exception e) {
-                                    callback.onFailure(e, null, -1);
-                                }
-                            }
-                        }, 0, 1000L);
-                        return timer;
+                        JsonObject object = JsonParser.parseString(resp.body().string()).getAsJsonObject();
+                        if (object.getAsJsonPrimitive("code").getAsInt() != 0)
+                            throw new BadRequestDataException(
+                                    object.getAsJsonPrimitive("code").getAsInt(),
+                                    object.getAsJsonPrimitive("message").getAsString()
+                            );
+                        return new QRLoginToken(
+                                object.getAsJsonObject("data").getAsJsonPrimitive("url").getAsString(),
+                                object.getAsJsonObject("data").getAsJsonPrimitive("qrcode_key").getAsString()
+                        );
                     } else {
-                        callback.onFailure(new IOException("Empty Body"), null, -1);
+                        throw new BadRequestDataException(resp.code(), "The url has no data");
                     }
-                } catch (Exception e) {
-                    callback.onFailure(e, null, -1);
                 }
-                return null;
+            }
+
+            public ScheduledFuture<?> loginWithQrLogin(QRLoginToken token, Callback callback) {
+                ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+                return service.scheduleAtFixedRate(()->{
+                    String tk = token.getToken();
+                    try (Response response = client.newCall(new Request.Builder()
+                            .url(
+                                    String.format(
+                                            "https://passport.bilibili.com/x/passport-login/web/qrcode/poll?qrcode_key=%s",
+                                            tk
+                                    )
+                            ).build()).execute()) {
+                        if (response.body() != null) {
+                            JsonObject object = JsonParser.parseString(response.body().string()).getAsJsonObject();
+                            int code = object.getAsJsonObject("data").getAsJsonPrimitive("code").getAsInt();
+                            String msg = object.getAsJsonObject("data").getAsJsonPrimitive("message").getAsString();
+                            switch (code){
+                                case 0:
+                                    long ts = object.getAsJsonObject("data").getAsJsonPrimitive("timestamp").getAsLong();
+                                    String rt = object.getAsJsonObject("data").getAsJsonPrimitive("refresh_token").getAsString();
+                                    callback.onSuccess(
+                                            new LoginData(rt, simpleCookieJar.getCookieStore(), ts),
+                                            msg,
+                                            code
+                                    );
+                                    break;
+                                case 86101:
+                                case 86090:
+                                    callback.onUpdate(msg, code);
+                                    break;
+                                case 86038:
+                                    callback.onFailure(new BadRequestDataException(code, msg), msg, code);
+                                    break;
+                            }
+                        } else {
+                            throw new BadRequestDataException(response.code(), "The url has no data");
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                },0,1, TimeUnit.SECONDS);
             }
         }
     }
@@ -466,7 +466,7 @@ public class BiliInstance {
                     object = object.getAsJsonObject("data");
                     return object.getAsJsonPrimitive("refresh").getAsBoolean();
                 } else {
-                    throw new IOException("Empty body");
+                    throw new BadRequestDataException(resp.code(), "The url has no data");
                 }
             }
         }
@@ -482,7 +482,7 @@ public class BiliInstance {
                     }
                     return null;
                 } else {
-                    throw new IOException("Empty body");
+                    throw new BadRequestDataException(resp.code(), "The url has no data");
                 }
             }
         }
@@ -520,7 +520,7 @@ public class BiliInstance {
                             System.currentTimeMillis()
                     );
                 } else {
-                    throw new IOException("Empty body");
+                    throw new BadRequestDataException(resp.code(), "The url has no data");
                 }
             }
         }
@@ -550,7 +550,7 @@ public class BiliInstance {
                         );
                     }
                 } else {
-                    throw new IOException("Empty body");
+                    throw new BadRequestDataException(resp.code(), "The url has no data");
                 }
             }
         }
@@ -558,7 +558,7 @@ public class BiliInstance {
 
     @SuppressWarnings("Duplicates")
     public class Video {
-        public VideoData getVideoData(int aid) throws IOException,BadRequestDataException {
+        public VideoData getVideoData(int aid) throws IOException, BadRequestDataException {
             Request req = new Request.Builder().url(String.format("https://api.bilibili.com/x/web-interface/view?aid=%d", aid)).build();
             try (Response response = client.newCall(req).execute()) {
                 if (response.body() != null) {
@@ -572,7 +572,7 @@ public class BiliInstance {
                     }
                     return new Gson().fromJson(object.get("data"), VideoData.class);
                 } else {
-                    throw new IOException("Empty body");
+                    throw new BadRequestDataException(response.code(), "The url has no data");
                 }
             }
         }
@@ -591,7 +591,7 @@ public class BiliInstance {
                     }
                     return new Gson().fromJson(object.get("data"), VideoData.class);
                 } else {
-                    throw new IOException("Empty body");
+                    throw new BadRequestDataException(response.code(), "The url has no data");
                 }
             }
         }
@@ -599,13 +599,13 @@ public class BiliInstance {
         public VideoStreamData getVideoStreamData(VideoData data, int page) throws IOException {
             HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse("https://api.bilibili.com/x/player/wbi/playurl")).newBuilder();
             Map<String, String> param = new HashMap<>();
-            param.put("bvid",data.getBvid());
+            param.put("bvid", data.getBvid());
             param.put("cid", String.valueOf(data.getPages().get(page).getCid()));
-            param.put("fourk","1");
-            param.put("fnval","16");
-            TreeMap<String,String> signedParam = signature.sign(param);
+            param.put("fourk", "1");
+            param.put("fnval", "16");
+            TreeMap<String, String> signedParam = signature.sign(param);
             for (String key : signedParam.keySet()) {
-                urlBuilder.addQueryParameter(key,signedParam.get(key));
+                urlBuilder.addQueryParameter(key, signedParam.get(key));
             }
             Request req = new Request.Builder().url(urlBuilder.build()).build();
             try (Response response = client.newCall(req).execute()) {
@@ -620,7 +620,7 @@ public class BiliInstance {
                     }
                     return new Gson().fromJson(object.get("data"), VideoStreamData.class);
                 } else {
-                    throw new IOException("Empty body");
+                    throw new BadRequestDataException(response.code(), "The url has no data");
                 }
             }
         }

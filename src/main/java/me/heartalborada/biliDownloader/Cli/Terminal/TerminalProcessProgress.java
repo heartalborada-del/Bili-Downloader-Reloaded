@@ -77,6 +77,11 @@ public class TerminalProcessProgress implements ProcessProgress {
         this.close();
     }
 
+    @Override
+    public boolean isFailed() {
+        return this.isClosed && this.isFailed;
+    }
+
 
     @Override
     public void rerender() {
@@ -87,6 +92,11 @@ public class TerminalProcessProgress implements ProcessProgress {
     public void close() {
         updateProgresses();
         this.isClosed = true;
+    }
+
+    @Override
+    public boolean isClosed() {
+        return this.isClosed;
     }
 
     private void updateProgresses() {

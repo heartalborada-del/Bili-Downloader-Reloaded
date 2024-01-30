@@ -5,7 +5,7 @@ import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import me.heartalborada.biliDownloader.Bili.Beans.LoginData;
+import me.heartalborada.biliDownloader.Bili.Beans.QRLoginToken;
 import me.heartalborada.biliDownloader.Bili.Beans.Video.Sub.Honor;
 import me.heartalborada.biliDownloader.Bili.Beans.Video.Sub.Staff;
 import me.heartalborada.biliDownloader.Bili.Beans.Video.VideoData;
@@ -14,30 +14,30 @@ import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.Sub.Video;
 import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.VideoStreamData;
 import me.heartalborada.biliDownloader.Bili.BiliInstance;
 import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
-import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
 import me.heartalborada.biliDownloader.Cli.Terminal.TerminalProcessProgress;
 import me.heartalborada.biliDownloader.Cli.Terminal.TerminalSelection;
 import me.heartalborada.biliDownloader.Interfaces.SelectionCallback;
 import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.MultiThreadDownload.DownloadInstance;
 import me.heartalborada.biliDownloader.MultiThreadDownload.MultiThreadDownloader;
-import me.heartalborada.biliDownloader.Utils.NotWriteQRCode;
+import me.heartalborada.biliDownloader.Utils.NoWhiteQRCode;
 import me.heartalborada.biliDownloader.Utils.Utils;
 import okhttp3.Cookie;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
-import org.jline.utils.NonBlockingReader;
+import org.jline.utils.*;
 import picocli.CommandLine;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -87,11 +87,50 @@ public class Commands implements Runnable {
                 subcommands = {CommandLine.HelpCommand.class},
                 description = "Log in to your Bilibili account"
         )
-        @SuppressWarnings("IntegerDivisionInFloatingPointContext")
         void login(
                 @CommandLine.Option(names = {"-t", "--type"}, description = "Allow \"QR\"", required = true) String type
-        ) throws InterruptedException {
-            PrintStream out = new PrintStream(CliMain.getTerminal().output());
+        ) throws IOException, WriterException {
+            if((type != null && type.equalsIgnoreCase("qr"))) {
+                QRLoginToken token = biliInstance.getLogin().getQR().getQRLoginToken();
+                ArrayList<AttributedString> QRDisplay = new ArrayList<>();
+                HashMap<EncodeHintType, Serializable> hints = new HashMap<>();
+                hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
+                hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+                hints.put(EncodeHintType.MARGIN, 0);
+                BitMatrix bitMatrix = new NoWhiteQRCode().encode(
+                        token.getQRUrl(),
+                        BarcodeFormat.QR_CODE,
+                        0,
+                        0,
+                        hints
+                );
+                for (int j = 0; j < bitMatrix.getHeight(); j++) {
+                    AttributedStringBuilder asb = new AttributedStringBuilder();
+                    for (int i = 0; i < bitMatrix.getWidth(); i++) {
+                        if (bitMatrix.get(i, j)) {
+                            asb.style(new AttributedStyle().background(AttributedStyle.WHITE)).append("\33[48;5;7m").append("██");
+                        } else {
+                            asb.style(new AttributedStyle().background(AttributedStyle.BLACK)).append("\33[0m").append("  ");
+                        }
+                    }
+                    QRDisplay.add(asb.toAttributedString());
+                }
+                Display display = new Display(terminal,false);
+                display.resize(QRDisplay.size(),terminal.getWidth() == 0 ? 20 : terminal.getWidth());
+                display.update(QRDisplay,terminal.getSize().cursorPos(QRDisplay.size(),0));
+            } else {
+                AttributedString string = new AttributedStringBuilder()
+                        .style(new AttributedStyle().background(AttributedStyle.RED).foreground(AttributedStyle.BLACK))
+                        .append("Unknown Type: ")
+                        .append(type)
+                        .toAttributedString();
+                Display display = new Display(terminal,false);
+                display.resize(1,terminal.getWidth() == 0 ? 20 : terminal.getWidth());
+                display.update(new ArrayList<>(){{
+                    add(string);
+                }},terminal.getSize().cursorPos(1,0));
+            }
+            /*PrintStream out = new PrintStream(CliMain.getTerminal().output());
             if (type != null && type.equalsIgnoreCase("qr")) {
                 CliMain.getTerminal().pause(true);
                 Timer task = biliInstance.getLogin().getQR().loginWithQrLogin(new Callback() {
@@ -181,7 +220,7 @@ public class Commands implements Runnable {
                 }).start();
             } else {
                 out.printf("\33[1;31mUnknown Type: %s\33[0m%n", type);
-            }
+            }*/
         }
 
         @CommandLine.Command(
@@ -615,26 +654,10 @@ public class Commands implements Runnable {
             }
         }
 
-        volatile boolean target = true;
         @CommandLine.Command(
                 name = "test"
         )
         void test() throws InterruptedException, IOException {
-            ExecutorService service = Executors.newFixedThreadPool(1);
-                /*service.submit(()->{
-                    KeyMap<KeyOperation> keys = new KeyMap<>();
-                    BindingReaderM bindingReader = new BindingReaderM(terminal.reader());
-                    keys.bind(KeyOperation.UP,key(terminal, InfoCmp.Capability.key_up));
-                    keys.bind(KeyOperation.DOWN,key(terminal, InfoCmp.Capability.key_down));
-                    keys.bind(KeyOperation.ENTER,key(terminal,InfoCmp.Capability.key_enter));
-                    keys.bind(KeyOperation.ENTER, String.valueOf((char) 13));
-                    keys.bind(KeyOperation.CTRL_C, String.valueOf((char) 3));
-                    System.out.println(bindingReader.readBinding(keys).name());
-                    target = false;
-                });
-                while (target) {
-
-                }*/
             Map<String, SelectionCallback<String>> map = new LinkedHashMap<>();
             map.put("WDNMD", TargetObj -> System.out.println("p1"));
             map.put("114514", TargetObj -> System.out.println("p2"));

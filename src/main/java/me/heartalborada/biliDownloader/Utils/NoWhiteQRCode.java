@@ -12,8 +12,9 @@ import com.google.zxing.qrcode.encoder.QRCode;
 
 import java.util.Map;
 
-public class NotWriteQRCode implements Writer {
-    public NotWriteQRCode() {
+public class NoWhiteQRCode implements Writer {
+    public NoWhiteQRCode() {
+
     }
 
     private static BitMatrix renderResult(QRCode code, int width, int height, int quietZone) {

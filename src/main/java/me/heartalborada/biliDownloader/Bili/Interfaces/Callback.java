@@ -9,6 +9,4 @@ public interface Callback {
     void onFailure(Exception e, String cause, int code);
 
     void onUpdate(String message, int code);
-
-    void onGetQRUrl(String QRUrl);
 }

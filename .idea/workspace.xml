@@ -7,15 +7,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":art: feat: TerminalSelection is usable">
-      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/Run_Jar.xml" beforeDir="false" />
+    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment="::">
+      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Beans/QRLoginToken.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/CliMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/CliMain.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.MD" beforeDir="false" afterPath="$PROJECT_DIR$/README.MD" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/BiliInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/BiliInstance.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Interfaces/Callback.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Interfaces/Callback.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/BindingReaderM.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/BindingReaderM.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalSelection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalSelection.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Interfaces/Selection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Interfaces/Selection.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/Speed/DownloadSpeedStat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/Speed/DownloadSpeedStat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalProcessProgress.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalProcessProgress.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Interfaces/ProcessProgress.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Interfaces/ProcessProgress.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/NotWriteQRCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/NoWhiteQRCode.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,8 +32,8 @@
         <option value="Kotlin Class" />
         <option value="Enum" />
         <option value="Interface" />
-        <option value="Class" />
         <option value="AnnotationType" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -263,7 +264,9 @@
       <workItem from="1706582058291" duration="777000" />
       <workItem from="1706598109774" duration="5966000" />
       <workItem from="1706615645542" duration="73000" />
-      <workItem from="1706615836377" duration="366000" />
+      <workItem from="1706615836377" duration="1023000" />
+      <workItem from="1706617818722" duration="2353000" />
+      <workItem from="1706627579399" duration="4428000" />
     </task>
     <task id="LOCAL-00001" summary=":sparkles: new project!">
       <option name="closed" value="true" />
@@ -577,7 +580,15 @@
       <option name="project" value="LOCAL" />
       <updated>1706537750302</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary=":art: fixed: TerminalSelection cannot handle the ^C event">
+      <option name="closed" value="true" />
+      <created>1706616517774</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1706616517774</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -627,7 +638,8 @@
     <MESSAGE value=":recycle: rewrite cli progress code" />
     <MESSAGE value=":art: recycle: Rewrite Terminal Selection" />
     <MESSAGE value=":art: feat: TerminalSelection is usable" />
-    <option name="LAST_COMMIT_MESSAGE" value=":art: feat: TerminalSelection is usable" />
+    <MESSAGE value=":art: fixed: TerminalSelection cannot handle the ^C event" />
+    <option name="LAST_COMMIT_MESSAGE" value=":art: fixed: TerminalSelection cannot handle the ^C event" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -647,8 +659,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalSelection.java</url>
-          <line>60</line>
+          <line>57</line>
           <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalSelection.java</url>
+          <line>38</line>
+          <option name="timeStamp" value="14" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -661,9 +678,6 @@
       </pinned-members>
     </pin-to-top-manager>
     <watches-manager>
-      <configuration name="Application">
-        <watch expression="simpleCookieJar" />
-      </configuration>
       <inline-watch fileUrl="file://$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/LibrariesLoader.java" line="33">
         <watch expression="list" />
       </inline-watch>
