@@ -7,11 +7,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":art: recycle: Rewrite Terminal Selection">
+    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":art: feat: TerminalSelection is usable">
+      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/Run_Jar.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/CliMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/CliMain.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/BindingReaderM.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/BindingReaderM.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalSelection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalSelection.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Interfaces/Selection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Interfaces/Selection.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/Speed/DownloadSpeedStat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/Speed/DownloadSpeedStat.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,6 +32,7 @@
         <option value="Enum" />
         <option value="Interface" />
         <option value="Class" />
+        <option value="AnnotationType" />
       </list>
     </option>
   </component>
@@ -47,7 +52,7 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="CurrentFile" />
+    <option name="selectedTabId" value="ProjectErrors" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
@@ -66,6 +71,7 @@
     "ASKED_ADD_EXTERNAL_FILES": "true",
     "Maven.Bili-Downloader-Reloaded [clean].executor": "Run",
     "Maven.Bili-Downloader-Reloaded [kotlin:compile...].executor": "Run",
+    "Maven.Bili-Downloader-Reloaded [mvn,package].executor": "Run",
     "Maven.Bili-Downloader-Reloaded [org.jetbrains.kotlin:kotlin-maven-plugin:1.8.0:compile].executor": "Run",
     "Maven.Bili-Downloader-Reloaded [package].executor": "Run",
     "Maven.Bili-Downloader-Reloaded [test].executor": "Run",
@@ -113,7 +119,7 @@
       <recent name="C:\Users\heart\IdeaProjects\Bili-Downloader-Reloaded\src\main\java\me\heartalborada\biliDownloader\utils" />
     </key>
   </component>
-  <component name="RunManager" selected="远程 JVM 调试.Remote">
+  <component name="RunManager" selected="应用程序.CliMain">
     <configuration name="CliMain" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="me.heartalborada.biliDownloader.Cli.CliMain" />
       <module name="Bili-Downloader-Reloaded" />
@@ -174,7 +180,6 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="JAR 应用程序.Run Jar" />
       <item itemvalue="Maven.Bili-Downloader-Reloaded [package]" />
       <item itemvalue="应用程序.Main" />
       <item itemvalue="应用程序.CliMain" />
@@ -253,7 +258,12 @@
       <workItem from="1706330314409" duration="314000" />
       <workItem from="1706330689468" duration="9984000" />
       <workItem from="1706368159404" duration="2350000" />
-      <workItem from="1706533055918" duration="4520000" />
+      <workItem from="1706533055918" duration="12083000" />
+      <workItem from="1706580878558" duration="1160000" />
+      <workItem from="1706582058291" duration="777000" />
+      <workItem from="1706598109774" duration="5966000" />
+      <workItem from="1706615645542" duration="73000" />
+      <workItem from="1706615836377" duration="366000" />
     </task>
     <task id="LOCAL-00001" summary=":sparkles: new project!">
       <option name="closed" value="true" />
@@ -559,7 +569,15 @@
       <option name="project" value="LOCAL" />
       <updated>1706345279230</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary=":art: feat: TerminalSelection is usable">
+      <option name="closed" value="true" />
+      <created>1706537750302</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1706537750302</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -608,7 +626,8 @@
     <MESSAGE value=":bug: 修复未登录时爆空指针异常的代码错误" />
     <MESSAGE value=":recycle: rewrite cli progress code" />
     <MESSAGE value=":art: recycle: Rewrite Terminal Selection" />
-    <option name="LAST_COMMIT_MESSAGE" value=":art: recycle: Rewrite Terminal Selection" />
+    <MESSAGE value=":art: feat: TerminalSelection is usable" />
+    <option name="LAST_COMMIT_MESSAGE" value=":art: feat: TerminalSelection is usable" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -625,6 +644,11 @@
             <option name="WATCH_EXIT" value="false" />
           </properties>
           <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalSelection.java</url>
+          <line>60</line>
+          <option name="timeStamp" value="11" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -36,6 +36,8 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -567,6 +569,7 @@ public class Commands implements Runnable {
                     for (DownloadInstance i : instances) {
                         if (!i.isDone()) {
                             flag = false;
+                            break;
                         }
                     }
                     if (flag) {
@@ -584,6 +587,7 @@ public class Commands implements Runnable {
                     for (DownloadInstance i : instances) {
                         if (!i.isDone()) {
                             flag = false;
+                            break;
                         }
                     }
                     if (flag) {
@@ -611,20 +615,34 @@ public class Commands implements Runnable {
             }
         }
 
+        volatile boolean target = true;
         @CommandLine.Command(
                 name = "test"
         )
         void test() throws InterruptedException, IOException {
+            ExecutorService service = Executors.newFixedThreadPool(1);
+                /*service.submit(()->{
+                    KeyMap<KeyOperation> keys = new KeyMap<>();
+                    BindingReaderM bindingReader = new BindingReaderM(terminal.reader());
+                    keys.bind(KeyOperation.UP,key(terminal, InfoCmp.Capability.key_up));
+                    keys.bind(KeyOperation.DOWN,key(terminal, InfoCmp.Capability.key_down));
+                    keys.bind(KeyOperation.ENTER,key(terminal,InfoCmp.Capability.key_enter));
+                    keys.bind(KeyOperation.ENTER, String.valueOf((char) 13));
+                    keys.bind(KeyOperation.CTRL_C, String.valueOf((char) 3));
+                    System.out.println(bindingReader.readBinding(keys).name());
+                    target = false;
+                });
+                while (target) {
+
+                }*/
             Map<String, SelectionCallback<String>> map = new LinkedHashMap<>();
             map.put("WDNMD", TargetObj -> System.out.println("p1"));
             map.put("114514", TargetObj -> System.out.println("p2"));
-            TerminalSelection<String> selection = new TerminalSelection<>(terminal,map);
-            selection.begin();
-            //terminal.pause();
-            //如果需要多线程读取，要让主线程睡一会（
-            Thread.sleep(5000L);
-            selection.close();
-            terminal.resume();
+            TerminalSelection<String> selection = new TerminalSelection<>(terminal,map,null);
+            selection.start();
+            while (!(selection.isCancelled() || selection.isDone())) {
+
+            }
         }
     }
 }

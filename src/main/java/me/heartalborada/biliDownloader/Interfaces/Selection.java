@@ -6,6 +6,8 @@ public interface Selection<T> {
     void bind(T obj, SelectionCallback<T> cb);
     void binds(Map<T,SelectionCallback<T>> map);
     void rerender();
-    void close();
-    void begin();
+    void start();
+    boolean cancel();
+    boolean isCancelled();
+    boolean isDone();
 }

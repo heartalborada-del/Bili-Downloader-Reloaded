@@ -4,8 +4,6 @@ import lombok.Getter;
 import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.Utils.LoggerFormatter;
 import org.jline.console.impl.SystemRegistryImpl;
-import org.jline.nativ.JLineLibrary;
-import org.jline.nativ.JLineNativeLoader;
 import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -21,7 +19,6 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static me.heartalborada.biliDownloader.Utils.Utils.getTargetClassModifiers;
@@ -35,11 +32,8 @@ public class CliMain {
             "██████╔╝██████╔╝██║  ██║    ╚██████╗███████╗██║\n" +
             "╚═════╝ ╚═════╝ ╚═╝  ╚═╝     ╚═════╝╚══════╝╚═╝\n" +
             "Type Ctrl+D or type \"exit\" to quit.          \n";
+    @Getter
     private static final Terminal terminal;
-
-    public static Terminal getTerminal() {
-        return terminal;
-    }
 
     private static LineReader lineReader;
 

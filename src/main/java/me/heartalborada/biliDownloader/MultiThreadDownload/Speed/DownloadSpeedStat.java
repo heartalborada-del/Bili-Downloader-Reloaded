@@ -10,7 +10,7 @@ public class DownloadSpeedStat {
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1);
     private long preCount = 0;
 
-    private boolean isShutdown = false;
+    private final boolean isShutdown = false;
     public DownloadSpeedStat(SpeedNotifyEvent speedNotifyEvent) {
         this.speedNotifyEvent = speedNotifyEvent;
     }
