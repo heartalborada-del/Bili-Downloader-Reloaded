@@ -9,7 +9,7 @@ import lombok.Getter;
 import me.heartalborada.biliDownloader.Bili.Beans.CountrySMS;
 import me.heartalborada.biliDownloader.Bili.Beans.GeetestVerify;
 import me.heartalborada.biliDownloader.Bili.Beans.LoginData;
-import me.heartalborada.biliDownloader.Bili.Beans.QRLoginToken;
+import me.heartalborada.biliDownloader.Bili.Beans.QRLogin.QRLoginToken;
 import me.heartalborada.biliDownloader.Bili.Beans.Video.VideoData;
 import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.VideoStreamData;
 import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
@@ -26,6 +26,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -36,10 +37,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @SuppressWarnings({"unused", "Duplicates"})
 public class BiliInstance {
@@ -184,12 +182,10 @@ public class BiliInstance {
 
     }
 
+    @Getter
     public class Login {
-        @Getter
         private final SMS SMS = new SMS();
-        @Getter
         private final Password Password = new Password();
-        @Getter
         private final QR QR = new QR();
 
         public class SMS {
@@ -368,10 +364,9 @@ public class BiliInstance {
                 }
             }
 
+            @Getter
             private class keys {
-                @Getter
                 private final String salt;
-                @Getter
                 private final RSAPublicKey key;
 
                 private keys(String salt, RSAPublicKey key) {
@@ -398,7 +393,8 @@ public class BiliInstance {
                             );
                         return new QRLoginToken(
                                 object.getAsJsonObject("data").getAsJsonPrimitive("url").getAsString(),
-                                object.getAsJsonObject("data").getAsJsonPrimitive("qrcode_key").getAsString()
+                                object.getAsJsonObject("data").getAsJsonPrimitive("qrcode_key").getAsString(),
+                                System.currentTimeMillis()
                         );
                     } else {
                         throw new BadRequestDataException(resp.code(), "The url has no data");
@@ -408,8 +404,24 @@ public class BiliInstance {
 
             public ScheduledFuture<?> loginWithQrLogin(QRLoginToken token, Callback callback) {
                 ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-                return service.scheduleAtFixedRate(()->{
-                    String tk = token.getToken();
+                return service.scheduleWithFixedDelay(new QRTask(token, callback, service),0,2, TimeUnit.SECONDS);
+            }
+
+            private class QRTask implements Runnable {
+                private final QRLoginToken TOKEN;
+                private final Callback CALLBACK;
+                private final long allow = System.currentTimeMillis()+180*1000;
+                private final ExecutorService SERVICE;
+                QRTask(QRLoginToken token, Callback callback, ExecutorService service) {
+                    TOKEN = token;
+                    CALLBACK = callback;
+                    SERVICE = service;
+                }
+
+                volatile private boolean isFailed = false,isDone = false;
+                @Override
+                public void run() {
+                    String tk = TOKEN.getToken();
                     try (Response response = client.newCall(new Request.Builder()
                             .url(
                                     String.format(
@@ -425,27 +437,34 @@ public class BiliInstance {
                                 case 0:
                                     long ts = object.getAsJsonObject("data").getAsJsonPrimitive("timestamp").getAsLong();
                                     String rt = object.getAsJsonObject("data").getAsJsonPrimitive("refresh_token").getAsString();
-                                    callback.onSuccess(
+                                    CALLBACK.onSuccess(
                                             new LoginData(rt, simpleCookieJar.getCookieStore(), ts),
                                             msg,
                                             code
                                     );
+                                    isDone = true;
+                                    SERVICE.shutdownNow();
                                     break;
                                 case 86101:
                                 case 86090:
-                                    callback.onUpdate(msg, code);
+                                    CALLBACK.onUpdate(msg, code);
                                     break;
                                 case 86038:
-                                    callback.onFailure(new BadRequestDataException(code, msg), msg, code);
+                                    CALLBACK.onFailure(new BadRequestDataException(code, msg), msg, code);
+                                    isFailed = true;
+                                    SERVICE.shutdownNow();
                                     break;
                             }
                         } else {
                             throw new BadRequestDataException(response.code(), "The url has no data");
                         }
-                    } catch (IOException e) {
+                    } catch (InterruptedIOException e) {
+                        CALLBACK.onFailure(e,"Canceled",-1);
+                        SERVICE.shutdownNow();
+                    }catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                },0,1, TimeUnit.SECONDS);
+                }
             }
         }
     }

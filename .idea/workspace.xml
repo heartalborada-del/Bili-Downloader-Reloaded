@@ -8,15 +8,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment="::">
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Beans/QRLoginToken.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.MD" beforeDir="false" afterPath="$PROJECT_DIR$/README.MD" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Beans/QRLoginToken.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Beans/QRLogin/QRLoginToken.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/BiliInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/BiliInstance.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Interfaces/Callback.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Interfaces/Callback.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/CliMain.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/CliMain.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalProcessProgress.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalProcessProgress.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Interfaces/ProcessProgress.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Interfaces/ProcessProgress.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/NotWriteQRCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/NoWhiteQRCode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -267,6 +265,9 @@
       <workItem from="1706615836377" duration="1023000" />
       <workItem from="1706617818722" duration="2353000" />
       <workItem from="1706627579399" duration="4428000" />
+      <workItem from="1706666615449" duration="3213000" />
+      <workItem from="1706674770619" duration="7273000" />
+      <workItem from="1706692348632" duration="6904000" />
     </task>
     <task id="LOCAL-00001" summary=":sparkles: new project!">
       <option name="closed" value="true" />

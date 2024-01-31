@@ -30,4 +30,5 @@ module me.heartalborada.biliDownloader {
     opens me.heartalborada.biliDownloader.Bili.Beans.Video.Sub to com.google.gson;
     opens me.heartalborada.biliDownloader.Bili.Beans.VideoStream to com.google.gson;
     opens me.heartalborada.biliDownloader.Bili.Beans.VideoStream.Sub to com.google.gson;
+    opens me.heartalborada.biliDownloader.Bili.Beans.QRLogin to com.google.gson;
 }

@@ -5,7 +5,8 @@ import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import me.heartalborada.biliDownloader.Bili.Beans.QRLoginToken;
+import me.heartalborada.biliDownloader.Bili.Beans.LoginData;
+import me.heartalborada.biliDownloader.Bili.Beans.QRLogin.QRLoginToken;
 import me.heartalborada.biliDownloader.Bili.Beans.Video.Sub.Honor;
 import me.heartalborada.biliDownloader.Bili.Beans.Video.Sub.Staff;
 import me.heartalborada.biliDownloader.Bili.Beans.Video.VideoData;
@@ -14,9 +15,8 @@ import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.Sub.Video;
 import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.VideoStreamData;
 import me.heartalborada.biliDownloader.Bili.BiliInstance;
 import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
+import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
 import me.heartalborada.biliDownloader.Cli.Terminal.TerminalProcessProgress;
-import me.heartalborada.biliDownloader.Cli.Terminal.TerminalSelection;
-import me.heartalborada.biliDownloader.Interfaces.SelectionCallback;
 import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.MultiThreadDownload.DownloadInstance;
 import me.heartalborada.biliDownloader.MultiThreadDownload.MultiThreadDownloader;
@@ -38,6 +38,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ScheduledFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,8 +91,21 @@ public class Commands implements Runnable {
         void login(
                 @CommandLine.Option(names = {"-t", "--type"}, description = "Allow \"QR\"", required = true) String type
         ) throws IOException, WriterException {
-            if((type != null && type.equalsIgnoreCase("qr"))) {
-                QRLoginToken token = biliInstance.getLogin().getQR().getQRLoginToken();
+            if (!(type != null && type.equalsIgnoreCase("qr"))) {
+                AttributedString string = new AttributedStringBuilder()
+                        .style(new AttributedStyle().background(AttributedStyle.RED).foreground(AttributedStyle.BLACK))
+                        .append("Unknown Type: ")
+                        .append(type)
+                        .toAttributedString();
+                Display display = new Display(terminal, false);
+                display.resize(1, terminal.getWidth() == 0 ? 20 : terminal.getWidth());
+                display.update(new ArrayList<>() {{
+                    add(string);
+                }}, terminal.getSize().cursorPos(1, 0));
+                return;
+            }
+            QRLoginToken token = biliInstance.getLogin().getQR().getQRLoginToken();
+            {
                 ArrayList<AttributedString> QRDisplay = new ArrayList<>();
                 HashMap<EncodeHintType, Serializable> hints = new HashMap<>();
                 hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
@@ -108,119 +122,95 @@ public class Commands implements Runnable {
                     AttributedStringBuilder asb = new AttributedStringBuilder();
                     for (int i = 0; i < bitMatrix.getWidth(); i++) {
                         if (bitMatrix.get(i, j)) {
-                            asb.style(new AttributedStyle().background(AttributedStyle.WHITE)).append("\33[48;5;7m").append("██");
+                            asb.style(new AttributedStyle().background(AttributedStyle.WHITE)).append("  ");
                         } else {
-                            asb.style(new AttributedStyle().background(AttributedStyle.BLACK)).append("\33[0m").append("  ");
+                            asb.style(new AttributedStyle().background(AttributedStyle.BLACK)).append("  ");
                         }
                     }
                     QRDisplay.add(asb.toAttributedString());
                 }
-                Display display = new Display(terminal,false);
-                display.resize(QRDisplay.size(),terminal.getWidth() == 0 ? 20 : terminal.getWidth());
-                display.update(QRDisplay,terminal.getSize().cursorPos(QRDisplay.size(),0));
-            } else {
-                AttributedString string = new AttributedStringBuilder()
-                        .style(new AttributedStyle().background(AttributedStyle.RED).foreground(AttributedStyle.BLACK))
-                        .append("Unknown Type: ")
-                        .append(type)
-                        .toAttributedString();
-                Display display = new Display(terminal,false);
-                display.resize(1,terminal.getWidth() == 0 ? 20 : terminal.getWidth());
-                display.update(new ArrayList<>(){{
-                    add(string);
-                }},terminal.getSize().cursorPos(1,0));
+                Display display = new Display(terminal, false);
+                display.resize(QRDisplay.size(), terminal.getWidth() == 0 ? QRDisplay.get(1).length() + 1 : terminal.getWidth());
+                display.update(QRDisplay, terminal.getSize().cursorPos(41, 0));
             }
-            /*PrintStream out = new PrintStream(CliMain.getTerminal().output());
-            if (type != null && type.equalsIgnoreCase("qr")) {
-                CliMain.getTerminal().pause(true);
-                Timer task = biliInstance.getLogin().getQR().loginWithQrLogin(new Callback() {
-                    final Long curT = System.currentTimeMillis();
-                    //TODO 修改此处
-                    final TerminalProcessProgress progress = new TerminalProcessProgress(lineReader.getTerminal());
-                    {
-                        progress.setTotalSize(180);
-                    }
-                    @SuppressWarnings("all")
-                    @Override
-                    public void onSuccess(LoginData data, String message, int code) {
-                        Main.getDataManager().getData().getBilibili().setCookies(data.getCookies());
-                        Main.getDataManager().getData().getBilibili().setRefreshToken(data.getRefreshToken());
-                        Main.getDataManager().getData().getBilibili().setLatestRefreshTimestamp(data.getTimestamp());
-                        progress.update(180);
-                        progress.updateText("\33[48;5;2m[SUCCESS]\33[0m");
-                        progress.close();
-                        terminal.resume();
-                    }
+            Display display = new Display(terminal,false);
+            LinkedList<AttributedString> originalList = new LinkedList<>(){{
+                AttributedString as = new AttributedStringBuilder()
+                        .style(new AttributedStyle().background(255,248,220).foreground(AttributedStyle.BLACK))
+                        .append("URL: ")
+                        .style(new AttributedStyle().background(205,133,63))
+                        .append(token.getQRUrl()).toAttributedString();
+                display.resize(2,as.length()+1);
+                add(as);
+            }};
+            Thread mainThread = Thread.currentThread();
+            boolean[] flag = new boolean[]{false};
+            ScheduledFuture<?> future = biliInstance.getLogin().getQR().loginWithQrLogin(token, new Callback() {
+                @Override
+                public void onSuccess(LoginData data, String message, int code) {
+                    Main.getDataManager().getData().getBilibili().setCookies(data.getCookies());
+                    Main.getDataManager().getData().getBilibili().setRefreshToken(data.getRefreshToken());
+                    Main.getDataManager().getData().getBilibili().setLatestRefreshTimestamp(data.getTimestamp());
+                    LinkedList<AttributedString> modify = new LinkedList<>(){{
+                        addAll(originalList);
+                        AttributedStringBuilder asb = new AttributedStringBuilder()
+                                .style(new AttributedStyle().background(AttributedStyle.GREEN))
+                                .append("SUCCESS");
+                        add(asb.toAttributedString());
+                    }};
+                    display.update(modify,terminal.getSize().cursorPos(2, 0));
+                    flag[0] = true;
+                    mainThread.interrupt();
+                }
 
-                    @Override
-                    public void onFailure(Exception e, String cause, int code) {
-                        progress.updateText("\33[48;5;1m[FAILED]\33[0m");
-                        progress.setFailed();
-                        progress.close();
-                        terminal.resume();
-                    }
+                @Override
+                public void onFailure(Exception e, String cause, int code) {
+                    LinkedList<AttributedString> modify = new LinkedList<>(){{
+                        addAll(originalList);
+                        AttributedStringBuilder asb = new AttributedStringBuilder()
+                                .style(new AttributedStyle().background(AttributedStyle.RED))
+                                .append("Failed")
+                                .append(" - ")
+                                .append(cause);
+                        add(asb.toAttributedString());
+                    }};
+                    display.update(modify,terminal.getSize().cursorPos(2, 0));
+                    mainThread.interrupt();
+                }
 
-                    @Override
-                    public void onUpdate(String message, int code) {
-                        progress.update((System.currentTimeMillis() - curT) / 1000);
-                        progress.updateText(String.format("\33[48;5;3m[WAITING]\33[0m\33[48;5;3m[%d: %s]\33[0m\33[48;5;4m[Time: %d-180]\33[0m", code, message, (System.currentTimeMillis() - curT) / 1000));
+                @Override
+                public void onUpdate(String message, int code) {
+                    LinkedList<AttributedString> modify = new LinkedList<>(){{
+                        addAll(originalList);
+                        AttributedStringBuilder asb = new AttributedStringBuilder()
+                                .style(new AttributedStyle().background(AttributedStyle.YELLOW))
+                                .append(String.format("[Waiting Response - %s]",message))
+                                .append(String.format("[Remaining time - %d]",(token.getRegTimestamp()+180*1000 - System.currentTimeMillis())/1000));
+                        add(asb.toAttributedString());
+                    }};
+                    display.update(modify,terminal.getSize().cursorPos(2, 0));
+                }
+            });
+            while (!(future.isDone() || future.isCancelled())) {
+                try {
+                    int ignore = terminal.reader().read();
+                } catch (InterruptedIOException ignore) {
+                    if (!future.isCancelled()) {
+                        future.cancel(true);
                     }
-
-                    @Override
-                    public void onGetQRUrl(String QRUrl) {
-                        out.printf("%n");
-                        try {
-                            HashMap<EncodeHintType, Serializable> hints = new HashMap<>();
-                            hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
-                            hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
-                            hints.put(EncodeHintType.MARGIN, 0);
-                            BitMatrix bitMatrix = new NotWriteQRCode().encode(
-                                    QRUrl,
-                                    BarcodeFormat.QR_CODE,
-                                    1,
-                                    1,
-                                    hints);
-                            for (int j = 0; j < bitMatrix.getHeight(); j++) {
-                                for (int i = 0; i < bitMatrix.getWidth(); i++) {
-                                    if (bitMatrix.get(i, j)) {
-                                        out.print("\33[48;5;7m  ");
-                                    } else {
-                                        out.print("\33[0m  ");
-                                    }
-                                }
-                                out.println("\33[0m");
-                            }
-                        } catch (WriterException e) {
-                            e.printStackTrace();
-                        }
-                        out.printf("%n\33[48;5;4mURL:\33[48;5;5m%s\33[0m%n", QRUrl);
+                    if(!flag[0]) {
+                        LinkedList<AttributedString> modify = new LinkedList<>() {{
+                            addAll(originalList);
+                            AttributedStringBuilder asb = new AttributedStringBuilder()
+                                    .style(new AttributedStyle().background(AttributedStyle.RED))
+                                    .append("Canceled");
+                            add(asb.toAttributedString());
+                        }};
+                        display.update(modify, terminal.getSize().cursorPos(2, 0));
                     }
-                });
-
-                new Thread(() -> {
-                    while (true) {
-                        try {
-                            lineReader.readLine();
-                            if (!terminal.paused()) {
-                                task.cancel();
-                                task.purge();
-                                terminal.resume();
-                                return;
-                            }
-                        } catch (UserInterruptException | EndOfFileException ignore) {
-                            if (terminal.paused()) {
-                                task.cancel();
-                                task.purge();
-                                out.printf("\33[48;5;1m[CANCELED]\33[0m%n");
-                                terminal.resume();
-                            }
-                            return;
-                        }
-                    }
-                }).start();
-            } else {
-                out.printf("\33[1;31mUnknown Type: %s\33[0m%n", type);
-            }*/
+                    break;
+                }
+            }
         }
 
         @CommandLine.Command(
@@ -533,6 +523,7 @@ public class Commands implements Runnable {
                     new File(Main.getCachePath(), String.format("%d/%d.mp4", videoData.getAid(), cid)),
                     new MultiThreadDownloader.Callback() {
                         long total = 0;
+
                         @Override
                         public void onSuccess(long fileSize) {
                             VideoProgressBar.update(fileSize);
@@ -592,7 +583,7 @@ public class Commands implements Runnable {
 
                             @Override
                             public void newSpeedStat(long speed, boolean isStop) {
-                                if(isStop) return;
+                                if (isStop) return;
                                 total += speed;
                                 AudioProgressBar.update(total);
                                 AudioProgressBar.updateText(String.format("Speed: %s/s", Utils.byteToUnit(speed)));
@@ -602,7 +593,7 @@ public class Commands implements Runnable {
                 ));
             }
             NonBlockingReader reader = terminal.reader();
-            Thread thread = new Thread(()-> {
+            Thread thread = new Thread(() -> {
                 while (true) {
                     boolean flag = true;
                     for (DownloadInstance i : instances) {
@@ -658,14 +649,20 @@ public class Commands implements Runnable {
                 name = "test"
         )
         void test() throws InterruptedException, IOException {
-            Map<String, SelectionCallback<String>> map = new LinkedHashMap<>();
-            map.put("WDNMD", TargetObj -> System.out.println("p1"));
-            map.put("114514", TargetObj -> System.out.println("p2"));
-            TerminalSelection<String> selection = new TerminalSelection<>(terminal,map,null);
-            selection.start();
-            while (!(selection.isCancelled() || selection.isDone())) {
-
+            Display display = new Display(terminal, false);
+            ArrayList<AttributedString> QRDisplay = new ArrayList<>();
+            {
+                AttributedStringBuilder asb = new AttributedStringBuilder();
+                asb.style(new AttributedStyle().background(AttributedStyle.BLUE)).append("A");
+                QRDisplay.add(asb.toAttributedString());
             }
+            {
+                AttributedStringBuilder asb = new AttributedStringBuilder();
+                asb.style(new AttributedStyle().background(AttributedStyle.RED)).append("B");
+                QRDisplay.add(asb.toAttributedString());
+            }
+            display.resize(QRDisplay.size(), terminal.getWidth() == 0 ? 82 : terminal.getWidth());
+            display.update(QRDisplay, terminal.getSize().cursorPos(QRDisplay.size(), 0));
         }
     }
 }

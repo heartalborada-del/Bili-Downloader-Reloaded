@@ -35,6 +35,7 @@ public class CliMain {
     @Getter
     private static final Terminal terminal;
 
+    @Getter
     private static LineReader lineReader;
 
     static {
@@ -51,6 +52,7 @@ public class CliMain {
                     .system(true)
                     .signalHandler(Terminal.SignalHandler.SIG_IGN)
                     .jansi(true)
+                    .color(true)
                     .jna(true)
                     .build();
         } catch (Exception e) {
