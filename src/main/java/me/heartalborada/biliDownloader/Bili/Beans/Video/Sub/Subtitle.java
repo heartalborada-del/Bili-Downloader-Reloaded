@@ -10,5 +10,5 @@ public class Subtitle {
 
     @SerializedName("allow_submit")
     private boolean allowSubmit;
-    private List<String> list;
+    private List<SubTitleListElement> list;
 }

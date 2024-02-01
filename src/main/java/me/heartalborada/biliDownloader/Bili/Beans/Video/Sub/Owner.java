@@ -4,10 +4,7 @@ import lombok.Data;
 
 @Data
 public class Owner {
-
     private int mid;
     private String name;
     private String face;
-
-
 }

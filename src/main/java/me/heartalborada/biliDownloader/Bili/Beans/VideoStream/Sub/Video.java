@@ -1,13 +1,11 @@
 package me.heartalborada.biliDownloader.Bili.Beans.VideoStream.Sub;
 
 import lombok.Data;
-import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.Sub.SegmentBase;
 
 import java.util.List;
 
 @Data
 public class Video {
-
     private int id;
     private String baseUrl;
     private List<String> backupUrl;
@@ -21,5 +19,19 @@ public class Video {
     private int startWithSap;
     private SegmentBase segmentBase;
     private int codecid;
-
+    public void setAll(Video v) {
+        this.setId(v.getId());
+        this.setBaseUrl(v.getBaseUrl());
+        this.setBackupUrl(v.getBackupUrl());
+        this.setBandwidth(v.getBandwidth());
+        this.setMimeType(v.getMimeType());
+        this.setCodecs(v.getCodecs());
+        this.setWidth(v.getWidth());
+        this.setHeight(v.getHeight());
+        this.setFrameRate(v.getFrameRate());
+        this.setSar(v.getSar());
+        this.setStartWithSap(v.getStartWithSap());
+        this.setSegmentBase(v.getSegmentBase());
+        this.setCodecid(v.getCodecid());
+    }
 }

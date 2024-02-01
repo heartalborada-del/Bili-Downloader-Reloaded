@@ -8,6 +8,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import me.heartalborada.biliDownloader.Bili.Beans.LoginData;
 import me.heartalborada.biliDownloader.Bili.Beans.QRLogin.QRLoginToken;
 import me.heartalborada.biliDownloader.Bili.Beans.Video.Sub.Honor;
+import me.heartalborada.biliDownloader.Bili.Beans.Video.Sub.Pages;
 import me.heartalborada.biliDownloader.Bili.Beans.Video.Sub.Staff;
 import me.heartalborada.biliDownloader.Bili.Beans.Video.VideoData;
 import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.Sub.Audio;
@@ -16,26 +17,22 @@ import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.VideoStreamData;
 import me.heartalborada.biliDownloader.Bili.BiliInstance;
 import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
 import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
-import me.heartalborada.biliDownloader.Cli.Terminal.TerminalProcessProgress;
+import me.heartalborada.biliDownloader.Cli.Terminal.TerminalSelection;
+import me.heartalborada.biliDownloader.Interfaces.SelectionCallback;
 import me.heartalborada.biliDownloader.Main;
-import me.heartalborada.biliDownloader.MultiThreadDownload.DownloadInstance;
-import me.heartalborada.biliDownloader.MultiThreadDownload.MultiThreadDownloader;
 import me.heartalborada.biliDownloader.Utils.NoWhiteQRCode;
-import me.heartalborada.biliDownloader.Utils.Utils;
-import okhttp3.Cookie;
-import org.jline.reader.EndOfFileException;
 import org.jline.reader.LineReader;
-import org.jline.reader.UserInterruptException;
 import org.jline.terminal.Terminal;
-import org.jline.utils.*;
+import org.jline.utils.AttributedString;
+import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.AttributedStyle;
+import org.jline.utils.Display;
 import picocli.CommandLine;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.net.URL;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
@@ -43,8 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static me.heartalborada.biliDownloader.Utils.Utils.NumberUtils.amountConversion;
-import static me.heartalborada.biliDownloader.Utils.Utils.timestampToDate;
-import static me.heartalborada.biliDownloader.Utils.Utils.zonedDateToFormatString;
+import static me.heartalborada.biliDownloader.Utils.Utils.*;
 
 @CommandLine.Command(name = "",
         description = {"Bilibili Features"},
@@ -58,6 +54,15 @@ public class Commands implements Runnable {
     Commands(Terminal terminal, LineReader lineReader) {
         this.terminal = terminal;
         this.lineReader = lineReader;
+    }
+
+    private static void DisplayResizeAndUpdate(List<AttributedString> list, Display display, Terminal terminal) {
+        int maxLen = 20;
+        for (AttributedString as : list) {
+            if (maxLen < calculateHalfWidth(as.toString()) + 1) maxLen = calculateHalfWidth(as.toString()) + 1;
+        }
+        display.resize(list.size(), terminal.getWidth() == 0 ? maxLen : terminal.getWidth());
+        display.update(list, terminal.getSize().cursorPos(list.size(), 0));
     }
 
     @Override
@@ -75,8 +80,8 @@ public class Commands implements Runnable {
 
     )
     class Bilibili {
-        private final Pattern avMatch = Pattern.compile("^((av|)[0-9]+)", Pattern.CASE_INSENSITIVE);
-        private final Pattern bvMatch = Pattern.compile("^((bv|)[0-9a-zA-Z]+)", Pattern.CASE_INSENSITIVE);
+        private final Pattern avMatch = Pattern.compile("^((av)[0-9]+)", Pattern.CASE_INSENSITIVE);
+        private final Pattern bvMatch = Pattern.compile("^((bv)[0-9a-zA-Z]+)", Pattern.CASE_INSENSITIVE);
         BiliInstance biliInstance = Main.getBiliInstance();
 
         public Bilibili() {
@@ -133,14 +138,14 @@ public class Commands implements Runnable {
                 display.resize(QRDisplay.size(), terminal.getWidth() == 0 ? QRDisplay.get(1).length() + 1 : terminal.getWidth());
                 display.update(QRDisplay, terminal.getSize().cursorPos(41, 0));
             }
-            Display display = new Display(terminal,false);
-            LinkedList<AttributedString> originalList = new LinkedList<>(){{
+            Display display = new Display(terminal, false);
+            LinkedList<AttributedString> originalList = new LinkedList<>() {{
                 AttributedString as = new AttributedStringBuilder()
-                        .style(new AttributedStyle().background(255,248,220).foreground(AttributedStyle.BLACK))
+                        .style(new AttributedStyle().background(255, 248, 220).foreground(AttributedStyle.BLACK))
                         .append("URL: ")
-                        .style(new AttributedStyle().background(205,133,63))
+                        .style(new AttributedStyle().background(205, 133, 63))
                         .append(token.getQRUrl()).toAttributedString();
-                display.resize(2,as.length()+1);
+                display.resize(2, as.length() + 1);
                 add(as);
             }};
             Thread mainThread = Thread.currentThread();
@@ -151,21 +156,21 @@ public class Commands implements Runnable {
                     Main.getDataManager().getData().getBilibili().setCookies(data.getCookies());
                     Main.getDataManager().getData().getBilibili().setRefreshToken(data.getRefreshToken());
                     Main.getDataManager().getData().getBilibili().setLatestRefreshTimestamp(data.getTimestamp());
-                    LinkedList<AttributedString> modify = new LinkedList<>(){{
+                    LinkedList<AttributedString> modify = new LinkedList<>() {{
                         addAll(originalList);
                         AttributedStringBuilder asb = new AttributedStringBuilder()
                                 .style(new AttributedStyle().background(AttributedStyle.GREEN))
                                 .append("SUCCESS");
                         add(asb.toAttributedString());
                     }};
-                    display.update(modify,terminal.getSize().cursorPos(2, 0));
+                    display.update(modify, terminal.getSize().cursorPos(2, 0));
                     flag[0] = true;
                     mainThread.interrupt();
                 }
 
                 @Override
                 public void onFailure(Exception e, String cause, int code) {
-                    LinkedList<AttributedString> modify = new LinkedList<>(){{
+                    LinkedList<AttributedString> modify = new LinkedList<>() {{
                         addAll(originalList);
                         AttributedStringBuilder asb = new AttributedStringBuilder()
                                 .style(new AttributedStyle().background(AttributedStyle.RED))
@@ -174,21 +179,21 @@ public class Commands implements Runnable {
                                 .append(cause);
                         add(asb.toAttributedString());
                     }};
-                    display.update(modify,terminal.getSize().cursorPos(2, 0));
+                    display.update(modify, terminal.getSize().cursorPos(2, 0));
                     mainThread.interrupt();
                 }
 
                 @Override
                 public void onUpdate(String message, int code) {
-                    LinkedList<AttributedString> modify = new LinkedList<>(){{
+                    LinkedList<AttributedString> modify = new LinkedList<>() {{
                         addAll(originalList);
                         AttributedStringBuilder asb = new AttributedStringBuilder()
                                 .style(new AttributedStyle().background(AttributedStyle.YELLOW))
-                                .append(String.format("[Waiting Response - %s]",message))
-                                .append(String.format("[Remaining time - %d]",(token.getRegTimestamp()+180*1000 - System.currentTimeMillis())/1000));
+                                .append(String.format("[Waiting Response - %s]", message))
+                                .append(String.format("[Remaining time - %d]", (token.getRegTimestamp() + 180 * 1000 - System.currentTimeMillis()) / 1000));
                         add(asb.toAttributedString());
                     }};
-                    display.update(modify,terminal.getSize().cursorPos(2, 0));
+                    display.update(modify, terminal.getSize().cursorPos(2, 0));
                 }
             });
             while (!(future.isDone() || future.isCancelled())) {
@@ -198,7 +203,7 @@ public class Commands implements Runnable {
                     if (!future.isCancelled()) {
                         future.cancel(true);
                     }
-                    if(!flag[0]) {
+                    if (!flag[0]) {
                         LinkedList<AttributedString> modify = new LinkedList<>() {{
                             addAll(originalList);
                             AttributedStringBuilder asb = new AttributedStringBuilder()
@@ -222,8 +227,8 @@ public class Commands implements Runnable {
         void info(
                 @CommandLine.Option(names = {"-i", "--id"}, description = "Bilibili Video ID (BVID/AID)", required = true) String id,
                 @CommandLine.Option(names = {"--no-emoji"}, description = "Disable Emoji Prefix") boolean disEmoji
-        ) throws IOException, InterruptedException, IllegalStateException {
-            terminal.pause(true);
+        ) throws IOException, IllegalStateException {
+            Display display = new Display(terminal, false);
             VideoData videoData;
             try {
                 if (Pattern.matches(avMatch.pattern(), id.toLowerCase())) {
@@ -243,37 +248,37 @@ public class Commands implements Runnable {
                             bid.substring(2)
                     );
                 } else {
-                    terminal.writer().printf("\33[31mUnknowID: %s\33[0m%n", id);
-                    terminal.resume();
+                    LinkedList<AttributedString> list = new LinkedList<>();
+                    list.add(new AttributedStringBuilder()
+                            .style(new AttributedStyle().foreground(AttributedStyle.RED))
+                            .append(String.format("UnknownID: %s", id)).toAttributedString());
+                    display.resize(list.size(), terminal.getWidth()-1);
+                    display.update(list, terminal.getSize().cursorPos(1, 0));
                     return;
                 }
             } catch (BadRequestDataException exception) {
-                terminal.writer().printf("\33[31mError: [%d]%s\33[0m%n", exception.getCode(), exception.getMessage());
-                terminal.resume();
+                LinkedList<AttributedString> list = new LinkedList<>();
+                list.add(
+                        new AttributedStringBuilder().style(new AttributedStyle().foreground(AttributedStyle.RED)).append(String.format("Error: [%d]%s", exception.getCode(), exception.getMessage())).toAttributedString()
+                );
+                DisplayResizeAndUpdate(list, display, terminal);
                 return;
             }
-            terminal.writer().printf("■ Title: %s%n", videoData.getTitle());
-            terminal.writer().printf("■ BVID: %s | AVID: %d%n", videoData.getBvid(), videoData.getAid());
-            terminal.writer().printf("■ View: %s | Like: %s | Coin: %s | Favorite: %s%n",
-                    amountConversion(BigDecimal.valueOf(videoData.getStat().getView())),
-                    amountConversion(BigDecimal.valueOf(videoData.getStat().getLike())),
-                    amountConversion(BigDecimal.valueOf(videoData.getStat().getCoin())),
-                    amountConversion(BigDecimal.valueOf(videoData.getStat().getFavorite())));
-            terminal.writer().printf("■ Publish Time: %s%n", zonedDateToFormatString(
-                    timestampToDate(videoData.getPublishDate() * 1000L, ZoneId.of("+08:00")
-                    ), "yyyy-MM-dd HH:mm:ss v"));
+            LinkedList<AttributedString> list = new LinkedList<>();
+            list.add(new AttributedStringBuilder().append(String.format("■ Title: %s", videoData.getTitle())).toAttributedString());
+            list.add(new AttributedStringBuilder().append(String.format("■ BVID: %s | AID: %d", videoData.getBvid(), videoData.getAid())).toAttributedString());
+            list.add(new AttributedStringBuilder().append(String.format("■ View: %s | Like: %s | Coin: %s | Favorite: %s", amountConversion(BigDecimal.valueOf(videoData.getStat().getView())), amountConversion(BigDecimal.valueOf(videoData.getStat().getLike())), amountConversion(BigDecimal.valueOf(videoData.getStat().getCoin())), amountConversion(BigDecimal.valueOf(videoData.getStat().getFavorite())))).toAttributedString());
+            list.add(new AttributedStringBuilder().append(String.format("■ Publish Time: %s", zonedDateToFormatString(timestampToDate(videoData.getPublishDate() * 1000L, ZoneId.of("+08:00")), "yyyy-MM-dd HH:mm:ss v"))).toAttributedString());
             if (videoData.getStaff() == null || videoData.getStaff().isEmpty()) {
-                terminal.writer().printf("■ Owner: %s%n", videoData.getOwner().getName());
+                list.add(new AttributedStringBuilder().append(String.format("■ Owner: %s", videoData.getOwner().getName())).toAttributedString());
             } else {
-                terminal.writer().println("■ Staffs: ");
-                for (Staff obj : videoData.getStaff()) {
-                    terminal.writer().printf("  □ %s - %s%n", obj.getTitle(), obj.getName());
-                }
+                list.add(new AttributedStringBuilder().append("■ Staffs: ").toAttributedString());
+                for (Staff obj : videoData.getStaff()) {list.add(new AttributedStringBuilder().append(String.format("  □ %s - %s", obj.getTitle(), obj.getName())).toAttributedString());}
             }
             if (!(videoData.getHonorReply().getHonor() == null)) {
-                terminal.writer().println("■ Honor: ");
+                list.add(new AttributedStringBuilder().append("■ Honors: ").toAttributedString());
                 for (Honor obj : videoData.getHonorReply().getHonor()) {
-                    String emojiPrefix = "";
+                    String emojiPrefix = "□";
                     if (!disEmoji) {
                         switch (obj.getType()) {
                             case 1:
@@ -290,10 +295,10 @@ public class Commands implements Runnable {
                                 break;
                         }
                     }
-                    terminal.writer().printf("  □ %s%s%n", emojiPrefix, obj.getDesc());
+                    list.add(new AttributedStringBuilder().append(String.format("  %s %s%n", emojiPrefix, obj.getDesc())).toAttributedString());
                 }
             }
-            terminal.resume();
+            DisplayResizeAndUpdate(list, display, terminal);
         }
 
         @CommandLine.Command(
@@ -305,9 +310,9 @@ public class Commands implements Runnable {
         void download(
                 @CommandLine.Option(names = {"-i", "--id"}, description = "Bilibili Video ID (BVID/AID)", required = true) String id,
                 @CommandLine.Option(names = {"-au", "--audio"}, description = "Is Need choose download Audio Quality") boolean needAudioQuality
-        ) throws IOException, InterruptedException {
-            terminal.pause(true);
-            VideoData videoData = null;
+        ) throws IOException {
+            Display display = new Display(terminal, false);
+            VideoData videoData;
             try {
                 if (Pattern.matches(avMatch.pattern(), id.toLowerCase())) {
                     Matcher matcher = avMatch.matcher(id);
@@ -326,50 +331,49 @@ public class Commands implements Runnable {
                             bid.substring(2)
                     );
                 } else {
-                    terminal.writer().printf("\33[31mUnknowID: %s\33[0m%n", id);
-                    terminal.resume();
+                    LinkedList<AttributedString> list = new LinkedList<>();
+                    list.add(new AttributedStringBuilder()
+                            .style(new AttributedStyle().foreground(AttributedStyle.RED))
+                            .append(String.format("UnknownID: %s", id)).toAttributedString());
+                    display.resize(list.size(), terminal.getWidth()-1);
+                    display.update(list, terminal.getSize().cursorPos(1, 0));
                     return;
                 }
             } catch (BadRequestDataException exception) {
-                terminal.writer().printf("\33[31mError: [%d]%s\33[0m%n", exception.getCode(), exception.getMessage());
-                terminal.resume();
+                LinkedList<AttributedString> list = new LinkedList<>();
+                list.add(
+                        new AttributedStringBuilder().style(new AttributedStyle().foreground(AttributedStyle.RED)).append(String.format("Error: [%d]%s", exception.getCode(), exception.getMessage())).toAttributedString()
+                );
+                DisplayResizeAndUpdate(list, display, terminal);
                 return;
             }
-            long cid;
-            VideoStreamData streamData;
+
+            final VideoStreamData streamData = new VideoStreamData();
+            final Pages pageData = new Pages();
             if (videoData.getPages().size() == 1) {
-                streamData = biliInstance.getVideo().getVideoStreamData(videoData, 0);
-                cid = videoData.getCid();
+                pageData.setAll(videoData.getPages().get(0));
+                streamData.setAll(biliInstance.getVideo().getVideoStreamData(videoData, videoData.getPages().get(0).getCid()));
             } else {
-                terminal.resume();
-                while (true) {
-                    try {
-                        String line = lineReader.readLine(String.format("\33[48;5;3m[Ctrl+C to quit]\33[0m Input a number [0-%d]: ", videoData.getPages().size() - 1));
-                        if (!Objects.equals(line, "")) {
-                            try {
-                                int parse = Integer.parseInt(line);
-                                if (parse >= videoData.getPages().size() || parse < 0) {
-                                    terminal.writer().printf("\33[1;31m%s\33[0m%n", "Invalid Input");
-                                    continue;
-                                }
-                                streamData = biliInstance.getVideo().getVideoStreamData(videoData, parse);
-                                cid = videoData.getPages().get(parse).getCid();
-                                terminal.pause(true);
-                                break;
-                            } catch (NumberFormatException e) {
-                                terminal.writer().printf("\33[1;31m%s\33[0m%n", "Invalid Input");
-                            }
+                LinkedHashMap<String, SelectionCallback<String>> selectionCallbackMap = new LinkedHashMap<>();
+                for (Pages p : videoData.getPages()) {
+                    selectionCallbackMap.put(p.getPart(), TargetObj -> {
+                        try {
+                            pageData.setAll(p);
+                            streamData.setAll(biliInstance.getVideo().getVideoStreamData(videoData, p.getCid()));
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                    } catch (UserInterruptException | EndOfFileException ignore) {
-                        terminal.writer().printf("\33[48;5;1m[CANCELED]\33[0m%n");
-                        terminal.resume();
-                        return;
-                    }
+                    });
                 }
-                terminal.pause(true);
+                TerminalSelection<String> ts = new TerminalSelection<>(terminal, selectionCallbackMap, null);
+                ts.start();
+                while (!(ts.isDone() || ts.isCancelled())) {
+                    if(ts.isCancelled()) return;
+                }
+                if(ts.isCancelled()) return;
             }
-            LinkedList<Video> videoList = new LinkedList<>();
-            terminal.writer().println("■ Video Quality & encode: ");
+            final Video video = new Video();
+            LinkedHashMap<String, SelectionCallback<String>> selectionCallbackMap = new LinkedHashMap<>();
             for (Video obj : streamData.getDash().getVideo()) {
                 String codec = "Unknown", qn = "Unknown";
                 switch (obj.getCodecid()) {
@@ -381,6 +385,7 @@ public class Commands implements Runnable {
                         break;
                     case 13:
                         codec = "H.265";
+                        break;
                 }
                 switch (obj.getId()) {
                     case 6:
@@ -420,39 +425,19 @@ public class Commands implements Runnable {
                         qn = "8K";
                         break;
                 }
-                videoList.add(obj);
-                terminal.writer().printf("  %d. %s - %s%n", videoList.size(), qn, codec);
+                selectionCallbackMap.put(String.format("%s - %s",qn,codec),TargetObj -> {
+                    video.setAll(obj);
+                });
             }
-            Video video;
-            while (true) {
-                terminal.resume();
-                try {
-                    String line = lineReader.readLine(String.format("\33[48;5;3m[Ctrl+C to quit]\33[0m Select Video Quality [1-%d]: ", videoList.size()));
-                    if (!Objects.equals(line, "")) {
-                        try {
-                            int parse = Integer.parseInt(line);
-                            if (parse > videoList.size() || parse <= 0) {
-                                terminal.writer().printf("\33[1;31m%s\33[0m%n", "Invalid Input");
-                                continue;
-                            }
-                            terminal.pause(true);
-                            video = videoList.get(parse - 1);
-                            break;
-                        } catch (NumberFormatException e) {
-                            terminal.writer().printf("\33[1;31m%s\33[0m%n", "Invalid Input");
-                        }
-                    }
-                } catch (UserInterruptException | EndOfFileException ignore) {
-                    terminal.writer().printf("\33[48;5;1m[CANCELED]\33[0m%n");
-                    terminal.resume();
-                    return;
-                }
-                terminal.pause(false);
+            TerminalSelection<String> ts = new TerminalSelection<>(terminal, selectionCallbackMap, null);
+            ts.start();
+            while (!(ts.isDone() || ts.isCancelled())) {
+                if(ts.isCancelled()) return;
             }
-            Audio audio = null;
-            if (needAudioQuality) {
-                terminal.writer().println("■ Video Quality: ");
-                LinkedList<Audio> audioList = new LinkedList<>();
+            if(ts.isCancelled()) return;
+            final Audio audio = new Audio();
+            if(needAudioQuality) {
+                selectionCallbackMap.clear();
                 for (Audio obj : streamData.getDash().getAudio()) {
                     String qn = "Unknown";
                     switch (obj.getId()) {
@@ -471,176 +456,23 @@ public class Commands implements Runnable {
                         case 30251:
                             qn = "Hi-Res";
                     }
-                    audioList.add(obj);
-                    terminal.writer().printf("  %d. %s%n", audioList.size(), qn);
+                    selectionCallbackMap.put(String.format("%s",qn),TargetObj -> {
+                        audio.setAll(obj);
+                    });
                 }
-                while (true) {
-                    try {
-                        String line = lineReader.readLine(String.format("\33[48;5;3m[Ctrl+C to quit]\33[0m Select Audio Quality [i-%d]: ", videoList.size()));
-                        if (!Objects.equals(line, "")) {
-                            try {
-                                int parse = Integer.parseInt(line);
-                                if (parse > audioList.size() || parse <= 0) {
-                                    terminal.writer().printf("\33[1;31m%s\33[0m%n", "Invalid Input");
-                                    continue;
-                                }
-                                terminal.pause(true);
-                                audio = audioList.get(parse - 1);
-                                break;
-                            } catch (NumberFormatException e) {
-                                terminal.writer().printf("\33[1;31m%s\33[0m%n", "Invalid Input");
-                            }
-                        }
-                    } catch (UserInterruptException | EndOfFileException ignore) {
-                        terminal.writer().printf("\33[48;5;1m[CANCELED]\33[0m%n");
-                        terminal.resume();
-                        return;
-                    }
+                ts = new TerminalSelection<>(terminal, selectionCallbackMap, null);
+                ts.start();
+                while (!(ts.isDone() || ts.isCancelled())) {
+                    if(ts.isCancelled()) return;
                 }
+                if(ts.isCancelled()) return;
             } else {
                 int m = 0;
                 for (Audio obj : streamData.getDash().getAudio()) {
                     if (obj.getId() > m) {
-                        audio = obj;
+                        audio.setAll(obj);
                         m = audio.getId();
                     }
-                }
-            }
-            MultiThreadDownloader downloader = new MultiThreadDownloader();
-            LinkedList<DownloadInstance> instances = new LinkedList<>();
-            LinkedHashMap<String, String> header = new LinkedHashMap<>();
-            StringBuilder cookieStr = new StringBuilder();
-            for (Cookie cookie : Main.getDataManager().getData().getBilibili().getCookies().get("bilibili.com:443")) {
-                cookieStr.append(String.format("%s=%s;", cookie.name(), cookie.value()));
-            }
-            header.put("Cookie", cookieStr.toString());
-            terminal.pause();
-            //TODO 修改此处
-            final TerminalProcessProgress AudioProgressBar = new TerminalProcessProgress(lineReader.getTerminal());
-            final TerminalProcessProgress VideoProgressBar = new TerminalProcessProgress(lineReader.getTerminal());
-            instances.add(downloader.download(
-                    new URL(video.getBaseUrl()),
-                    new File(Main.getCachePath(), String.format("%d/%d.mp4", videoData.getAid(), cid)),
-                    new MultiThreadDownloader.Callback() {
-                        long total = 0;
-
-                        @Override
-                        public void onSuccess(long fileSize) {
-                            VideoProgressBar.update(fileSize);
-                            VideoProgressBar.close();
-                            VideoProgressBar.rerender();
-                        }
-
-                        @Override
-                        public void onFailure(Exception e, String cause) {
-                            VideoProgressBar.setFailed();
-                            VideoProgressBar.close();
-                            VideoProgressBar.rerender();
-                            e.printStackTrace();
-                        }
-
-                        @Override
-                        public void onStart(long fileSize) {
-                            VideoProgressBar.setTotalSize(fileSize);
-                            VideoProgressBar.rerender();
-                            //System.out.println(fileSize);
-                        }
-
-                        @Override
-                        public void newSpeedStat(long speed, boolean isStop) {
-                            if (isStop) return;
-                            total += speed;
-                            VideoProgressBar.update(total);
-                            VideoProgressBar.updateText(String.format("Speed: %s/s", Utils.byteToUnit(speed)));
-                            VideoProgressBar.rerender();
-                        }
-                    },
-                    header
-            ));
-            if (audio != null) {
-                instances.add(downloader.download(
-                        new URL(audio.getBaseUrl()),
-                        new File(Main.getCachePath(), String.format("%d/%d.m4a", videoData.getAid(), cid)),
-                        new MultiThreadDownloader.Callback() {
-                            long total = 0;
-
-                            @Override
-                            public void onSuccess(long fileSize) {
-                                AudioProgressBar.update(fileSize);
-                                AudioProgressBar.close();
-                            }
-
-                            @Override
-                            public void onFailure(Exception e, String cause) {
-                                AudioProgressBar.close();
-                                e.printStackTrace();
-                            }
-
-                            @Override
-                            public void onStart(long fileSize) {
-                                AudioProgressBar.setTotalSize(fileSize);
-                            }
-
-                            @Override
-                            public void newSpeedStat(long speed, boolean isStop) {
-                                if (isStop) return;
-                                total += speed;
-                                AudioProgressBar.update(total);
-                                AudioProgressBar.updateText(String.format("Speed: %s/s", Utils.byteToUnit(speed)));
-                            }
-                        },
-                        header
-                ));
-            }
-            NonBlockingReader reader = terminal.reader();
-            Thread thread = new Thread(() -> {
-                while (true) {
-                    boolean flag = true;
-                    for (DownloadInstance i : instances) {
-                        if (!i.isDone()) {
-                            flag = false;
-                            break;
-                        }
-                    }
-                    if (flag) {
-                        terminal.resume();
-                        reader.shutdown();
-                        return;
-                    }
-                }
-            });
-            thread.start();
-            while (true) {
-                try {
-                    reader.read();
-                    boolean flag = true;
-                    for (DownloadInstance i : instances) {
-                        if (!i.isDone()) {
-                            flag = false;
-                            break;
-                        }
-                    }
-                    if (flag) {
-                        AudioProgressBar.close();
-                        VideoProgressBar.close();
-                        terminal.resume();
-                        reader.shutdown();
-                        thread.stop();
-                        return;
-                    }
-                } catch (InterruptedIOException eof) {
-                    AudioProgressBar.close();
-                    VideoProgressBar.close();
-                    for (DownloadInstance i : instances) {
-                        i.stop();
-                    }
-                    terminal.writer().printf("\33[48;5;1m[CANCELED]\33[0m%n");
-                    reader.shutdown();
-                    thread.stop();
-                    terminal.resume();
-                    return;
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
                 }
             }
         }

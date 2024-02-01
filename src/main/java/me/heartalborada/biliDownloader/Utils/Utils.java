@@ -1,12 +1,14 @@
 package me.heartalborada.biliDownloader.Utils;
 
+import com.ibm.icu.lang.UCharacter;
+import com.ibm.icu.lang.UProperty;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
-
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -102,5 +104,19 @@ public class Utils {
             }
             throw e;
         }
+    }
+
+    public static int calculateHalfWidth(String text) {
+        int totalWidth = 0;
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            int t = UCharacter.getIntPropertyValue(c, UProperty.EAST_ASIAN_WIDTH);
+            if(UCharacter.EastAsianWidth.WIDE == t || UCharacter.EastAsianWidth.FULLWIDTH == t) {
+                totalWidth+=2;
+            } else {
+                totalWidth++;
+            }
+        }
+        return totalWidth;
     }
 }

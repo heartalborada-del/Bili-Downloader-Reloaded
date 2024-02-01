@@ -109,8 +109,6 @@ public class CliMain {
                     } catch (IllegalArgumentException | SystemRegistryImpl.UnknownCommandException e) {
                         terminal.writer().printf("\33[1;31m%s\33[0m%n", e.getMessage());
                     }
-                } else {
-                    terminal.writer().printf("%n");
                 }
             } catch (UserInterruptException ignore) {
             } catch (EndOfFileException e) {

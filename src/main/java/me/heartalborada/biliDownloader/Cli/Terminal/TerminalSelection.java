@@ -12,7 +12,6 @@ import org.jline.utils.*;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.jline.keymap.KeyMap.key;
 
 public class TerminalSelection<T> implements Selection<T> {
-    private final ConcurrentHashMap<T,SelectionCallback<T>> binds = new ConcurrentHashMap<>();
+    private final LinkedHashMap<T,SelectionCallback<T>> binds = new LinkedHashMap<>();
     volatile private boolean isClosed = false,isBegin = false,isDone = false;
     private final Display display;
     private final int width;

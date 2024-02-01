@@ -7,7 +7,6 @@ import java.util.List;
 
 @lombok.Data
 public class VideoData {
-
     private String bvid;
     private int aid;
     private int videos;

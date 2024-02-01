@@ -615,11 +615,11 @@ public class BiliInstance {
             }
         }
 
-        public VideoStreamData getVideoStreamData(VideoData data, int page) throws IOException {
+        public VideoStreamData getVideoStreamData(VideoData data, long cid) throws IOException {
             HttpUrl.Builder urlBuilder = Objects.requireNonNull(HttpUrl.parse("https://api.bilibili.com/x/player/wbi/playurl")).newBuilder();
             Map<String, String> param = new HashMap<>();
             param.put("bvid", data.getBvid());
-            param.put("cid", String.valueOf(data.getPages().get(page).getCid()));
+            param.put("cid", String.valueOf(cid));
             param.put("fourk", "1");
             param.put("fnval", "16");
             TreeMap<String, String> signedParam = signature.sign(param);

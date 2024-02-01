@@ -82,6 +82,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.ibm.icu</groupId>
+            <artifactId>icu4j</artifactId>
+            <version>74.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.28</version>
@@ -162,6 +168,7 @@
                             <Add-Opens>java.base/java.lang java.base/java.lang.reflect java.base/java.net java.base/jdk.internal.loader</Add-Opens>
                             <Add-Exports>java.base/jdk.internal.loader</Add-Exports>
                             <Builtin-Dependency>false</Builtin-Dependency>
+                            <Build-Timestamp>${maven.build.timestamp}</Build-Timestamp>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -264,6 +271,7 @@
                             <Add-Opens>java.base/java.lang java.base/java.lang.reflect java.base/java.net java.base/jdk.internal.loader</Add-Opens>
                             <Add-Exports>java.base/jdk.internal.loader</Add-Exports>
                             <Builtin-Dependency>true</Builtin-Dependency>
+                            <Build-Timestamp>${maven.build.timestamp}</Build-Timestamp>
                         </manifestEntries>
                     </archive>
                 </configuration>
