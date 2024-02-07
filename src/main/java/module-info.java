@@ -18,6 +18,8 @@ module me.heartalborada.biliDownloader {
     requires kotlinx.coroutines.core.jvm;
     requires org.fusesource.jansi;
     requires com.ibm.icu;
+    requires org.apache.commons.exec;
+    requires jave.core;
 
     opens me.heartalborada.biliDownloader.Bili.Beans to com.google.gson;
     opens me.heartalborada.biliDownloader.Utils.Managers.Beans to com.google.gson;

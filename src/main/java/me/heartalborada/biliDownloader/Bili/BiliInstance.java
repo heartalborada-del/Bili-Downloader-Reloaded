@@ -48,6 +48,7 @@ public class BiliInstance {
             36, 20, 34, 44, 52
     };
     private final SimpleCookieJar simpleCookieJar;
+    @Getter
     private final OkHttpClient client;
     @Getter
     private final Login login = new Login();

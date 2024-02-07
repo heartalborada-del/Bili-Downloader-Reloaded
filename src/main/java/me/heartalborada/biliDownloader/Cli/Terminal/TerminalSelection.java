@@ -43,7 +43,6 @@ public class TerminalSelection<T> implements Selection<T> {
         } else {
             this.headSuggestionString = headSuggestionString;
         }
-        //if(!terminal.paused()) terminal.pause();
     }
 
     @Override
@@ -96,40 +95,44 @@ public class TerminalSelection<T> implements Selection<T> {
                 keys.bind(KeyOperation.ENTER, String.valueOf((char) 13));
                 keys.bind(KeyOperation.CTRL_C, String.valueOf((char) 3));
                 while(!this.isClosed) {
-                    KeyOperation key = bindingReader.readBinding(keys);
-                    switch (key) {
-                        case UP:
-                            if (this.selectedNum.get() - 1 < 0) this.selectedNum.set(this.binds.size() - 1);
-                            else this.selectedNum.decrementAndGet();
-                            rerender();
-                            break;
-                        case DOWN:
-                            if (this.selectedNum.get() + 1 >= this.binds.size()) this.selectedNum.set(0);
-                            else this.selectedNum.incrementAndGet();
-                            rerender();
-                            break;
-                        case CTRL_C:
-                            this.footSuggestionString = new AttributedStringBuilder()
-                                    .style(new AttributedStyle().background(AttributedStyle.RED).foreground(0x0))
-                                    .append("Canceled")
-                                    .toAttributedString();
-                            rerender();
-                            this.isClosed = true;
-                            break;
-                        case ENTER:
-                            T Tobj = null;
-                            int i = 0;
-                            for (T obj : this.binds.keySet()) {
-                                if (i == this.selectedNum.get())
-                                    Tobj = obj;
-                                i++;
-                            }
-                            if (Tobj == null) break;
-                            rerender();
-                            this.binds.get(Tobj).onSelected(Tobj);
-                            this.isClosed = true;
-                            this.isDone = true;
-                            break;
+                    try {
+                        KeyOperation key = bindingReader.readBinding(keys);
+                        switch (key) {
+                            case UP:
+                                if (this.selectedNum.get() - 1 < 0) this.selectedNum.set(this.binds.size() - 1);
+                                else this.selectedNum.decrementAndGet();
+                                rerender();
+                                break;
+                            case DOWN:
+                                if (this.selectedNum.get() + 1 >= this.binds.size()) this.selectedNum.set(0);
+                                else this.selectedNum.incrementAndGet();
+                                rerender();
+                                break;
+                            case CTRL_C:
+                                this.footSuggestionString = new AttributedStringBuilder()
+                                        .style(new AttributedStyle().background(AttributedStyle.RED).foreground(0x0))
+                                        .append("Canceled")
+                                        .toAttributedString();
+                                rerender();
+                                this.isClosed = true;
+                                break;
+                            case ENTER:
+                                T Tobj = null;
+                                int i = 0;
+                                for (T obj : this.binds.keySet()) {
+                                    if (i == this.selectedNum.get())
+                                        Tobj = obj;
+                                    i++;
+                                }
+                                if (Tobj == null) break;
+                                rerender();
+                                this.binds.get(Tobj).onSelected(Tobj);
+                                this.isClosed = true;
+                                this.isDone = true;
+                                break;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             });

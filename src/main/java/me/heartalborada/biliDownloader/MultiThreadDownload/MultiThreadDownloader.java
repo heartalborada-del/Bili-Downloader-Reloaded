@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
 
 @SuppressWarnings("unused")
 public class MultiThreadDownloader {
@@ -30,7 +29,7 @@ public class MultiThreadDownloader {
         this.client = client.newBuilder().build();
     }
 
-    public DownloadInstance download(URL url, File filePath, Callback callback, LinkedHashMap<String,String> header) throws IOException {
+    public DownloadInstance download(URL url, File filePath, Callback callback) throws IOException {
         return new DownloadInstance(
                 10 * 1024 * 1024,
                 threadCount,
@@ -38,7 +37,7 @@ public class MultiThreadDownloader {
                 callback,
                 Path.of(filePath.toURI()),
                 new DownloadSpeedStat(callback::newSpeedStat),
-                header
+                client
         );
     }
 

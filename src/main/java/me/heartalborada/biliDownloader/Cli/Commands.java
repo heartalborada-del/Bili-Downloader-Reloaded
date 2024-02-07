@@ -17,9 +17,13 @@ import me.heartalborada.biliDownloader.Bili.Beans.VideoStream.VideoStreamData;
 import me.heartalborada.biliDownloader.Bili.BiliInstance;
 import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
 import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
+import me.heartalborada.biliDownloader.Cli.Terminal.TerminalProcessProgress;
 import me.heartalborada.biliDownloader.Cli.Terminal.TerminalSelection;
+import me.heartalborada.biliDownloader.FFmpeg.Convertor;
 import me.heartalborada.biliDownloader.Interfaces.SelectionCallback;
 import me.heartalborada.biliDownloader.Main;
+import me.heartalborada.biliDownloader.MultiThreadDownload.DownloadInstance;
+import me.heartalborada.biliDownloader.MultiThreadDownload.MultiThreadDownloader;
 import me.heartalborada.biliDownloader.Utils.NoWhiteQRCode;
 import org.jline.reader.LineReader;
 import org.jline.terminal.Terminal;
@@ -28,13 +32,18 @@ import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 import org.jline.utils.Display;
 import picocli.CommandLine;
+import ws.schild.jave.info.MultimediaInfo;
+import ws.schild.jave.progress.EncoderProgressListener;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -252,7 +261,7 @@ public class Commands implements Runnable {
                     list.add(new AttributedStringBuilder()
                             .style(new AttributedStyle().foreground(AttributedStyle.RED))
                             .append(String.format("UnknownID: %s", id)).toAttributedString());
-                    display.resize(list.size(), terminal.getWidth()-1);
+                    display.resize(list.size(), terminal.getWidth() - 1);
                     display.update(list, terminal.getSize().cursorPos(1, 0));
                     return;
                 }
@@ -273,7 +282,9 @@ public class Commands implements Runnable {
                 list.add(new AttributedStringBuilder().append(String.format("■ Owner: %s", videoData.getOwner().getName())).toAttributedString());
             } else {
                 list.add(new AttributedStringBuilder().append("■ Staffs: ").toAttributedString());
-                for (Staff obj : videoData.getStaff()) {list.add(new AttributedStringBuilder().append(String.format("  □ %s - %s", obj.getTitle(), obj.getName())).toAttributedString());}
+                for (Staff obj : videoData.getStaff()) {
+                    list.add(new AttributedStringBuilder().append(String.format("  □ %s - %s", obj.getTitle(), obj.getName())).toAttributedString());
+                }
             }
             if (!(videoData.getHonorReply().getHonor() == null)) {
                 list.add(new AttributedStringBuilder().append("■ Honors: ").toAttributedString());
@@ -335,7 +346,7 @@ public class Commands implements Runnable {
                     list.add(new AttributedStringBuilder()
                             .style(new AttributedStyle().foreground(AttributedStyle.RED))
                             .append(String.format("UnknownID: %s", id)).toAttributedString());
-                    display.resize(list.size(), terminal.getWidth()-1);
+                    display.resize(list.size(), terminal.getWidth() - 1);
                     display.update(list, terminal.getSize().cursorPos(1, 0));
                     return;
                 }
@@ -347,7 +358,6 @@ public class Commands implements Runnable {
                 DisplayResizeAndUpdate(list, display, terminal);
                 return;
             }
-
             final VideoStreamData streamData = new VideoStreamData();
             final Pages pageData = new Pages();
             if (videoData.getPages().size() == 1) {
@@ -359,7 +369,8 @@ public class Commands implements Runnable {
                     selectionCallbackMap.put(p.getPart(), TargetObj -> {
                         try {
                             pageData.setAll(p);
-                            streamData.setAll(biliInstance.getVideo().getVideoStreamData(videoData, p.getCid()));
+                            VideoStreamData v = biliInstance.getVideo().getVideoStreamData(videoData, p.getCid());
+                            streamData.setAll(v);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -368,9 +379,9 @@ public class Commands implements Runnable {
                 TerminalSelection<String> ts = new TerminalSelection<>(terminal, selectionCallbackMap, null);
                 ts.start();
                 while (!(ts.isDone() || ts.isCancelled())) {
-                    if(ts.isCancelled()) return;
+                    if (ts.isCancelled()) return;
                 }
-                if(ts.isCancelled()) return;
+                if (ts.isCancelled()) return;
             }
             final Video video = new Video();
             LinkedHashMap<String, SelectionCallback<String>> selectionCallbackMap = new LinkedHashMap<>();
@@ -425,18 +436,18 @@ public class Commands implements Runnable {
                         qn = "8K";
                         break;
                 }
-                selectionCallbackMap.put(String.format("%s - %s",qn,codec),TargetObj -> {
+                selectionCallbackMap.put(String.format("%s - %s", qn, codec), TargetObj -> {
                     video.setAll(obj);
                 });
             }
             TerminalSelection<String> ts = new TerminalSelection<>(terminal, selectionCallbackMap, null);
             ts.start();
             while (!(ts.isDone() || ts.isCancelled())) {
-                if(ts.isCancelled()) return;
+                if (ts.isCancelled()) return;
             }
-            if(ts.isCancelled()) return;
+            if (ts.isCancelled()) return;
             final Audio audio = new Audio();
-            if(needAudioQuality) {
+            if (needAudioQuality) {
                 selectionCallbackMap.clear();
                 for (Audio obj : streamData.getDash().getAudio()) {
                     String qn = "Unknown";
@@ -456,16 +467,17 @@ public class Commands implements Runnable {
                         case 30251:
                             qn = "Hi-Res";
                     }
-                    selectionCallbackMap.put(String.format("%s",qn),TargetObj -> {
+                    selectionCallbackMap.put(String.format("%s", qn), TargetObj -> {
                         audio.setAll(obj);
                     });
                 }
                 ts = new TerminalSelection<>(terminal, selectionCallbackMap, null);
                 ts.start();
                 while (!(ts.isDone() || ts.isCancelled())) {
-                    if(ts.isCancelled()) return;
+                    if (ts.isCancelled()) return;
                 }
-                if(ts.isCancelled()) return;
+                if (ts.isCancelled()) {
+                }
             } else {
                 int m = 0;
                 for (Audio obj : streamData.getDash().getAudio()) {
@@ -475,26 +487,107 @@ public class Commands implements Runnable {
                     }
                 }
             }
+            MultiThreadDownloader downloader = new MultiThreadDownloader(biliInstance.getClient());
+            download(downloader, new URL(video.getBaseUrl()), new File(Main.getCachePath(), String.format("%d/%d-%d-%d.m4s", videoData.getAid(), pageData.getCid(), pageData.getPage(), video.getId())));
+            download(downloader, new URL(audio.getBaseUrl()), new File(Main.getCachePath(), String.format("%d/%d-%d-%d.m4s", videoData.getAid(), pageData.getCid(), pageData.getPage(), audio.getId())));
+            try {
+                convert(
+                        new File(Main.getCachePath(), String.format("%d/%d-%d-%d.m4s", videoData.getAid(), pageData.getCid(), pageData.getPage(), video.getId())),
+                        new File(Main.getCachePath(), String.format("%d/%d-%d-%d.m4s", videoData.getAid(), pageData.getCid(), pageData.getPage(), audio.getId())),
+                        new File(Main.getDownloadPath(), String.format("%d/%d_p%d.mp4", videoData.getAid(), pageData.getCid(), pageData.getPage()-1))
+                );
+            } catch (IOException e) {
+                terminal.writer().println("\33[1;31mFFmpeg not install, skip convert!\33[0m");
+            }
         }
 
-        @CommandLine.Command(
-                name = "test"
-        )
-        void test() throws InterruptedException, IOException {
-            Display display = new Display(terminal, false);
-            ArrayList<AttributedString> QRDisplay = new ArrayList<>();
-            {
-                AttributedStringBuilder asb = new AttributedStringBuilder();
-                asb.style(new AttributedStyle().background(AttributedStyle.BLUE)).append("A");
-                QRDisplay.add(asb.toAttributedString());
+        private void convert(File v,File a,File o) throws IOException {
+            final boolean[] flag = new boolean[]{false};
+            final TerminalProcessProgress progress = new TerminalProcessProgress(terminal);
+            progress.setTotalSize(100);
+            final Thread m = Thread.currentThread();
+            Future<?> f = Convertor.doConvertor(
+                    v,a,o,
+                    new EncoderProgressListener() {
+                        @Override
+                        public void sourceInfo(MultimediaInfo info) {}
+
+                        @Override
+                        public void progress(int i) {
+                            progress.update(i);
+                            if(i==-1 || i==100) {
+                                progress.update(100);
+                                progress.close();
+                                flag[0] = true;
+                                m.interrupt();
+                            }
+                        }
+
+                        @Override
+                        public void message(String s) {}
+                    }
+            );
+            while (!progress.isClosed() || !f.isCancelled()) {
+                try {
+                    int ignore = terminal.reader().read();
+                } catch (InterruptedIOException ignore) {
+                    if (!f.isCancelled()) {
+                        f.cancel(true);
+                    }
+                    if (!flag[0]) {
+                        Display display = new Display(terminal,false);
+                        LinkedList<AttributedString> modify = new LinkedList<>() {{
+                            AttributedStringBuilder asb = new AttributedStringBuilder()
+                                    .style(new AttributedStyle().background(AttributedStyle.RED))
+                                    .append("Canceled");
+                            add(asb.toAttributedString());
+                        }};
+                        display.update(modify, terminal.getSize().cursorPos(1, 0));
+                    }
+                    break;
+                }
             }
-            {
-                AttributedStringBuilder asb = new AttributedStringBuilder();
-                asb.style(new AttributedStyle().background(AttributedStyle.RED)).append("B");
-                QRDisplay.add(asb.toAttributedString());
+        }
+        private void download(MultiThreadDownloader downloader, URL url, File filePath) throws IOException {
+            final Thread thread = Thread.currentThread();
+            DownloadInstance instance = downloader.download(url, filePath, new MultiThreadDownloader.Callback() {
+                final TerminalProcessProgress progress = new TerminalProcessProgress(terminal, "{stat} | {bar} | {percentage}% | {processed}/{total}");
+                long size = 0;
+
+                @Override
+                public void onSuccess(long fileSize) {
+                    progress.update(fileSize);
+                    progress.close();
+                    thread.interrupt();
+                }
+
+                @Override
+                public void onFailure(Exception e, String cause) {
+                    progress.setFailed();
+                    thread.interrupt();
+                }
+
+                @Override
+                public void onStart(long fileSize) {
+                    progress.setTotalSize(fileSize);
+                }
+
+                @Override
+                public void newSpeedStat(long speed, boolean isStop) {
+                    size += speed;
+                    progress.update(size);
+                }
+            });
+            while (!(instance.isDone() || instance.isFailed())) {
+                try {
+                    int ignore = terminal.reader().read();
+                } catch (InterruptedIOException ignore) {
+                    if (!(instance.isFailed() || instance.isDone())) {
+                        instance.stop();
+                    }
+                    break;
+                }
             }
-            display.resize(QRDisplay.size(), terminal.getWidth() == 0 ? 82 : terminal.getWidth());
-            display.update(QRDisplay, terminal.getSize().cursorPos(QRDisplay.size(), 0));
         }
     }
 }

@@ -12,5 +12,5 @@ public class Dash {
     private List<Video> video;
     private List<Audio> audio;
     private Dolby dolby;
-    private String flac;
+    private Flac flac;
 }

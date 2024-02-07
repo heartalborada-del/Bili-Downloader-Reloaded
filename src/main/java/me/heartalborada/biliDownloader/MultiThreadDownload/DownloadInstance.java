@@ -1,16 +1,20 @@
 package me.heartalborada.biliDownloader.MultiThreadDownload;
 
+import lombok.Getter;
+import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
 import me.heartalborada.biliDownloader.MultiThreadDownload.Speed.DownloadSpeedStat;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -25,9 +29,22 @@ public class DownloadInstance {
     private final MultiThreadDownloader.Callback callback;
     private final Path savePath;
     private final DownloadSpeedStat stat;
-    private final Map<String, String> header;
     private long THREAD_COUNTER = 0;
-    private boolean SUCCESS_FLAG = false;
+    private final OkHttpClient client;
+    @Getter
+    private volatile boolean isDone = false,isFailed = false;
+
+    private static class headerInterceptor implements Interceptor {
+        @NotNull
+        @Override
+        public Response intercept(@NotNull Chain chain) throws IOException {
+            Request.Builder b = chain.request().newBuilder();
+            b.addHeader("Origin", chain.request().url().host());
+            b.addHeader("Referer", chain.request().url().host());
+            b.addHeader("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.24");
+            return chain.proceed(b.build());
+        }
+    }
 
     public DownloadInstance(
             long threshold,
@@ -36,34 +53,30 @@ public class DownloadInstance {
             MultiThreadDownloader.Callback callback,
             Path savePath,
             DownloadSpeedStat stat,
-            LinkedHashMap<String, String> header
+            OkHttpClient client
     ) throws IOException {
         this.stat = stat;
         service = Executors.newFixedThreadPool(threadCount + 1);
         this.url = url;
         this.callback = callback;
         this.savePath = savePath;
-        File f = new File(savePath.toUri());
-        if (!f.getParentFile().exists())
-            f.getParentFile().mkdirs();
-        if (f.exists())
-            f.delete();
-        this.header = header;
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestProperty("Origin", "https://www.bilibili.com/");
-        conn.setRequestProperty("Referer", "https://www.bilibili.com");
-        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.24");
-        for (String k : header.keySet()) {
-            conn.setRequestProperty(k, header.get(k));
-        }
+        this.client = client.newBuilder().addInterceptor(new headerInterceptor()).build();
         long length = -1;
         boolean isAllowMultiThread = false;
-        if (!Objects.equals(conn.getHeaderField("Transfer-Encoding"), "chunked") && (Objects.equals(conn.getHeaderField("Accept-Ranges"), "bytes") || conn.getHeaderField("Content-Length") != null)) {
-            length = conn.getContentLength();
-            isAllowMultiThread = true;
+        try (Response resp = client.newCall(new Request.Builder().url(url).build()).execute()) {
+            if(!Objects.equals(resp.header("Transfer-Encoding"), "chunked") && (Objects.equals(resp.header("Accept-Ranges"), "bytes") || resp.header("Content-Length") != null))
+                isAllowMultiThread = true;
+            if(!Objects.equals(resp.header("Content-Length"),null))
+                length = Long.parseLong(resp.header("Content-Length"));
         }
-        conn.getInputStream().close();
         this.fileSize = length;
+        if(fileSize == -1)
+            throw new RuntimeException("Cannot get download file size.");
+        File f = new File(savePath.toUri());
+        if (!f.getParentFile().exists() && !f.getParentFile().mkdirs())
+            throw new IOException(String.format("Cannot make dictionaries: %s.",f.getPath()));
+        if (f.exists() && !f.delete())
+            throw new IOException(String.format("Cannot delete: %s.",f.getPath()));
         callback.onStart(fileSize);
         service.submit(new SaveTask());
         if (isAllowMultiThread && fileSize > threshold) {
@@ -84,14 +97,10 @@ public class DownloadInstance {
     }
 
     public boolean stop() {
+        if(!isDone) isFailed = true;
         stat.stop();
-        SUCCESS_FLAG = true;
         service.shutdownNow();
         return service.isShutdown();
-    }
-
-    public boolean isDone() {
-        return SUCCESS_FLAG;
     }
 
     class Task implements Runnable {
@@ -108,38 +117,23 @@ public class DownloadInstance {
         //@SuppressWarnings("all")
         @Override
         public void run() {
-            HttpURLConnection conn = null;
-            try {
-                conn = (HttpURLConnection) url.openConnection();
-                if (!(endPos < 0 || startPos < 0))
-                    conn.setRequestProperty("Range", String.format("bytes=%d-%d", startPos, endPos));
-                conn.setRequestProperty("Origin", "https://www.bilibili.com/");
-                conn.setRequestProperty("Referer", "https://www.bilibili.com");
-                conn.setRequestProperty("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.24");
-                for (String k : header.keySet()) {
-                    conn.setRequestProperty(k, header.get(k));
-                }
-                conn.connect();
+            Request req = new Request.Builder().url(url).header("Range", String.format("bytes=%d-%d", startPos, endPos)).build();
+            try (Response resp = client.newCall(req).execute()) {
+                if(resp.body() == null)
+                    throw new BadRequestDataException(resp.code(), "The url has no data");
                 BufferData buffData = new BufferData(serialNum, startPos, endPos);
-                byte[] data = new byte[1024 * 8];
                 int len;
-                InputStream inputStream = conn.getInputStream();
-                if (inputStream != null) {
-                    while ((len = inputStream.read(data)) > 0) {
-                        stat.add(len);
-                        buffData.write(data, 0, len);
-                    }
+                InputStream inputStream = resp.body().byteStream();
+                byte[] data = new byte[8*1024];
+                while ((len = inputStream.read(data)) > 0) {
+                    stat.add(len);
+                    buffData.write(data, 0, len);
                 }
-                if(!SUCCESS_FLAG)
-                    dataQueue.offer(buffData);
+                dataQueue.offer(buffData);
             } catch (Exception e) {
+                isFailed = true;
                 callback.onFailure(e, e.getMessage());
-                SUCCESS_FLAG = true;
                 service.shutdownNow();
-            } finally {
-                if (conn != null) {
-                    conn.disconnect();
-                }
             }
         }
     }
@@ -154,15 +148,14 @@ public class DownloadInstance {
                     if(buffData == null) continue;
                     randomAccessFile.seek(buffData.getStartPos());
                     randomAccessFile.write(buffData.array());
-                    //log.info(buffData.getStartPos() + "-" + buffData.getEndPos() + " 已写入到文件，写入长度：" + buffData.array().length);
                     writSize += buffData.array().length;
-                } while (writSize < fileSize && !SUCCESS_FLAG);
+                } while (writSize < fileSize);
+                isDone = true;
                 stat.stop();
                 callback.onSuccess(writSize);
-                SUCCESS_FLAG = true;
             } catch (IOException e) {
+                isFailed = true;
                 callback.onFailure(e, e.getMessage());
-                SUCCESS_FLAG = true;
                 service.shutdownNow();
             }
         }

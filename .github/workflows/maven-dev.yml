@@ -20,11 +20,11 @@ jobs:
           distribution: 'adopt'
           cache: maven
       - name: Get Build Version
-        run: echo bv=`echo "${{ GITHUB.SHA }}" | cut -b 1-8` >> "$GITHUB_ENV"
+        run: echo CI_ID=`echo "${{ GITHUB.SHA }}" | cut -b 1-8` >> "$GITHUB_ENV"
       - name: Build with Maven
-        run: mvn compile package -f pom.xml
+        run: mvn -P CI-Build compile package -f pom.xml
       - name: Upload to Actions
         uses: actions/upload-artifact@v4.3.0
         with:
-          name: "BDR-DEV-build-${{ env.bv }}"
+          name: "BDR-DEV-build-${{ env.ci_ID }}"
           path: "target/*.jar"

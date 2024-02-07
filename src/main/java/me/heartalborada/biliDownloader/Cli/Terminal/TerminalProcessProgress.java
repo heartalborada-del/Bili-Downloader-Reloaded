@@ -67,13 +67,14 @@ public class TerminalProcessProgress implements ProcessProgress {
 
     @Override
     public void update(long processed, long size) {
-        this.total =size;
+        this.total = size;
         update(processed);
     }
 
     @Override
     public void setFailed() {
         this.isFailed = true;
+        rerender();
         this.close();
     }
 
@@ -122,7 +123,7 @@ public class TerminalProcessProgress implements ProcessProgress {
     private String getStat() {
         if(this.isFailed && this.isClosed) {
             return "[Failed]";
-        } else if (this.isClosed && this.processed >= this.total) {
+        } else if (!this.isClosed && this.processed >= this.total) {
             return "[Done]";
         } else {
             return "[Processing]";
