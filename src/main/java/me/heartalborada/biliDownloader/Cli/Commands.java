@@ -20,6 +20,7 @@ import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
 import me.heartalborada.biliDownloader.Cli.Terminal.TerminalProcessProgress;
 import me.heartalborada.biliDownloader.Cli.Terminal.TerminalSelection;
 import me.heartalborada.biliDownloader.FFmpeg.Convertor;
+import me.heartalborada.biliDownloader.Interfaces.EncoderProgressListenerM;
 import me.heartalborada.biliDownloader.Interfaces.SelectionCallback;
 import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.MultiThreadDownload.DownloadInstance;
@@ -33,7 +34,6 @@ import org.jline.utils.AttributedStyle;
 import org.jline.utils.Display;
 import picocli.CommandLine;
 import ws.schild.jave.info.MultimediaInfo;
-import ws.schild.jave.progress.EncoderProgressListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -508,7 +508,16 @@ public class Commands implements Runnable {
             final Thread m = Thread.currentThread();
             Future<?> f = Convertor.doConvertor(
                     v,a,o,
-                    new EncoderProgressListener() {
+                    new EncoderProgressListenerM() {
+                        @Override
+                        public void onFailed(Throwable throwable) {
+                            //TODO output log
+                            flag[0] = true;
+                            progress.setFailed();
+                            progress.close();
+                            m.interrupt();
+                        }
+
                         @Override
                         public void sourceInfo(MultimediaInfo info) {}
 

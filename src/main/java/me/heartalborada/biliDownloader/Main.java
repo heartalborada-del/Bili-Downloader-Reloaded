@@ -3,6 +3,7 @@ package me.heartalborada.biliDownloader;
 import lombok.Getter;
 import me.heartalborada.biliDownloader.Bili.BiliInstance;
 import me.heartalborada.biliDownloader.Cli.CliMain;
+import me.heartalborada.biliDownloader.FFmpeg.Locator;
 import me.heartalborada.biliDownloader.Utils.LibrariesLoader;
 import me.heartalborada.biliDownloader.Utils.Managers.ConfigManager;
 import me.heartalborada.biliDownloader.Utils.Managers.DataManager;
@@ -65,6 +66,7 @@ public class Main {
                     dependencelist.add(new String[]{"com.google.zxing", "core", "3.5.2", ""});
                     dependencelist.add(new String[]{"com.ibm.icu", "icu4j", "74.2", ""});
                     dependencelist.add(new String[]{"org.apache.commons","commons-exec","1.4.0",""});
+                    dependencelist.add(new String[]{"org.slf4j","slf4j-api","2.0.11",""});
                 }
             }
             for (String[] strs : dependencelist) {
@@ -96,6 +98,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException {
+        new Locator("");
         CliMain.main(args);
     }
 }

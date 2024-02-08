@@ -102,8 +102,7 @@ public class TerminalProcessProgress implements ProcessProgress {
 
     private void updateProgresses() {
         if(lock.tryLock()){
-            if(isClosed || isFailed)
-                return;
+            if(isClosed) return;
             String output = this.ProgressStyle
                     .replace("{bar}", Utils.generateProgressBar(
                             '█','░',10,this.total,this.processed
@@ -121,7 +120,7 @@ public class TerminalProcessProgress implements ProcessProgress {
     }
 
     private String getStat() {
-        if(this.isFailed && this.isClosed) {
+        if(this.isFailed) {
             return "[Failed]";
         } else if (!this.isClosed && this.processed >= this.total) {
             return "[Done]";

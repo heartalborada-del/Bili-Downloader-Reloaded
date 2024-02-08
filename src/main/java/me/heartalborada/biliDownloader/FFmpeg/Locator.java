@@ -8,6 +8,7 @@ import java.util.LinkedList;
 
 public class Locator implements ProcessLocator {
     private String findFFMPEG(String UserProvideFFMPEGPath) throws IOException {
+        String suffix = System.getProperty("os.name").toLowerCase().contains("windows") ? "exe" : "";
         //Check System is installed FFMPEG
         {
             ProcessBuilder processBuilder = new ProcessBuilder(new LinkedList<>(){{
@@ -17,14 +18,19 @@ public class Locator implements ProcessLocator {
             try {
                 Process proc = processBuilder.start();
                 if (proc.waitFor() == 0) {
-                    return "ffmpeg";
+                    String pathSeparator = System.getProperty("os.name").startsWith("Windows") ? ";" : ":";
+                    String[] paths = System.getenv("PATH").split(pathSeparator);
+                    for (String p : paths) {
+                        File f = new File(p,suffix.isEmpty() ? "ffmpeg" :"ffmpeg.exe");
+                        if(f.exists()) {
+                            return f.getPath();
+                        }
+                    }
                 }
             } catch (IOException | IllegalThreadStateException | InterruptedException ignore) {}
         }
         //Check User Provide FFMPEG
         {
-            String os = System.getProperty("os.name").toLowerCase();
-            String suffix = os.contains("windows") ? "exe" : "";
             ProcessBuilder processBuilder = new ProcessBuilder(new LinkedList<>(){{
                 add(new File(UserProvideFFMPEGPath, suffix.isEmpty() ? "ffmpeg" :"ffmpeg.exe").getPath());
                 add("-version");

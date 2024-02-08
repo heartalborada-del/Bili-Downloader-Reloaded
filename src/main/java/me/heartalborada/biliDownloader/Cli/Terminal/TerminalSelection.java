@@ -5,6 +5,7 @@ import me.heartalborada.biliDownloader.Cli.Enums.KeyOperation;
 import me.heartalborada.biliDownloader.Interfaces.Selection;
 import me.heartalborada.biliDownloader.Interfaces.SelectionCallback;
 import org.jline.keymap.KeyMap;
+import org.jline.terminal.Attributes;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.impl.DumbTerminal;
 import org.jline.utils.*;
@@ -30,11 +31,13 @@ public class TerminalSelection<T> implements Selection<T> {
     private volatile AttributedString footSuggestionString;
     private final AttributedString headSuggestionString;
     volatile private Thread runningThread;
+    private final Attributes attr;
     public TerminalSelection(Terminal terminal, Map<T,SelectionCallback<T>> binds,AttributedString headSuggestionString) {
         this.binds.putAll(binds);
         this.width = terminal.getWidth() == 0 ? 20 : terminal.getWidth();
         this.terminal = terminal;
         this.display = new Display(terminal,false);
+        this.attr = terminal.enterRawMode();
         if(Objects.equals(headSuggestionString,null)) {
             AttributedStringBuilder builder = new AttributedStringBuilder()
                     .style(new AttributedStyle().background(AttributedStyle.YELLOW).foreground(AttributedStyle.BLACK))
@@ -75,6 +78,8 @@ public class TerminalSelection<T> implements Selection<T> {
     @SneakyThrows
     @Override
     public void start() {
+        terminal.puts(InfoCmp.Capability.keypad_xmit,new Object());
+        terminal.flush();
         terminal.handle(Terminal.Signal.INT,signal -> {
             if(runningThread != null) {
                 runningThread.interrupt();
@@ -94,6 +99,7 @@ public class TerminalSelection<T> implements Selection<T> {
                 keys.bind(KeyOperation.ENTER,key(terminal,InfoCmp.Capability.key_enter));
                 keys.bind(KeyOperation.ENTER, String.valueOf((char) 13));
                 keys.bind(KeyOperation.CTRL_C, String.valueOf((char) 3));
+                keys.setNomatch(KeyOperation.UNKNOWN);
                 while(!this.isClosed) {
                     try {
                         KeyOperation key = bindingReader.readBinding(keys);
@@ -114,7 +120,7 @@ public class TerminalSelection<T> implements Selection<T> {
                                         .append("Canceled")
                                         .toAttributedString();
                                 rerender();
-                                this.isClosed = true;
+                                close();
                                 break;
                             case ENTER:
                                 T Tobj = null;
@@ -127,8 +133,8 @@ public class TerminalSelection<T> implements Selection<T> {
                                 if (Tobj == null) break;
                                 rerender();
                                 this.binds.get(Tobj).onSelected(Tobj);
-                                this.isClosed = true;
                                 this.isDone = true;
+                                close();
                                 break;
                         }
                     } catch (Exception e) {
@@ -164,8 +170,8 @@ public class TerminalSelection<T> implements Selection<T> {
                                 if (Tobj == null) break;
                                 this.binds.get(Tobj).onSelected(Tobj);
                                 rerender();
-                                this.isClosed = true;
                                 this.isDone = true;
+                                close();
                             } else {
                                 this.footSuggestionString = new AttributedStringBuilder()
                                         .style(new AttributedStyle().background(0XDC143C).foreground(0x0))
@@ -185,7 +191,7 @@ public class TerminalSelection<T> implements Selection<T> {
                                 .append("Canceled")
                                 .toAttributedString();
                         rerender();
-                        this.isClosed = true;
+                        close();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -235,7 +241,7 @@ public class TerminalSelection<T> implements Selection<T> {
 
     @Override
     public boolean cancel() {
-        this.service.shutdownNow();
+        close();
         return service.isShutdown() && service.isTerminated();
     }
 
@@ -247,5 +253,14 @@ public class TerminalSelection<T> implements Selection<T> {
     @Override
     public boolean isDone() {
         return isDone;
+    }
+
+    @Override
+    public void close() {
+        this.service.shutdownNow();
+        this.isClosed = true;
+        terminal.puts(InfoCmp.Capability.keypad_local,new Object());
+        terminal.setAttributes(attr);
+        terminal.flush();
     }
 }

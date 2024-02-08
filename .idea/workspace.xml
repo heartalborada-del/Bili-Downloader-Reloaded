@@ -7,37 +7,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":recycle: rewrite: CLI QR Login has Rewritten">
-      <change afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Beans/VideoStream/Sub/Flac.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/FFmpeg/Convertor.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/FFmpeg/Locator.java" afterDir="false" />
+    <list default="true" id="1a6f46e4-2c97-497d-8d31-3c43cee3ff1a" name="更改" comment=":recycle: rewrite: ALL CLI FUNCTION">
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Interfaces/EncoderProgressListenerM.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.github/workflows/maven-dev.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/maven-dev.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/Main.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.MD" beforeDir="false" afterPath="$PROJECT_DIR$/README.MD" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Beans/VideoStream/Sub/Dash.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/Beans/VideoStream/Sub/Dash.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/BiliInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/BiliInstance.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Commands.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Enums/KeyOperation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Enums/KeyOperation.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalProcessProgress.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalProcessProgress.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalSelection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Cli/Terminal/TerminalSelection.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/FFmpeg/Convertor.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/FFmpeg/Convertor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/FFmpeg/Locator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/FFmpeg/Locator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Interfaces/Selection.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Interfaces/Selection.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/DownloadInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/DownloadInstance.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/MultiThreadDownloader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/MultiThreadDownload/MultiThreadDownloader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/UI/HelloApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/UI/HelloApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/UI/HelloController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/UI/HelloController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/LibrariesLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/LibrariesLoader.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/Beans/ConfigInstance.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Managers/Beans/ConfigInstance.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Okhttp/SimpleCookieJar.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Okhttp/SimpleCookieJar.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Utils/Utils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/module-info.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/module-info.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/me/heartalborada/biliDownloader/hello-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/me/heartalborada/biliDownloader/hello-view.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,8 +35,8 @@
       <list>
         <option value="Kotlin Class" />
         <option value="Enum" />
-        <option value="Interface" />
         <option value="AnnotationType" />
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -77,7 +60,7 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="ProjectErrors" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
@@ -91,46 +74,46 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "JAR 应用程序.Jar.executor": "Run",
-    "JAR 应用程序.未命名.executor": "Run",
-    "Maven.Bili-Downloader-Reloaded [clean].executor": "Run",
-    "Maven.Bili-Downloader-Reloaded [install].executor": "Run",
-    "Maven.Bili-Downloader-Reloaded [kotlin:compile...].executor": "Run",
-    "Maven.Bili-Downloader-Reloaded [mvn,package].executor": "Run",
-    "Maven.Bili-Downloader-Reloaded [org.jetbrains.kotlin:kotlin-maven-plugin:1.8.0:compile].executor": "Run",
-    "Maven.Bili-Downloader-Reloaded [package].executor": "Run",
-    "Maven.Bili-Downloader-Reloaded [test].executor": "Run",
-    "Maven.Bili-Downloader-Reloaded [verify].executor": "Run",
-    "Maven.Bili-Downloader-Reloaded [versions:revert].executor": "Run",
-    "Maven.Bili-Downloader-Reloaded [versions:set...].executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "deletionFromPopupRequiresConfirmation": "false",
-    "extract.method.default.visibility": "private",
-    "git-widget-placeholder": "dev",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/heart/IdeaProjects/Bili-Downloader-Reloaded/target/Bili-Downloader-Reloaded-1.0-SNAPSHOT-shaded.jar",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "模块",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true",
-    "应用程序.CliMain.executor": "Run",
-    "应用程序.Main.executor": "Run",
-    "远程 JVM 调试.Remote.executor": "Debug"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;JAR 应用程序.Jar.executor&quot;: &quot;Run&quot;,
+    &quot;JAR 应用程序.未命名.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Bili-Downloader-Reloaded [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Bili-Downloader-Reloaded [install].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Bili-Downloader-Reloaded [kotlin:compile...].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Bili-Downloader-Reloaded [mvn,package].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Bili-Downloader-Reloaded [org.jetbrains.kotlin:kotlin-maven-plugin:1.8.0:compile].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Bili-Downloader-Reloaded [package].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Bili-Downloader-Reloaded [test].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Bili-Downloader-Reloaded [verify].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Bili-Downloader-Reloaded [versions:revert].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.Bili-Downloader-Reloaded [versions:set...].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;deletionFromPopupRequiresConfirmation&quot;: &quot;false&quot;,
+    &quot;extract.method.default.visibility&quot;: &quot;private&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/heart/IdeaProjects/Bili-Downloader-Reloaded/target/Bili-Downloader-Reloaded-1.0-SNAPSHOT-shaded.jar&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;模块&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;,
+    &quot;应用程序.CliMain.executor&quot;: &quot;Run&quot;,
+    &quot;应用程序.Main.executor&quot;: &quot;Debug&quot;,
+    &quot;远程 JVM 调试.Remote.executor&quot;: &quot;Debug&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CreateClassDialog.RecentsKey">
       <recent name="me.heartalborada.biliDownloader.Bili.Beans.VideoStream.Sub" />
@@ -147,7 +130,7 @@
       <recent name="C:\Users\heart\IdeaProjects\Bili-Downloader-Reloaded\src\main\java\me\heartalborada\biliDownloader\utils" />
     </key>
   </component>
-  <component name="RunManager" selected="应用程序.Main">
+  <component name="RunManager" selected="远程 JVM 调试.Remote">
     <configuration name="CliMain" type="Application" factoryName="Application" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="me.heartalborada.biliDownloader.Cli.CliMain" />
       <module name="Bili-Downloader-Reloaded" />
@@ -233,10 +216,10 @@
       <option name="SERVER_MODE" value="false" />
       <option name="SHMEM_ADDRESS" />
       <option name="HOST" value="localhost" />
-      <option name="PORT" value="5005" />
+      <option name="PORT" value="5000" />
       <option name="AUTO_RESTART" value="false" />
       <RunnerSettings RunnerId="Debug">
-        <option name="DEBUG_PORT" value="5005" />
+        <option name="DEBUG_PORT" value="5000" />
         <option name="LOCAL" value="false" />
       </RunnerSettings>
       <method v="2" />
@@ -340,7 +323,9 @@
       <workItem from="1707023565385" duration="8875000" />
       <workItem from="1707119926272" duration="170000" />
       <workItem from="1707199016227" duration="833000" />
-      <workItem from="1707315734368" duration="4676000" />
+      <workItem from="1707315734368" duration="5598000" />
+      <workItem from="1707363381798" duration="2172000" />
+      <workItem from="1707366075994" duration="6630000" />
     </task>
     <task id="LOCAL-00001" summary=":sparkles: new project!">
       <option name="closed" value="true" />
@@ -670,7 +655,15 @@
       <option name="project" value="LOCAL" />
       <updated>1706699326186</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary=":recycle: rewrite: ALL CLI FUNCTION">
+      <option name="closed" value="true" />
+      <created>1707321317813</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1707321317813</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -722,7 +715,8 @@
     <MESSAGE value=":art: feat: TerminalSelection is usable" />
     <MESSAGE value=":art: fixed: TerminalSelection cannot handle the ^C event" />
     <MESSAGE value=":recycle: rewrite: CLI QR Login has Rewritten" />
-    <option name="LAST_COMMIT_MESSAGE" value=":recycle: rewrite: CLI QR Login has Rewritten" />
+    <MESSAGE value=":recycle: rewrite: ALL CLI FUNCTION" />
+    <option name="LAST_COMMIT_MESSAGE" value=":recycle: rewrite: ALL CLI FUNCTION" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -746,9 +740,9 @@
           <option name="timeStamp" value="30" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>jar://$MAVEN_REPOSITORY$/ws/schild/jave-core/3.4.0/jave-core-3.4.0-sources.jar!/ws/schild/jave/process/ProcessWrapper.java</url>
-          <line>101</line>
-          <option name="timeStamp" value="49" />
+          <url>file://$PROJECT_DIR$/src/main/java/me/heartalborada/biliDownloader/Bili/BiliInstance.java</url>
+          <line>109</line>
+          <option name="timeStamp" value="32" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

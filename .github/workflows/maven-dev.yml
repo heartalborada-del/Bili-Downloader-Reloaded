@@ -26,5 +26,5 @@ jobs:
       - name: Upload to Actions
         uses: actions/upload-artifact@v4.3.0
         with:
-          name: "BDR-DEV-build-${{ env.ci_ID }}"
+          name: "BDR-DEV-build-${{ env.CI_ID }}"
           path: "target/*.jar"

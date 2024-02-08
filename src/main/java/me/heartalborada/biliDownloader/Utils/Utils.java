@@ -2,9 +2,7 @@ package me.heartalborada.biliDownloader.Utils;
 
 import com.ibm.icu.lang.UCharacter;
 import com.ibm.icu.lang.UProperty;
-import me.heartalborada.biliDownloader.Main;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,7 +12,6 @@ import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
 
 public class Utils {
     public static String StrArrToSting(String[] arr) {
@@ -114,27 +111,12 @@ public class Utils {
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
             int t = UCharacter.getIntPropertyValue(c, UProperty.EAST_ASIAN_WIDTH);
-            if(UCharacter.EastAsianWidth.WIDE == t || UCharacter.EastAsianWidth.FULLWIDTH == t) {
-                totalWidth+=2;
+            if (UCharacter.EastAsianWidth.WIDE == t || UCharacter.EastAsianWidth.FULLWIDTH == t) {
+                totalWidth += 2;
             } else {
                 totalWidth++;
             }
         }
         return totalWidth;
-    }
-    public static boolean chkFFmpeg() {
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder();
-            Map<String,String> environment = processBuilder.environment();
-            String separator = (System.getProperty("os.name").toLowerCase().contains("win")) ? ";" : ":";
-            Process process;
-            if(Main.getConfigManager().getConfig() != null && Main.getConfigManager().getConfig().getFFmpegPath().trim().isEmpty())
-                process = Runtime.getRuntime().exec("ffmpeg -version",new String[]{String.format("PATH=%s",Main.getConfigManager().getConfig().getFFmpegPath() + separator + environment.get("PATH"))});
-            else process = Runtime.getRuntime().exec("ffmpeg -version");
-            int exitCode = process.waitFor();
-            return exitCode == 0;
-        } catch (InterruptedException | IOException ignore) {
-            return false;
-        }
     }
 }
