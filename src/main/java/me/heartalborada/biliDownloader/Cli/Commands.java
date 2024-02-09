@@ -27,11 +27,9 @@ import me.heartalborada.biliDownloader.MultiThreadDownload.DownloadInstance;
 import me.heartalborada.biliDownloader.MultiThreadDownload.MultiThreadDownloader;
 import me.heartalborada.biliDownloader.Utils.NoWhiteQRCode;
 import org.jline.reader.LineReader;
+import org.jline.terminal.Attributes;
 import org.jline.terminal.Terminal;
-import org.jline.utils.AttributedString;
-import org.jline.utils.AttributedStringBuilder;
-import org.jline.utils.AttributedStyle;
-import org.jline.utils.Display;
+import org.jline.utils.*;
 import picocli.CommandLine;
 import ws.schild.jave.info.MultimediaInfo;
 
@@ -494,20 +492,20 @@ public class Commands implements Runnable {
                 convert(
                         new File(Main.getCachePath(), String.format("%d/%d-%d-%d.m4s", videoData.getAid(), pageData.getCid(), pageData.getPage(), video.getId())),
                         new File(Main.getCachePath(), String.format("%d/%d-%d-%d.m4s", videoData.getAid(), pageData.getCid(), pageData.getPage(), audio.getId())),
-                        new File(Main.getDownloadPath(), String.format("%d/%d_p%d.mp4", videoData.getAid(), pageData.getCid(), pageData.getPage()-1))
+                        new File(Main.getDownloadPath(), String.format("%d/%d_p%d.mp4", videoData.getAid(), pageData.getCid(), pageData.getPage() - 1))
                 );
             } catch (IOException e) {
                 terminal.writer().println("\33[1;31mFFmpeg not install, skip convert!\33[0m");
             }
         }
 
-        private void convert(File v,File a,File o) throws IOException {
+        private void convert(File v, File a, File o) throws IOException {
             final boolean[] flag = new boolean[]{false};
             final TerminalProcessProgress progress = new TerminalProcessProgress(terminal);
             progress.setTotalSize(100);
             final Thread m = Thread.currentThread();
             Future<?> f = Convertor.doConvertor(
-                    v,a,o,
+                    v, a, o,
                     new EncoderProgressListenerM() {
                         @Override
                         public void onFailed(Throwable throwable) {
@@ -519,12 +517,13 @@ public class Commands implements Runnable {
                         }
 
                         @Override
-                        public void sourceInfo(MultimediaInfo info) {}
+                        public void sourceInfo(MultimediaInfo info) {
+                        }
 
                         @Override
                         public void progress(int i) {
                             progress.update(i);
-                            if(i==-1 || i==100) {
+                            if (i == -1 || i == 100) {
                                 progress.update(100);
                                 progress.close();
                                 flag[0] = true;
@@ -533,9 +532,13 @@ public class Commands implements Runnable {
                         }
 
                         @Override
-                        public void message(String s) {}
+                        public void message(String s) {
+                        }
                     }
             );
+            Attributes attr = terminal.enterRawMode();
+            terminal.puts(InfoCmp.Capability.keypad_xmit, new Object());
+            terminal.flush();
             while (!progress.isClosed() || !f.isCancelled()) {
                 try {
                     int ignore = terminal.reader().read();
@@ -544,7 +547,7 @@ public class Commands implements Runnable {
                         f.cancel(true);
                     }
                     if (!flag[0]) {
-                        Display display = new Display(terminal,false);
+                        Display display = new Display(terminal, false);
                         LinkedList<AttributedString> modify = new LinkedList<>() {{
                             AttributedStringBuilder asb = new AttributedStringBuilder()
                                     .style(new AttributedStyle().background(AttributedStyle.RED))
@@ -556,7 +559,11 @@ public class Commands implements Runnable {
                     break;
                 }
             }
+            terminal.puts(InfoCmp.Capability.keypad_local, new Object());
+            if(attr != null) terminal.setAttributes(attr);
+            terminal.flush();
         }
+
         private void download(MultiThreadDownloader downloader, URL url, File filePath) throws IOException {
             final Thread thread = Thread.currentThread();
             DownloadInstance instance = downloader.download(url, filePath, new MultiThreadDownloader.Callback() {
@@ -573,6 +580,7 @@ public class Commands implements Runnable {
                 @Override
                 public void onFailure(Exception e, String cause) {
                     progress.setFailed();
+                    progress.close();
                     thread.interrupt();
                 }
 
@@ -587,6 +595,9 @@ public class Commands implements Runnable {
                     progress.update(size);
                 }
             });
+            Attributes attr = terminal.enterRawMode();
+            terminal.puts(InfoCmp.Capability.keypad_xmit, new Object());
+            terminal.flush();
             while (!(instance.isDone() || instance.isFailed())) {
                 try {
                     int ignore = terminal.reader().read();
@@ -597,6 +608,9 @@ public class Commands implements Runnable {
                     break;
                 }
             }
+            terminal.puts(InfoCmp.Capability.keypad_local, new Object());
+            if(attr != null) terminal.setAttributes(attr);
+            terminal.flush();
         }
     }
 }

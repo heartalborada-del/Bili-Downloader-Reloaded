@@ -25,12 +25,11 @@ import static me.heartalborada.biliDownloader.Utils.Utils.getTargetClassModifier
 
 public class CliMain {
     private static final String welcome = "\n" +
-            "██████╗ ██████╗ ██████╗      ██████╗██╗     ██╗\n" +
-            "██╔══██╗██╔══██╗██╔══██╗    ██╔════╝██║     ██║\n" +
-            "██████╔╝██║  ██║██████╔╝    ██║     ██║     ██║\n" +
-            "██╔══██╗██║  ██║██╔══██╗    ██║     ██║     ██║\n" +
-            "██████╔╝██████╔╝██║  ██║    ╚██████╗███████╗██║\n" +
-            "╚═════╝ ╚═════╝ ╚═╝  ╚═╝     ╚═════╝╚══════╝╚═╝\n" +
+            "   ___    ___    ___        _____   __    ____\n" +
+            "  / _ )  / _ \\  / _ \\      / ___/  / /   /  _/\n" +
+            " / _  | / // / / , _/     / /__   / /__ _/ /  \n" +
+            "/____/ /____/ /_/|_|      \\___/  /____//___/  \n" +
+            "\n"+
             "Type Ctrl+D or type \"exit\" to quit.          \n";
     @Getter
     private static final Terminal terminal;

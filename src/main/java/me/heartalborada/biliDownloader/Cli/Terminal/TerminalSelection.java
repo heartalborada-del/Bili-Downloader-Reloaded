@@ -20,25 +20,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.jline.keymap.KeyMap.key;
 
 public class TerminalSelection<T> implements Selection<T> {
-    private final LinkedHashMap<T,SelectionCallback<T>> binds = new LinkedHashMap<>();
-    volatile private boolean isClosed = false,isBegin = false,isDone = false;
+    private final LinkedHashMap<T, SelectionCallback<T>> binds = new LinkedHashMap<>();
     private final Display display;
     private final int width;
     private final ExecutorService service = Executors.newSingleThreadExecutor();
     private final AtomicInteger selectedNum = new AtomicInteger(-1);
     private final LinkedList<Character> characters = new LinkedList<>();
     private final Terminal terminal;
-    private volatile AttributedString footSuggestionString;
     private final AttributedString headSuggestionString;
-    volatile private Thread runningThread;
     private final Attributes attr;
-    public TerminalSelection(Terminal terminal, Map<T,SelectionCallback<T>> binds,AttributedString headSuggestionString) {
+    volatile private boolean isClosed = false, isBegin = false, isDone = false;
+    private volatile AttributedString footSuggestionString;
+    volatile private Thread runningThread;
+
+    public TerminalSelection(Terminal terminal, Map<T, SelectionCallback<T>> binds, AttributedString headSuggestionString) {
         this.binds.putAll(binds);
         this.width = terminal.getWidth() == 0 ? 20 : terminal.getWidth();
         this.terminal = terminal;
-        this.display = new Display(terminal,false);
+        this.display = new Display(terminal, false);
         this.attr = terminal.enterRawMode();
-        if(Objects.equals(headSuggestionString,null)) {
+        if (Objects.equals(headSuggestionString, null)) {
             AttributedStringBuilder builder = new AttributedStringBuilder()
                     .style(new AttributedStyle().background(AttributedStyle.YELLOW).foreground(AttributedStyle.BLACK))
                     .append("You can press Ctrl+C to cancel.");
@@ -50,15 +51,15 @@ public class TerminalSelection<T> implements Selection<T> {
 
     @Override
     public void bind(T obj, SelectionCallback<T> cb) {
-        this.binds.put(obj,cb);
+        this.binds.put(obj, cb);
     }
 
     @Override
     public void rerender() {
         List<AttributedString> c = new LinkedList<>();
-        if(headSuggestionString != null) c.add(headSuggestionString);
-        if(this.terminal instanceof DumbTerminal) {
-            c.addAll(generateSequenceCollection(true,this.binds.keySet(),null));
+        if (headSuggestionString != null) c.add(headSuggestionString);
+        if (this.terminal instanceof DumbTerminal) {
+            c.addAll(generateSequenceCollection(true, this.binds.keySet(), null));
             StringBuilder stringBuilder = new StringBuilder(this.characters.size());
             for (Character character : this.characters) stringBuilder.append(character);
             AttributedStringBuilder builder = new AttributedStringBuilder()
@@ -68,39 +69,39 @@ public class TerminalSelection<T> implements Selection<T> {
                     .append(stringBuilder.toString());
             c.add(builder.toAttributedString());
         } else {
-            c.addAll(generateSequenceCollection(false, binds.keySet(),getSetElement(binds.keySet(),selectedNum.get())));
+            c.addAll(generateSequenceCollection(false, binds.keySet(), getSetElement(binds.keySet(), selectedNum.get())));
         }
-        if(this.footSuggestionString != null) c.add(this.footSuggestionString);
-        this.display.resize(c.size(),width);
-        this.display.update(c,terminal.getSize().cursorPos(c.size(),0));
+        if (this.footSuggestionString != null) c.add(this.footSuggestionString);
+        this.display.resize(c.size(), width);
+        this.display.update(c, terminal.getSize().cursorPos(c.size(), 0));
     }
 
     @SneakyThrows
     @Override
     public void start() {
-        terminal.puts(InfoCmp.Capability.keypad_xmit,new Object());
+        terminal.puts(InfoCmp.Capability.keypad_xmit, new Object());
         terminal.flush();
-        terminal.handle(Terminal.Signal.INT,signal -> {
-            if(runningThread != null) {
+        terminal.handle(Terminal.Signal.INT, signal -> {
+            if (runningThread != null) {
                 runningThread.interrupt();
                 runningThread = null;
             }
         });
-        if(isBegin) return;
+        if (isBegin) return;
         this.isBegin = true;
         rerender();
-        if(!(this.terminal instanceof DumbTerminal)) {
+        if (!(this.terminal instanceof DumbTerminal)) {
             this.service.submit(() -> {
                 this.runningThread = Thread.currentThread();
                 KeyMap<KeyOperation> keys = new KeyMap<>();
                 BindingReaderM bindingReader = new BindingReaderM(terminal.reader());
-                keys.bind(KeyOperation.UP,key(terminal, InfoCmp.Capability.key_up));
-                keys.bind(KeyOperation.DOWN,key(terminal, InfoCmp.Capability.key_down));
-                keys.bind(KeyOperation.ENTER,key(terminal,InfoCmp.Capability.key_enter));
+                keys.bind(KeyOperation.UP, key(terminal, InfoCmp.Capability.key_up));
+                keys.bind(KeyOperation.DOWN, key(terminal, InfoCmp.Capability.key_down));
+                keys.bind(KeyOperation.ENTER, key(terminal, InfoCmp.Capability.key_enter));
                 keys.bind(KeyOperation.ENTER, String.valueOf((char) 13));
                 keys.bind(KeyOperation.CTRL_C, String.valueOf((char) 3));
                 keys.setNomatch(KeyOperation.UNKNOWN);
-                while(!this.isClosed) {
+                while (!this.isClosed) {
                     try {
                         KeyOperation key = bindingReader.readBinding(keys);
                         switch (key) {
@@ -150,11 +151,11 @@ public class TerminalSelection<T> implements Selection<T> {
                     try {
                         int i = nonBlockingReader.read();
                         //Press Backspace
-                        if(i==8) {
+                        if (i == 8) {
                             this.characters.removeLast();
                             rerender();
                         }//Press Enter
-                        else if (i==13) {
+                        else if (i == 13) {
                             StringBuilder stringBuilder = new StringBuilder(characters.size());
                             for (Character character : characters) stringBuilder.append(character);
                             int parsed = Integer.parseInt(stringBuilder.toString());
@@ -163,7 +164,7 @@ public class TerminalSelection<T> implements Selection<T> {
                                 T Tobj = null;
                                 int i2 = 0;
                                 for (T obj : this.binds.keySet()) {
-                                    if (i2 == parsed-1)
+                                    if (i2 == parsed - 1)
                                         Tobj = obj;
                                     i2++;
                                 }
@@ -181,7 +182,7 @@ public class TerminalSelection<T> implements Selection<T> {
                                 rerender();
                             }
                         }//Number Key
-                        else if(i>=48&&i<=57) {
+                        else if (i >= 48 && i <= 57) {
                             this.characters.add((char) i);
                             rerender();
                         }
@@ -201,19 +202,19 @@ public class TerminalSelection<T> implements Selection<T> {
     }
 
     @Override
-    public void binds(Map<T,SelectionCallback<T>> map) {
+    public void binds(Map<T, SelectionCallback<T>> map) {
         this.binds.putAll(map);
         rerender();
     }
 
-    private List<AttributedString> generateSequenceCollection(boolean isDumb,Set<T> set, T highLightRow) {
+    private List<AttributedString> generateSequenceCollection(boolean isDumb, Set<T> set, T highLightRow) {
         LinkedList<AttributedString> charSequences = new LinkedList<>();
-        int i=1;
-        for (T o:set) {
+        int i = 1;
+        for (T o : set) {
             AttributedStringBuilder builder = new AttributedStringBuilder();
-            if(o == highLightRow)
+            if (o == highLightRow)
                 builder.style(new AttributedStyle().background(0x94c765));
-            if(isDumb)
+            if (isDumb)
                 builder.append(String.valueOf(i)).append("-");
             else
                 builder.append("•").append(" ");
@@ -225,9 +226,9 @@ public class TerminalSelection<T> implements Selection<T> {
     }
 
     private T getSetElement(Set<T> set, int selected) {
-        int i=0;
+        int i = 0;
         for (T obj : set) {
-            if(i==selected)
+            if (i == selected)
                 return obj;
             i++;
         }
@@ -235,7 +236,7 @@ public class TerminalSelection<T> implements Selection<T> {
     }
 
     private boolean checkValid(int n) {
-        if(n>this.binds.size()-1) return false;
+        if (n > this.binds.size() - 1) return false;
         else return n > 0;
     }
 
@@ -259,8 +260,8 @@ public class TerminalSelection<T> implements Selection<T> {
     public void close() {
         this.service.shutdownNow();
         this.isClosed = true;
-        terminal.puts(InfoCmp.Capability.keypad_local,new Object());
-        terminal.setAttributes(attr);
+        terminal.puts(InfoCmp.Capability.keypad_local, new Object());
+        if(attr != null) terminal.setAttributes(attr);
         terminal.flush();
     }
 }

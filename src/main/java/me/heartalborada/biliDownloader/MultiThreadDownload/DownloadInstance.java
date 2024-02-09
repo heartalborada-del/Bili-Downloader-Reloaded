@@ -3,11 +3,10 @@ package me.heartalborada.biliDownloader.MultiThreadDownload;
 import lombok.Getter;
 import me.heartalborada.biliDownloader.Bili.Exceptions.BadRequestDataException;
 import me.heartalborada.biliDownloader.MultiThreadDownload.Speed.DownloadSpeedStat;
-import okhttp3.Interceptor;
+import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,10 +15,7 @@ import java.io.RandomAccessFile;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.*;
 
 public class DownloadInstance {
     private final URL url;
@@ -29,22 +25,10 @@ public class DownloadInstance {
     private final MultiThreadDownloader.Callback callback;
     private final Path savePath;
     private final DownloadSpeedStat stat;
-    private long THREAD_COUNTER = 0;
     private final OkHttpClient client;
+    private long THREAD_COUNTER = 0;
     @Getter
-    private volatile boolean isDone = false,isFailed = false;
-
-    private static class headerInterceptor implements Interceptor {
-        @NotNull
-        @Override
-        public Response intercept(@NotNull Chain chain) throws IOException {
-            Request.Builder b = chain.request().newBuilder();
-            b.addHeader("Origin", chain.request().url().host());
-            b.addHeader("Referer", chain.request().url().host());
-            b.addHeader("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.24");
-            return chain.proceed(b.build());
-        }
-    }
+    private volatile boolean isDone = false, isFailed = false;
 
     public DownloadInstance(
             long threshold,
@@ -60,23 +44,23 @@ public class DownloadInstance {
         this.url = url;
         this.callback = callback;
         this.savePath = savePath;
-        this.client = client.newBuilder().addInterceptor(new headerInterceptor()).build();
+        this.client = client.newBuilder().connectionPool(new ConnectionPool(threadCount+1, 120, TimeUnit.SECONDS)).build();
         long length = -1;
         boolean isAllowMultiThread = false;
-        try (Response resp = client.newCall(new Request.Builder().url(url).build()).execute()) {
-            if(!Objects.equals(resp.header("Transfer-Encoding"), "chunked") && (Objects.equals(resp.header("Accept-Ranges"), "bytes") || resp.header("Content-Length") != null))
+        try (Response resp = this.client.newCall(new Request.Builder().url(url).build()).execute()) {
+            if (!Objects.equals(resp.header("Transfer-Encoding"), "chunked") && (Objects.equals(resp.header("Accept-Ranges"), "bytes") || resp.header("Content-Length") != null))
                 isAllowMultiThread = true;
-            if(!Objects.equals(resp.header("Content-Length"),null))
+            if (!Objects.equals(resp.header("Content-Length"), null))
                 length = Long.parseLong(resp.header("Content-Length"));
         }
         this.fileSize = length;
-        if(fileSize == -1)
+        if (fileSize == -1)
             throw new RuntimeException("Cannot get download file size.");
         File f = new File(savePath.toUri());
         if (!f.getParentFile().exists() && !f.getParentFile().mkdirs())
-            throw new IOException(String.format("Cannot make dictionaries: %s.",f.getPath()));
+            throw new IOException(String.format("Cannot make dictionaries: %s.", f.getPath()));
         if (f.exists() && !f.delete())
-            throw new IOException(String.format("Cannot delete: %s.",f.getPath()));
+            throw new IOException(String.format("Cannot delete: %s.", f.getPath()));
         callback.onStart(fileSize);
         service.submit(new SaveTask());
         if (isAllowMultiThread && fileSize > threshold) {
@@ -97,7 +81,7 @@ public class DownloadInstance {
     }
 
     public boolean stop() {
-        if(!isDone) isFailed = true;
+        if (!isDone) isFailed = true;
         stat.stop();
         service.shutdownNow();
         return service.isShutdown();
@@ -119,12 +103,12 @@ public class DownloadInstance {
         public void run() {
             Request req = new Request.Builder().url(url).header("Range", String.format("bytes=%d-%d", startPos, endPos)).build();
             try (Response resp = client.newCall(req).execute()) {
-                if(resp.body() == null)
+                if (resp.body() == null)
                     throw new BadRequestDataException(resp.code(), "The url has no data");
                 BufferData buffData = new BufferData(serialNum, startPos, endPos);
                 int len;
                 InputStream inputStream = resp.body().byteStream();
-                byte[] data = new byte[8*1024];
+                byte[] data = new byte[8 * 1024];
                 while ((len = inputStream.read(data)) > 0) {
                     stat.add(len);
                     buffData.write(data, 0, len);
@@ -145,7 +129,7 @@ public class DownloadInstance {
                 long writSize = 0;
                 do {
                     BufferData buffData = dataQueue.poll();
-                    if(buffData == null) continue;
+                    if (buffData == null) continue;
                     randomAccessFile.seek(buffData.getStartPos());
                     randomAccessFile.write(buffData.array());
                     writSize += buffData.array().length;

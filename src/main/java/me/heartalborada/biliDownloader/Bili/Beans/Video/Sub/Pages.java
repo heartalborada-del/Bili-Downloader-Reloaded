@@ -12,6 +12,7 @@ public class Pages {
     private String vid;
     private String weblink;
     private Dimension dimension;
+
     public void setAll(Pages p) {
         this.setCid(p.getCid());
         this.setPage(p.getPage());

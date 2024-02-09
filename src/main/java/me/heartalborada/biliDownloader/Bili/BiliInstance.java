@@ -405,21 +405,22 @@ public class BiliInstance {
 
             public ScheduledFuture<?> loginWithQrLogin(QRLoginToken token, Callback callback) {
                 ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-                return service.scheduleWithFixedDelay(new QRTask(token, callback, service),0,2, TimeUnit.SECONDS);
+                return service.scheduleWithFixedDelay(new QRTask(token, callback, service), 0, 2, TimeUnit.SECONDS);
             }
 
             private class QRTask implements Runnable {
                 private final QRLoginToken TOKEN;
                 private final Callback CALLBACK;
-                private final long allow = System.currentTimeMillis()+180*1000;
+                private final long allow = System.currentTimeMillis() + 180 * 1000;
                 private final ExecutorService SERVICE;
+                volatile private boolean isFailed = false, isDone = false;
+
                 QRTask(QRLoginToken token, Callback callback, ExecutorService service) {
                     TOKEN = token;
                     CALLBACK = callback;
                     SERVICE = service;
                 }
 
-                volatile private boolean isFailed = false,isDone = false;
                 @Override
                 public void run() {
                     String tk = TOKEN.getToken();
@@ -434,7 +435,7 @@ public class BiliInstance {
                             JsonObject object = JsonParser.parseString(response.body().string()).getAsJsonObject();
                             int code = object.getAsJsonObject("data").getAsJsonPrimitive("code").getAsInt();
                             String msg = object.getAsJsonObject("data").getAsJsonPrimitive("message").getAsString();
-                            switch (code){
+                            switch (code) {
                                 case 0:
                                     long ts = object.getAsJsonObject("data").getAsJsonPrimitive("timestamp").getAsLong();
                                     String rt = object.getAsJsonObject("data").getAsJsonPrimitive("refresh_token").getAsString();
@@ -460,9 +461,9 @@ public class BiliInstance {
                             throw new BadRequestDataException(response.code(), "The url has no data");
                         }
                     } catch (InterruptedIOException e) {
-                        CALLBACK.onFailure(e,"Canceled",-1);
+                        CALLBACK.onFailure(e, "Canceled", -1);
                         SERVICE.shutdownNow();
-                    }catch (IOException e) {
+                    } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }

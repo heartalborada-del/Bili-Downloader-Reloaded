@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
-public class BufferData implements Comparable{
+public class BufferData implements Comparable {
     @Getter
     private final long num;
     @Getter

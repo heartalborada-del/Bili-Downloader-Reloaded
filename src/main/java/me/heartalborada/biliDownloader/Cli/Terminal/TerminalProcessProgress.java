@@ -11,17 +11,16 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class TerminalProcessProgress implements ProcessProgress {
-    private boolean isFailed,isClosed;
     private final Terminal terminal;
     private final Display display;
-    private long total, processed;
-    private String extraString = "";
     private final Lock lock = new ReentrantLock();
     private final String ProgressStyle;
+    private boolean isFailed, isClosed;
+    private long total, processed;
+    private String extraString = "";
 
     /**
-     *
-     * @param terminal Jline Terminal
+     * @param terminal      Jline Terminal
      * @param ProgressStyle These are allowed placeholder<br>
      *                      <code>{bar}</code> Progress bar<br>
      *                      <code>{percentage}</code> Percentage<br>
@@ -30,17 +29,18 @@ public class TerminalProcessProgress implements ProcessProgress {
      *                      <code>{extra}</code> Extra Text<br>
      *                      <code>{stat}</code> Progress Stat
      */
-    public TerminalProcessProgress(Terminal terminal, String ProgressStyle){
+    public TerminalProcessProgress(Terminal terminal, String ProgressStyle) {
         this.terminal = terminal;
         this.ProgressStyle = ProgressStyle;
-        this.display = new Display(terminal,false);
-        display.resize(1,terminal.getWidth() == 0 ? 20 : terminal.getWidth());
+        this.display = new Display(terminal, false);
+        display.resize(1, terminal.getWidth() == 0 ? 20 : terminal.getWidth());
     }
-    public  TerminalProcessProgress(Terminal terminal) {
+
+    public TerminalProcessProgress(Terminal terminal) {
         this.terminal = terminal;
         this.ProgressStyle = "{stat} | {bar} | {percentage}% | {processed}/{total}";
-        this.display = new Display(terminal,false);
-        display.resize(1,terminal.getWidth() == 0 ? 20 : terminal.getWidth());
+        this.display = new Display(terminal, false);
+        display.resize(1, terminal.getWidth() == 0 ? 20 : terminal.getWidth());
     }
 
     @Override
@@ -56,7 +56,7 @@ public class TerminalProcessProgress implements ProcessProgress {
 
     @Override
     public void setTotalSize(long size) {
-        this.total =size;
+        this.total = size;
     }
 
     @Override
@@ -101,26 +101,26 @@ public class TerminalProcessProgress implements ProcessProgress {
     }
 
     private void updateProgresses() {
-        if(lock.tryLock()){
-            if(isClosed) return;
+        if (lock.tryLock()) {
+            if (isClosed) return;
             String output = this.ProgressStyle
                     .replace("{bar}", Utils.generateProgressBar(
-                            '█','░',10,this.total,this.processed
+                            '█', '░', 10, this.total, this.processed
                     ))
-                    .replace("{stat}",getStat())
-                    .replace("{percentage}",String.valueOf((this.processed*100/this.total)))
-                    .replace("{processed}",String.valueOf(this.processed))
-                    .replace("{total}",String.valueOf(this.total))
-                    .replace("{extra}",extraString);
+                    .replace("{stat}", getStat())
+                    .replace("{percentage}", String.valueOf((this.processed * 100 / this.total)))
+                    .replace("{processed}", String.valueOf(this.processed))
+                    .replace("{total}", String.valueOf(this.total))
+                    .replace("{extra}", extraString);
             display.update(
                     Collections.singletonList(new AttributedStringBuilder().append(output).toAttributedString())
-                    , terminal.getSize().cursorPos(1,0));
+                    , terminal.getSize().cursorPos(1, 0));
             lock.unlock();
         }
     }
 
     private String getStat() {
-        if(this.isFailed) {
+        if (this.isFailed) {
             return "[Failed]";
         } else if (!this.isClosed && this.processed >= this.total) {
             return "[Done]";

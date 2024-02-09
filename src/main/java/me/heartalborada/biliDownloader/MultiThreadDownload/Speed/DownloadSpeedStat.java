@@ -8,9 +8,9 @@ public class DownloadSpeedStat {
     private final SpeedNotifyEvent speedNotifyEvent;
     private final AtomicLong counter = new AtomicLong(0);
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1);
+    private final boolean isShutdown = false;
     private long preCount = 0;
 
-    private final boolean isShutdown = false;
     public DownloadSpeedStat(SpeedNotifyEvent speedNotifyEvent) {
         this.speedNotifyEvent = speedNotifyEvent;
     }

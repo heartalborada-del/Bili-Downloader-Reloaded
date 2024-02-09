@@ -38,6 +38,7 @@ public class VideoStreamData {
     @SerializedName("last_play_cid")
     private int lastPlayCid;
     private Dash dash;
+
     public void setAll(VideoStreamData data) {
         this.setFrom(data.getFrom());
         this.setResult(data.getResult());

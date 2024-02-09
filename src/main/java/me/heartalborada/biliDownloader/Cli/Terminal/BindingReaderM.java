@@ -35,7 +35,7 @@ public class BindingReaderM extends BindingReader {
         } catch (ClosedException e) {
             throw new EndOfFileException(e);
         } catch (IOException e) {
-            if(e instanceof InterruptedIOException)
+            if (e instanceof InterruptedIOException)
                 return 0x0003;
             throw new IOError(e);
         }

@@ -12,19 +12,23 @@ import java.nio.file.Path;
 public class MultiThreadDownloader {
     private final int threadCount;
     private final OkHttpClient client;
+
     public MultiThreadDownloader() {
         this.threadCount = 4;
         client = new OkHttpClient.Builder().build();
     }
+
     public MultiThreadDownloader(int threadCount) {
         this.threadCount = threadCount;
         client = new OkHttpClient.Builder().build();
     }
+
     public MultiThreadDownloader(OkHttpClient client) {
         this.threadCount = 4;
         this.client = client.newBuilder().build();
     }
-    public MultiThreadDownloader(int threadCount,OkHttpClient client) {
+
+    public MultiThreadDownloader(int threadCount, OkHttpClient client) {
         this.threadCount = threadCount;
         this.client = client.newBuilder().build();
     }
@@ -48,6 +52,6 @@ public class MultiThreadDownloader {
 
         void onStart(long fileSize);
 
-        void newSpeedStat(long speed,boolean isStop);
+        void newSpeedStat(long speed, boolean isStop);
     }
 }

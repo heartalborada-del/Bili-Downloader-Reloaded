@@ -26,6 +26,7 @@ public class Audio {
     @SerializedName("SegmentBase")
     private SegmentBase segmentBase;
     private int codecid;
+
     public void setAll(Audio audio) {
         this.setId(audio.getId());
         this.setBaseUrl(audio.getBaseUrl());

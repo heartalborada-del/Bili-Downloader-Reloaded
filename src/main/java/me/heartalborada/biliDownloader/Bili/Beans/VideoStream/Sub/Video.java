@@ -19,6 +19,7 @@ public class Video {
     private int startWithSap;
     private SegmentBase segmentBase;
     private int codecid;
+
     public void setAll(Video v) {
         this.setId(v.getId());
         this.setBaseUrl(v.getBaseUrl());

@@ -3,7 +3,6 @@ package me.heartalborada.biliDownloader;
 import lombok.Getter;
 import me.heartalborada.biliDownloader.Bili.BiliInstance;
 import me.heartalborada.biliDownloader.Cli.CliMain;
-import me.heartalborada.biliDownloader.FFmpeg.Locator;
 import me.heartalborada.biliDownloader.Utils.LibrariesLoader;
 import me.heartalborada.biliDownloader.Utils.Managers.ConfigManager;
 import me.heartalborada.biliDownloader.Utils.Managers.DataManager;
@@ -27,23 +26,23 @@ public class Main {
     @Getter
     private static final File libPath = new File(dataPath, "libs");
     @Getter
-    private static final File cachePath = new File(dataPath,"caches");
+    private static final File cachePath = new File(dataPath, "caches");
     @Getter
-    private static final File downloadPath = new File(dataPath,"downloads");
+    private static final File downloadPath = new File(dataPath, "downloads");
+    @Getter
+    private final static BiliInstance biliInstance;
     @Getter
     private static ConfigManager configManager;
     @Getter
     private static DataManager dataManager;
-    @Getter
-    private final static BiliInstance biliInstance;
 
     static {
         BiliInstance temp;
         List<String[]> dependencelist = new LinkedList<>();
-        if(!dataPath.exists() && !dataPath.mkdirs())
+        if (!dataPath.exists() && !dataPath.mkdirs())
             throw new RuntimeException(new IOException(String.format("Failed create data dictionary: %s", dataPath.getPath())));
         try {
-            if(!Objects.equals(System.getProperty("development", "false"), "true")) {
+            if (!Objects.equals(System.getProperty("development", "false"), "true")) {
                 boolean isBuiltinDependency = false;
                 Enumeration<URL> resources = Main.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
                 while (resources.hasMoreElements()) {
@@ -65,8 +64,8 @@ public class Main {
                     dependencelist.add(new String[]{"org.fusesource.jansi", "jansi", "2.4.0", ""});
                     dependencelist.add(new String[]{"com.google.zxing", "core", "3.5.2", ""});
                     dependencelist.add(new String[]{"com.ibm.icu", "icu4j", "74.2", ""});
-                    dependencelist.add(new String[]{"org.apache.commons","commons-exec","1.4.0",""});
-                    dependencelist.add(new String[]{"org.slf4j","slf4j-api","2.0.11",""});
+                    dependencelist.add(new String[]{"org.apache.commons", "commons-exec", "1.4.0", ""});
+                    dependencelist.add(new String[]{"org.slf4j", "slf4j-api", "2.0.11", ""});
                 }
             }
             for (String[] strs : dependencelist) {
@@ -98,7 +97,6 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException {
-        new Locator("");
         CliMain.main(args);
     }
 }
