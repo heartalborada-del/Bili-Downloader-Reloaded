@@ -26,7 +26,6 @@ import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.MultiThreadDownload.DownloadInstance;
 import me.heartalborada.biliDownloader.MultiThreadDownload.MultiThreadDownloader;
 import me.heartalborada.biliDownloader.Utils.NoWhiteQRCode;
-import org.jline.reader.LineReader;
 import org.jline.terminal.Attributes;
 import org.jline.terminal.Terminal;
 import org.jline.utils.*;
@@ -56,11 +55,9 @@ import static me.heartalborada.biliDownloader.Utils.Utils.*;
 @SuppressWarnings("Duplicates")
 public class Commands implements Runnable {
     private final Terminal terminal;
-    private final LineReader lineReader;
 
-    Commands(Terminal terminal, LineReader lineReader) {
+    Commands(Terminal terminal) {
         this.terminal = terminal;
-        this.lineReader = lineReader;
     }
 
     private static void DisplayResizeAndUpdate(List<AttributedString> list, Display display, Terminal terminal) {
@@ -163,6 +160,11 @@ public class Commands implements Runnable {
                     Main.getDataManager().getData().getBilibili().setCookies(data.getCookies());
                     Main.getDataManager().getData().getBilibili().setRefreshToken(data.getRefreshToken());
                     Main.getDataManager().getData().getBilibili().setLatestRefreshTimestamp(data.getTimestamp());
+                    try {
+                        Main.getDataManager().save();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                     LinkedList<AttributedString> modify = new LinkedList<>() {{
                         addAll(originalList);
                         AttributedStringBuilder asb = new AttributedStringBuilder()
@@ -434,9 +436,7 @@ public class Commands implements Runnable {
                         qn = "8K";
                         break;
                 }
-                selectionCallbackMap.put(String.format("%s - %s", qn, codec), TargetObj -> {
-                    video.setAll(obj);
-                });
+                selectionCallbackMap.put(String.format("%s - %s", qn, codec), TargetObj -> video.setAll(obj));
             }
             TerminalSelection<String> ts = new TerminalSelection<>(terminal, selectionCallbackMap, null);
             ts.start();
@@ -465,16 +465,12 @@ public class Commands implements Runnable {
                         case 30251:
                             qn = "Hi-Res";
                     }
-                    selectionCallbackMap.put(String.format("%s", qn), TargetObj -> {
-                        audio.setAll(obj);
-                    });
+                    selectionCallbackMap.put(String.format("%s", qn), TargetObj -> audio.setAll(obj));
                 }
                 ts = new TerminalSelection<>(terminal, selectionCallbackMap, null);
                 ts.start();
                 while (!(ts.isDone() || ts.isCancelled())) {
                     if (ts.isCancelled()) return;
-                }
-                if (ts.isCancelled()) {
                 }
             } else {
                 int m = 0;

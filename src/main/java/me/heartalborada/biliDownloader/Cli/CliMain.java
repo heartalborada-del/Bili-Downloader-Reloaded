@@ -70,7 +70,7 @@ public class CliMain {
         Supplier<Path> workDir = () -> Paths.get(Main.getDataPath().getPath());
         SystemRegistryImpl systemRegistry = new SystemRegistryImpl(parser, terminal, workDir, null);
 
-        Commands commands = new Commands(terminal, LineReaderBuilder.builder().terminal(terminal).build());
+        Commands commands = new Commands(terminal);
         CommandLine.IFactory factory = new InnerClassFactory(commands);
 
         CommandLine commandLine = new CommandLine(commands, factory);
