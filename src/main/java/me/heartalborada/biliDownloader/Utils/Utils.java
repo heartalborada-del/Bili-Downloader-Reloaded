@@ -1,8 +1,5 @@
 package me.heartalborada.biliDownloader.Utils;
 
-import com.ibm.icu.lang.UCharacter;
-import com.ibm.icu.lang.UProperty;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,17 +11,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Utils {
-    public static String StrArrToSting(String[] arr) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < arr.length; i++) {
-            sb.append(arr[i]);
-            if (i != arr.length - 1) {
-                sb.append(" ");
-            }
-        }
-        return sb.toString();
-    }
-
     public static ZonedDateTime timestampToDate(long timestamp, ZoneId id) {
         Timestamp con = new Timestamp(timestamp);
         return con.toLocalDateTime().atZone(id);
@@ -39,10 +25,10 @@ public class Utils {
         long size = 1;
         String[] unit = new String[]{"B", "KB", "MB", "GB", "TB"};
         String str = null;
-        for (int i = 0; i < unit.length; i++) {
+        for (String s : unit) {
             long nextSize = size << 10;
             if (byteSize < nextSize) {
-                str = String.format("%.2f%s", byteSize / (size + 0.0f), unit[i]);
+                str = String.format("%.2f%s", byteSize / (size + 0.0f), s);
                 break;
             }
             size = nextSize;
@@ -53,7 +39,7 @@ public class Utils {
     public static String generateProgressBar(char barCompleteChar, char barIncompleteChar, int barLength, long total, long current) {
         long p = total / barLength;
         StringBuilder sb = new StringBuilder();
-        for (int i = 0, g = 0; i < barLength; i++, g += p) {
+        for (long i = 0, g = 0; i < barLength; i++, g += p) {
             if (g < current)
                 sb.append(barCompleteChar);
             else
@@ -82,20 +68,6 @@ public class Utils {
             }
             throw e;
         }
-    }
-
-    public static int calculateHalfWidth(String text) {
-        int totalWidth = 0;
-        for (int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            int t = UCharacter.getIntPropertyValue(c, UProperty.EAST_ASIAN_WIDTH);
-            if (UCharacter.EastAsianWidth.WIDE == t || UCharacter.EastAsianWidth.FULLWIDTH == t) {
-                totalWidth += 2;
-            } else {
-                totalWidth++;
-            }
-        }
-        return totalWidth;
     }
 
     public static class NumberUtils {

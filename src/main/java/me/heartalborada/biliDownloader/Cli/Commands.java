@@ -63,7 +63,7 @@ public class Commands implements Runnable {
     private static void DisplayResizeAndUpdate(List<AttributedString> list, Display display, Terminal terminal) {
         int maxLen = 20;
         for (AttributedString as : list) {
-            if (maxLen < calculateHalfWidth(as.toString()) + 1) maxLen = calculateHalfWidth(as.toString()) + 1;
+            if (maxLen < as.toString().length() * 2) maxLen = as.toString().length() * 2;
         }
         display.resize(list.size(), terminal.getWidth() == 0 ? maxLen : terminal.getWidth());
         display.update(list, terminal.getSize().cursorPos(list.size(), 0));
@@ -562,8 +562,8 @@ public class Commands implements Runnable {
 
         private void download(MultiThreadDownloader downloader, URL url, File filePath) throws IOException {
             final Thread thread = Thread.currentThread();
+            final TerminalProcessProgress progress = new TerminalProcessProgress(terminal, "{stat} | {bar} | {percentage}% | {processed}/{total}");
             DownloadInstance instance = downloader.download(url, filePath, new MultiThreadDownloader.Callback() {
-                final TerminalProcessProgress progress = new TerminalProcessProgress(terminal, "{stat} | {bar} | {percentage}% | {processed}/{total}");
                 long size = 0;
 
                 @Override

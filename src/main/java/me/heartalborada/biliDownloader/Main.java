@@ -63,7 +63,6 @@ public class Main {
                     dependencelist.add(new String[]{"info.picocli", "picocli-shell-jline3", "4.7.5", ""});
                     dependencelist.add(new String[]{"org.fusesource.jansi", "jansi", "2.4.0", ""});
                     dependencelist.add(new String[]{"com.google.zxing", "core", "3.5.2", ""});
-                    dependencelist.add(new String[]{"com.ibm.icu", "icu4j", "74.2", ""});
                     dependencelist.add(new String[]{"org.apache.commons", "commons-exec", "1.4.0", ""});
                     dependencelist.add(new String[]{"org.slf4j", "slf4j-api", "2.0.11", ""});
                 }

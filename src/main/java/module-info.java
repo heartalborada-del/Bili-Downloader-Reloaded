@@ -17,7 +17,6 @@ module me.heartalborada.biliDownloader {
     requires picocli.shell.jline3;
     requires kotlinx.coroutines.core.jvm;
     requires org.fusesource.jansi;
-    requires com.ibm.icu;
     requires org.apache.commons.exec;
     requires jave.core;
 
