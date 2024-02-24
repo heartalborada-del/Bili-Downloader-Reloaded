@@ -36,7 +36,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.9.2</junit.version>
-        <kotlin.version>1.8.0</kotlin.version>
+        <kotlin.version>1.9.22</kotlin.version>
     </properties>
 
     <dependencies>
