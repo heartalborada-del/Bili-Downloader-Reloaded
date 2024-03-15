@@ -4,5 +4,6 @@ import lombok.Data;
 
 @Data
 public class ConfigInstance {
-    private final String FFmpegPath = "";
+    private final String Version = "1.0.1";
+    private String FFMpegPath = "";
 }

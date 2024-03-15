@@ -20,12 +20,14 @@ import me.heartalborada.biliDownloader.Bili.Interfaces.Callback;
 import me.heartalborada.biliDownloader.Cli.Terminal.TerminalProcessProgress;
 import me.heartalborada.biliDownloader.Cli.Terminal.TerminalSelection;
 import me.heartalborada.biliDownloader.FFmpeg.Convertor;
+import me.heartalborada.biliDownloader.FFmpeg.Locator;
 import me.heartalborada.biliDownloader.Interfaces.EncoderProgressListenerM;
 import me.heartalborada.biliDownloader.Interfaces.SelectionCallback;
 import me.heartalborada.biliDownloader.Main;
 import me.heartalborada.biliDownloader.MultiThreadDownload.DownloadInstance;
 import me.heartalborada.biliDownloader.MultiThreadDownload.MultiThreadDownloader;
 import me.heartalborada.biliDownloader.Utils.NoWhiteQRCode;
+import org.jline.jansi.Ansi;
 import org.jline.terminal.Attributes;
 import org.jline.terminal.Terminal;
 import org.jline.utils.*;
@@ -49,13 +51,13 @@ import static me.heartalborada.biliDownloader.Utils.Utils.NumberUtils.amountConv
 import static me.heartalborada.biliDownloader.Utils.Utils.*;
 
 @CommandLine.Command(name = "",
-        description = {"Bilibili Features"},
-        subcommands = {Commands.Bilibili.class, CommandLine.HelpCommand.class}
+        description = {"Features"},
+        subcommands = {Commands.FFMpeg.class, Commands.Bilibili.class, CommandLine.HelpCommand.class}
 )
 @SuppressWarnings("Duplicates")
 public class Commands implements Runnable {
     private final Terminal terminal;
-
+    private final String Version = "1.0";
     Commands(Terminal terminal) {
         this.terminal = terminal;
     }
@@ -79,7 +81,7 @@ public class Commands implements Runnable {
             aliases = {"bili"},
             description = {"Bilibili Features"},
             mixinStandardHelpOptions = true,
-            version = "0.1",
+            version = Version,
             subcommands = {CommandLine.HelpCommand.class}
 
     )
@@ -107,10 +109,7 @@ public class Commands implements Runnable {
                         .append(type)
                         .toAttributedString();
                 Display display = new Display(terminal, false);
-                display.resize(1, terminal.getWidth() == 0 ? 20 : terminal.getWidth());
-                display.update(new ArrayList<>() {{
-                    add(string);
-                }}, terminal.getSize().cursorPos(1, 0));
+                DisplayResizeAndUpdate(new ArrayList<>() {{ add(string); }},display,terminal);
                 return;
             }
             QRLoginToken token = biliInstance.getLogin().getQR().getQRLoginToken();
@@ -139,8 +138,7 @@ public class Commands implements Runnable {
                     QRDisplay.add(asb.toAttributedString());
                 }
                 Display display = new Display(terminal, false);
-                display.resize(QRDisplay.size(), terminal.getWidth() == 0 ? QRDisplay.get(1).length() + 1 : terminal.getWidth());
-                display.update(QRDisplay, terminal.getSize().cursorPos(41, 0));
+                DisplayResizeAndUpdate(QRDisplay,display,terminal);
             }
             Display display = new Display(terminal, false);
             LinkedList<AttributedString> originalList = new LinkedList<>() {{
@@ -261,8 +259,7 @@ public class Commands implements Runnable {
                     list.add(new AttributedStringBuilder()
                             .style(new AttributedStyle().foreground(AttributedStyle.RED))
                             .append(String.format("UnknownID: %s", id)).toAttributedString());
-                    display.resize(list.size(), terminal.getWidth() - 1);
-                    display.update(list, terminal.getSize().cursorPos(1, 0));
+                    DisplayResizeAndUpdate(list,display,terminal);
                     return;
                 }
             } catch (BadRequestDataException exception) {
@@ -346,8 +343,7 @@ public class Commands implements Runnable {
                     list.add(new AttributedStringBuilder()
                             .style(new AttributedStyle().foreground(AttributedStyle.RED))
                             .append(String.format("UnknownID: %s", id)).toAttributedString());
-                    display.resize(list.size(), terminal.getWidth() - 1);
-                    display.update(list, terminal.getSize().cursorPos(1, 0));
+                    DisplayResizeAndUpdate(list,display,terminal);
                     return;
                 }
             } catch (BadRequestDataException exception) {
@@ -607,6 +603,46 @@ public class Commands implements Runnable {
             terminal.puts(InfoCmp.Capability.keypad_local, new Object());
             if(attr != null) terminal.setAttributes(attr);
             terminal.flush();
+        }
+    }
+
+    @CommandLine.Command(
+            name = "ffmpeg",
+            aliases = {"ffm"},
+            description = {"FFMpeg Features"},
+            mixinStandardHelpOptions = true,
+            version = Version,
+            subcommands = {CommandLine.HelpCommand.class}
+    )
+    class FFMpeg {
+        @CommandLine.Command(
+                name = "check",
+                mixinStandardHelpOptions = true,
+                subcommands = {CommandLine.HelpCommand.class},
+                description = "Check FFMpeg is installed"
+        )
+        void check() {
+            Display disp = new Display(terminal,false);
+            try {
+                String path = new Locator(Main.getConfigManager().getConfig().getFFMpegPath()).getExecutablePath();
+                DisplayResizeAndUpdate(new ArrayList<>(){{
+                    add(new AttributedStringBuilder()
+                            .style(new AttributedStyle().background(72,209,204).foreground(AttributedStyle.BLACK))
+                            .append("Found FFMpeg, Absolute Path: ")
+                            .style(new AttributedStyle().background(230,197,65).foreground(AttributedStyle.BLACK))
+                            .append(path)
+                            .append(new Ansi().reset().toString())
+                            .toAttributedString());
+                }},disp,terminal);
+            }catch (IOException ignore) {
+                DisplayResizeAndUpdate(new ArrayList<>(){{
+                    add(new AttributedStringBuilder()
+                            .style(new AttributedStyle().background(AttributedStyle.RED).foreground(AttributedStyle.WHITE))
+                            .append("Cannot found FFMpeg. Are you installed it?")
+                            .append(new Ansi().reset().toString())
+                            .toAttributedString());
+                }},disp,terminal);
+            }
         }
     }
 }

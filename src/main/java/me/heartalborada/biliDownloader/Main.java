@@ -90,7 +90,7 @@ public class Main {
             temp = new BiliInstance(getDataManager().getData().getBilibili().getCookies());
         } catch (IOException e) {
             temp = new BiliInstance();
-            configManager = null;
+            //configManager = null;
         }
         biliInstance = temp;
     }

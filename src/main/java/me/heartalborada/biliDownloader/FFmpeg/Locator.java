@@ -29,23 +29,22 @@ public class Locator implements ProcessLocator {
                     for (String p : paths) {
                         File f = new File(p, suffix.isEmpty() ? "ffmpeg" : "ffmpeg.exe");
                         if (f.exists()) {
-                            return f.getPath();
+                            return f.getAbsolutePath();
                         }
                     }
                 }
             } catch (IOException | IllegalThreadStateException | InterruptedException ignore) {
             }
         }
-        //Check User Provide FFMPEG
         {
             ProcessBuilder processBuilder = new ProcessBuilder(new LinkedList<>() {{
-                add(new File(UserProvideFFMPEGPath, suffix.isEmpty() ? "ffmpeg" : "ffmpeg.exe").getPath());
+                add(new File(UserProvideFFMPEGPath, suffix.isEmpty() ? "ffmpeg" : "ffmpeg.exe").toPath().normalize().toAbsolutePath().toString());
                 add("-version");
             }});
             try {
                 Process proc = processBuilder.start();
                 if (proc.waitFor() == 0) {
-                    return new File(UserProvideFFMPEGPath, suffix.isEmpty() ? "ffmpeg" : "ffmpeg.exe").getPath();
+                    return new File(UserProvideFFMPEGPath, suffix.isEmpty() ? "ffmpeg" : "ffmpeg.exe").toPath().normalize().toAbsolutePath().toString();
                 }
             } catch (IOException | IllegalThreadStateException | InterruptedException ignore) {
             }

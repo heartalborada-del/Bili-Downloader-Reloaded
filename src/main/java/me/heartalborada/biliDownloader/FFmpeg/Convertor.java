@@ -20,7 +20,7 @@ public class Convertor {
     private static final ExecutorService service = Executors.newFixedThreadPool(5);
 
     public static Future<?> doConvertor(File video, File audio, File output, EncoderProgressListenerM listener) throws IOException {
-        final Locator l = new Locator(Main.getConfigManager().getConfig().getFFmpegPath());
+        final Locator l = new Locator(Main.getConfigManager().getConfig().getFFMpegPath());
         final MultimediaObject vo = new MultimediaObject(video, l), ao = new MultimediaObject(audio, l);
         final Encoder encoder = new Encoder(l);
         return service.submit(() -> {
